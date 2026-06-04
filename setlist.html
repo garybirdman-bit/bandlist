@@ -132,6 +132,21 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .ph{padding:20px 16px 0;flex-shrink:0;background:var(--bg);}
 @media (orientation:landscape){
   .ph{padding:6px 12px 0;}
+  .lp-header{display:flex!important;}
+}
+/* Landscape header player */
+.lp-header{
+  display:none;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.lp-play{width:30px;height:30px;border-radius:50%;background:#D4793F;border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lp-prog{flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;min-width:80px;}
+.lp-prog-fill{height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
+.lp-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
+@media (orientation:landscape){
+  .ph{padding:6px 12px 0;}
   .landscape-player{display:flex!important;}
 }
 .landscape-player{
@@ -154,6 +169,21 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .lp-prog-fill{width:100%;background:#D4793F;border-radius:3px;position:absolute;bottom:0;left:0;transition:height .1s linear;}
 .lp-time{font-family:'Inter',sans-serif;font-size:8px;color:#555;letter-spacing:.5px;writing-mode:vertical-rl;transform:rotate(180deg);}
 .lp-notrack{font-size:18px;color:#2a2a34;}
+@media (orientation:landscape){
+  .ph{padding:6px 12px 0;}
+  .lp-header{display:flex!important;}
+}
+/* Landscape header player */
+.lp-header{
+  display:none;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.lp-play{width:30px;height:30px;border-radius:50%;background:#D4793F;border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lp-prog{flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;min-width:80px;}
+.lp-prog-fill{height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
+.lp-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
 @media (orientation:landscape){
   .ph{padding:6px 12px 0;}
   .ph-top{margin-bottom:4px!important;}
@@ -379,11 +409,6 @@ textarea.fi.tall{min-height:120px;}
 }
 
 
-.panel-with-lp{padding-right:52px;}
-@media (orientation:landscape){
-  #panel{padding-right:52px;}
-}
-
 /* PRINT */
 @media print{
   .hdr,.nav-tabs,.ctabs,.divl,.panel,.modal,.cxm,.cxov,.add-sec-row,.sec-acts,.dh,.sdel,.search-wrap,.overflow-menu,.status-filter{display:none!important;}
@@ -480,6 +505,13 @@ textarea.fi.tall{min-height:120px;}
 </div>
 
 <div class="panel" id="panel" style="display:none">
+<div class="lp-header" id="lpHeader" style="padding:0 12px 6px;gap:8px;border-bottom:1px solid #2a2a34;">
+  <button class="lp-play" id="lpPlayBtn" onclick="togglePlay()">▶</button>
+  <div class="lp-prog" id="lpProg" style="flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;">
+    <div class="lp-prog-fill" id="lpFill" style="width:0%;height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;pointer-events:none;"></div>
+  </div>
+  <span class="lp-time" id="lpTime" style="font-family:Inter,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>
+</div>
   <div class="ph" id="ph"></div>
   <div class="ctrls" id="ctrls"></div>
   <div class="ctrls-compact" id="ctrlsCompact"></div>
@@ -1783,66 +1815,23 @@ function submitSong(){
 
 /* PLAYER */
 function rLandscapePlayer(s){
-  var lp=document.getElementById('lpContent');
-  if(!lp)return;
-  lp.innerHTML='';
+  var lph=document.getElementById('lpHeader');
+  if(!lph)return;
   if(!s||!s.trackName||!s.trackData){
-    lp.innerHTML='<div class="lp-notrack">♫</div>';
-    return;
+    lph.style.opacity='0.3';
+    lph.style.pointerEvents='none';
+  } else {
+    lph.style.opacity='1';
+    lph.style.pointerEvents='auto';
   }
-  var playBtn=document.createElement('button');
-  playBtn.className='lp-play';
-  playBtn.id='lpPlayBtn';
-  playBtn.textContent='▶';
-  playBtn.addEventListener('click',togglePlay);
-  lp.appendChild(playBtn);
-
-  var barWrap=document.createElement('div');
-  barWrap.className='lp-bar-wrap';
-  var prog=document.createElement('div');
-  prog.className='lp-prog';
-  prog.id='lpProg';
-  var fill=document.createElement('div');
-  fill.className='lp-prog-fill';
-  fill.id='lpFill';
-  fill.style.height='0%';
-  prog.appendChild(fill);
-  prog.addEventListener('click',function(e){
-    if(!audioObj||!audioObj.duration)return;
-    var rect=prog.getBoundingClientRect();
-    var pct=1-((e.clientY-rect.top)/rect.height);
-    audioObj.currentTime=Math.max(0,Math.min(1,pct))*audioObj.duration;
-  });
-  barWrap.appendChild(prog);
-  var timeEl=document.createElement('div');
-  timeEl.className='lp-time';
-  timeEl.id='lpTime';
-  timeEl.textContent='0:00';
-  barWrap.appendChild(timeEl);
-  lp.appendChild(barWrap);
-
-  // sync with audio
-  if(audioObj){
-    audioObj.ontimeupdate=function(){
-      var pf=document.getElementById('progFill');
-      var ct=document.getElementById('curTime');
-      var lpf=document.getElementById('lpFill');
-      var lpt=document.getElementById('lpTime');
-      var lpb=document.getElementById('lpPlayBtn');
-      if(audioObj.duration){
-        var pct=(audioObj.currentTime/audioObj.duration*100);
-        if(pf)pf.style.width=pct+'%';
-        if(lpf)lpf.style.height=pct+'%';
-      }
-      if(ct)ct.textContent=fmtTime(audioObj.currentTime);
-      if(lpt)lpt.textContent=fmtTime(audioObj.currentTime);
-      if(lpb)lpb.textContent=audioObj.paused?'▶':'⏸';
-    };
-    audioObj.onended=function(){
-      var btn=document.getElementById('playBtn');
-      var lpb=document.getElementById('lpPlayBtn');
-      if(btn)btn.textContent='▶';
-      if(lpb)lpb.textContent='▶';
+  // hook progress bar seek
+  var prog=document.getElementById('lpProg');
+  if(prog){
+    prog.onclick=function(e){
+      if(!audioObj||!audioObj.duration)return;
+      var rect=prog.getBoundingClientRect();
+      var pct=(e.clientX-rect.left)/rect.width;
+      audioObj.currentTime=Math.max(0,Math.min(1,pct))*audioObj.duration;
     };
   }
 }
@@ -1885,11 +1874,23 @@ function fmtTime(t){if(isNaN(t))return"0:00";var m=Math.floor(t/60);var s=Math.f
 function initAudio(s){
   if(audioObj){audioObj.pause();audioObj=null;}
   audioObj=new Audio(s.trackData);audioObj.volume=audioVolume;
-  audioObj.ontimeupdate=function(){var pf=document.getElementById("progFill");var ct=document.getElementById("curTime");if(pf&&audioObj.duration)pf.style.width=(audioObj.currentTime/audioObj.duration*100)+"%";if(ct)ct.textContent=fmtTime(audioObj.currentTime);};
+  audioObj.ontimeupdate=function(){
+  var pf=document.getElementById("progFill");var ct=document.getElementById("curTime");
+  var lpf=document.getElementById("lpFill");var lpt=document.getElementById("lpTime");var lpb=document.getElementById("lpPlayBtn");
+  var pct=audioObj.duration?(audioObj.currentTime/audioObj.duration*100):0;
+  if(pf&&audioObj.duration)pf.style.width=pct+"%";
+  if(ct)ct.textContent=fmtTime(audioObj.currentTime);
+  if(lpf)lpf.style.width=pct+"%";
+  if(lpt)lpt.textContent=fmtTime(audioObj.currentTime);
+  if(lpb)lpb.textContent=audioObj.paused?"▶":"■";
+};
   audioObj.onloadedmetadata=function(){var dt=document.getElementById("durTime");if(dt)dt.textContent=fmtTime(audioObj.duration);};
-  audioObj.onended=function(){var btn=document.getElementById("playBtn");if(btn)btn.textContent="▶";};
+  audioObj.onended=function(){
+  var btn=document.getElementById("playBtn");if(btn)btn.textContent="▶";
+  var lpb=document.getElementById("lpPlayBtn");if(lpb)lpb.textContent="▶";
+};
 }
-function togglePlay(){if(!audioObj)return;var btn=document.getElementById("playBtn");if(audioObj.paused){audioObj.play();if(btn)btn.textContent="⏸";}else{audioObj.pause();if(btn)btn.textContent="▶";}}
+function togglePlay(){if(!audioObj)return;var btn=document.getElementById("playBtn");if(audioObj.paused){audioObj.play();if(btn)btn.textContent="■";}else{audioObj.pause();if(btn)btn.textContent="▶";}}
 function seekAudio(e){if(!audioObj||!audioObj.duration)return;var bar=document.getElementById("progBar");var rect=bar.getBoundingClientRect();audioObj.currentTime=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*audioObj.duration;}
 function setVolume(e){var bar=document.getElementById("volBar");var rect=bar.getBoundingClientRect();audioVolume=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));if(audioObj)audioObj.volume=audioVolume;var vf=document.getElementById("volFill");if(vf)vf.style.width=(audioVolume*100)+"%";}
 function loadTrack(sid,input){
@@ -2307,12 +2308,6 @@ if('serviceWorker' in navigator){
       <button class="map-note-ok" onclick="mapSaveNote()">OK</button>
       <button class="map-note-cancel" onclick="mapCloseNote()">Отмена</button>
     </div>
-  </div>
-</div>
-
-<div class="landscape-player" id="landscapePlayer">
-  <div id="lpContent" style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;padding:0 8px;flex:1;justify-content:center;">
-    <div class="lp-notrack">♫</div>
   </div>
 </div>
 </body>
