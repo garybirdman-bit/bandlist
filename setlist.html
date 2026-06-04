@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#1a1a1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bandlist">
+<link rel="manifest" href="manifest.json">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bandlist</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@300;400;500&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+var db=null;
+try{
+  firebase.initializeApp({
+    apiKey:"AIzaSyCOUlsS9gumRqtioIPTu7rzV0hVpXgVnRA",
+    authDomain:"bandlist-c750c.firebaseapp.com",
+    databaseURL:"https://bandlist-c750c-default-rtdb.firebaseio.com",
+    projectId:"bandlist-c750c",
+    storageBucket:"bandlist-c750c.firebasestorage.app",
+    messagingSenderId:"946709262652",
+    appId:"1:946709262652:web:547467b3add1e1d5d6ee39"
+  });
+  db=firebase.database();
+}catch(e){console.log("Firebase недоступен — работаем локально");}
+</script>
+<style>
+:root{
+  --or:#D4793F;--or-dim:rgba(212,121,63,0.15);
+  --bg:#1a1a1f;--s1:#22222a;--s2:#2a2a34;--s3:#32323e;
+  --br:#32323e;--tx:#f0ece4;--tx2:#d0ccc4;--mu:#b0aaa4;--mu2:#707070;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Montserrat',sans-serif;font-weight:300;}
+body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sans-serif;}
+
+/* HEADER */
+.hdr{padding:20px 20px 0;flex-shrink:0;background:var(--bg);}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.logo{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:10px;}
+.add-btn{width:34px;height:34px;background:var(--or);border:none;border-radius:50%;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 12px rgba(212,121,63,0.3);}
+.more-btn{width:34px;height:34px;background:var(--s1);border:1px solid var(--br);border-radius:50%;color:var(--tx2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* NAV TABS (Сетлист / Репертуар) */
+.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--br);margin-bottom:0;flex-shrink:0;}
+.nav-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.nav-tab.on{color:var(--or);border-bottom-color:var(--or);}
+
+/* CONCERT TABS */
+.ctabs{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:10px 20px 10px;scrollbar-width:none;background:var(--bg);}
+.ctabs::-webkit-scrollbar{display:none;}
+.ctab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid var(--s3);background:var(--s1);color:var(--tx2);transition:all .2s;white-space:nowrap;}
+.ctab.on{background:var(--or);border-color:var(--or);color:#fff;font-weight:500;}
+.ctab input{background:none;border:none;outline:none;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:1px;width:90px;padding:0;}
+.cadd{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1px dashed var(--s3);background:var(--s1);color:var(--tx2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* SEARCH */
+.search-wrap{padding:8px 12px;background:var(--bg);flex-shrink:0;}
+.search-inner{position:relative;}
+.search-inp{width:100%;background:var(--s1);border:1px solid var(--br);border-radius:12px;color:var(--tx);padding:9px 14px 9px 36px;font-size:13px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
+.search-inp:focus{border-color:var(--or);}
+.search-inp::placeholder{color:var(--mu2);}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;}
+
+.divl{height:1px;background:var(--br);flex-shrink:0;}
+
+/* LIST */
+.lw{flex:1;overflow-y:auto;scrollbar-width:none;background:var(--bg);padding-top:4px;padding-bottom:80px;}
+.lw::-webkit-scrollbar{display:none;}
+
+/* SECTIONS */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 6px;}
+.sec-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--or);font-weight:500;font-family:'Inter',sans-serif;}
+.sec-acts{display:flex;gap:2px;}
+.sec-btn{background:none;border:none;color:var(--tx2);font-size:12px;cursor:pointer;padding:3px 6px;border-radius:4px;opacity:.8;}
+.sec-btn.red{color:#e05252;}
+.add-sec-row{padding:8px 12px 20px;}
+.add-sec-btn{width:100%;padding:10px;border:1px dashed var(--s3);border-radius:12px;background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+
+/* SONG ROWS */
+.row{display:flex;align-items:center;gap:10px;padding:12px 14px;position:relative;margin:0 12px 6px;background:var(--s1);border-radius:14px;}
+.row.dragging{opacity:.3;}
+.row.dover{background:var(--s2);border:1px solid var(--or);}
+.dh{display:flex;flex-direction:column;gap:4px;cursor:grab;padding:4px 2px;flex-shrink:0;touch-action:none;}
+.dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:2px;}
+.snum{font-family:'Golos Text',sans-serif;font-size:13px;color:var(--mu);width:16px;text-align:center;flex-shrink:0;}
+.si{flex:1;min-width:0;cursor:pointer;}
+.st{font-family:'Golos Text',sans-serif;font-size:15px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
+.ss{font-size:10px;color:#888;margin-top:3px;letter-spacing:.5px;text-transform:uppercase;font-family:'Golos Text',sans-serif;}
+.sk{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:600;color:#fff;flex-shrink:0;width:28px;text-align:center;}
+.sdel{background:none;border:none;color:var(--tx2);font-size:12px;cursor:pointer;padding:4px;flex-shrink:0;}
+.sdel:hover{color:#e05252;}
+
+/* STATUS BADGE */
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;cursor:pointer;}
+.status-ready{background:#2a9d8f;}
+.status-learning{background:#D4793F;}
+
+.status-idea{background:#9b8ea8;}
+
+/* REPERTOIRE */
+.rep-row{display:flex;align-items:center;gap:10px;padding:12px 14px;margin:0 12px 6px;background:var(--s1);border-radius:14px;cursor:pointer;}
+.rep-row.dover{background:var(--s2);border:1px solid var(--or);}
+.rep-row.dragging{opacity:.3;}
+.rep-row:hover{background:var(--s2);}
+.rep-info{flex:1;min-width:0;}
+.rep-title{font-family:'Golos Text',sans-serif;font-size:15px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
+.rep-sub{font-size:10px;color:#888;margin-top:3px;letter-spacing:.5px;text-transform:uppercase;font-family:'Golos Text',sans-serif;}
+.rep-key{font-family:'Golos Text',sans-serif;font-size:16px;font-weight:600;color:#fff;flex-shrink:0;width:32px;text-align:center;}
+.rep-actions{display:flex;gap:6px;flex-shrink:0;}
+.rep-add-btn{background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:8px;color:var(--or);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;padding:5px 12px;cursor:pointer;transition:all .2s;}
+.rep-del{background:none;border:none;color:var(--mu2);font-size:12px;cursor:pointer;padding:4px;}
+.rep-dh{display:flex;flex-direction:column;gap:4px;cursor:grab;padding:4px 2px;flex-shrink:0;touch-action:none;}
+.rep-dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:2px;}
+.rep-del:hover{color:#e05252;}
+.status-filter{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.status-filter::-webkit-scrollbar{display:none;}
+.sf-btn{flex-shrink:0;padding:5px 12px;border-radius:20px;font-size:11px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:.5px;cursor:pointer;border:1px solid #3a3a46;background:transparent;color:#c0bbb5;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.sf-btn.on{border-color:var(--or);color:var(--or);background:var(--or-dim);}
+
+/* SLIDE PANEL */
+.panel{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.panel.open{transform:translateY(0);}
+.ph{padding:20px 16px 0;flex-shrink:0;background:var(--bg);}
+@media (orientation:landscape){
+  .ph{padding:6px 12px 0;}
+  .ph-top{margin-bottom:4px!important;}
+  .pa{font-size:9px!important;letter-spacing:2px!important;margin-bottom:2px!important;display:inline!important;}
+  .pt{font-size:14px!important;display:inline!important;margin-left:6px!important;}
+  .ph-top>div{display:flex;align-items:baseline;gap:0;}
+  .ptabs{margin-top:6px!important;}
+  .ptab{padding:5px 10px!important;font-size:9px!important;}
+  .panel-form-active .ptabs{display:none;}
+}
+.ph-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.pa{font-size:10px;color:var(--or);letter-spacing:3px;text-transform:uppercase;margin-bottom:5px;}
+.pt{font-family:'Golos Text',sans-serif;font-size:20px;font-weight:400;line-height:1.1;color:var(--tx);}
+.pcl{background:var(--s2);border:none;color:var(--tx2);border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer;flex-shrink:0;}
+.ptabs{display:flex;margin-top:14px;border-bottom:1px solid var(--br);overflow-x:auto;scrollbar-width:none;}
+.ptabs::-webkit-scrollbar{display:none;}
+.ptab{background:none;border:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.ptab.on{color:var(--or);border-bottom-color:var(--or);}
+
+/* CONTROLS */
+.ctrls{display:flex;gap:8px;padding:12px 12px;border-bottom:1px solid var(--br);flex-shrink:0;background:var(--bg);}
+.ctrls-compact{display:none;padding:6px 14px;border-bottom:1px solid var(--br);flex-shrink:0;background:var(--bg);align-items:center;gap:16px;}
+.ctrls-compact-item{font-family:'Inter',sans-serif;font-size:11px;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;}
+.ctrls-compact-val{color:var(--or);font-weight:600;margin-left:4px;}
+@media (orientation:landscape){
+  .panel-form-active .ctrls{display:none;}
+  .panel-form-active .ctrls-compact{display:flex;}
+  .panel-form-active #playerSlot{display:none;}
+}
+.cb{flex:1;background:var(--s2);border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;gap:6px;}
+.cl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);font-weight:400;}
+.cr{display:flex;align-items:center;justify-content:space-between;gap:4px;}
+.cv{font-family:'Golos Text',sans-serif;font-size:20px;font-weight:600;min-width:40px;text-align:center;color:var(--tx);}
+.cv.or{color:#fff !important;font-size:24px;}
+.cbtn{width:28px;height:28px;border-radius:8px;border:1px solid var(--br);background:var(--s3);color:var(--tx);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cbtn:active{background:var(--br);}
+.tapbtn{height:26px;border-radius:8px;border:1px solid var(--or);background:transparent;color:var(--or);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;width:100%;font-weight:500;}
+.tapbtn:active{background:var(--or);color:#fff;}
+
+/* PANEL BODY */
+.pb{flex:1;overflow-y:auto;padding:14px 12px 50px;scrollbar-width:none;background:var(--bg);}
+.pb::-webkit-scrollbar{display:none;}
+
+/* FORM TAB */
+.fr{display:flex;align-items:center;gap:6px;padding:10px 10px;margin-bottom:6px;background:var(--s1);border-radius:12px;}
+.fi2{font-family:'Golos Text',sans-serif;font-size:12px;color:var(--or);width:14px;text-align:center;flex-shrink:0;}
+.fn-inp{background:none;border:none;border-bottom:1px solid var(--br);color:var(--tx);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:300;outline:none;flex:1;padding:2px 0;min-width:0;}
+.fn-inp:focus{border-bottom-color:var(--or);}
+.ftbtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--br);background:var(--s2);color:var(--tx2);font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ftval{font-family:'Golos Text',sans-serif;font-size:17px;color:var(--tx);min-width:26px;text-align:center;flex-shrink:0;font-weight:600;}
+.form-add-btn{width:100%;padding:14px;border:1px dashed var(--or);border-radius:12px;background:var(--or-dim);color:var(--or);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-weight:500;}
+
+/* LYRICS */
+.lyr{font-size:14px;line-height:2;font-weight:300;color:var(--tx2);}
+.lhd{font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--or);margin-top:20px;margin-bottom:5px;}
+.lhd:first-child{margin-top:0;}
+
+/* CHORDS + NOTES */
+.ta{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:12px;color:var(--tx);padding:12px;font-size:14px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:160px;line-height:1.9;}
+.ta.notes{font-family:'Montserrat',sans-serif;font-weight:300;font-size:13px;line-height:1.8;}
+.ta:focus{border-color:var(--or);}
+.ta-hint{font-size:10px;color:var(--tx2);letter-spacing:1px;margin-bottom:8px;}
+.chord-sec{margin-bottom:8px;background:var(--s1);border-radius:12px;overflow:hidden;}
+.chord-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;}
+.chord-sec-name{font-size:13px;color:var(--tx2);display:flex;align-items:center;gap:8px;letter-spacing:.3px;}
+.chord-sec-del{background:none;border:none;color:var(--mu2);font-size:12px;cursor:pointer;padding:2px 6px;}
+.chord-sec-ta{background:none;border:none;border-top:1px solid var(--br);color:var(--tx);padding:10px 14px;font-size:15px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:44px;line-height:1.7;width:100%;}
+.chord-sec-ta:focus{background:var(--s2);}
+.chord-add-btn{width:100%;padding:11px;border:1px dashed var(--s3);border-radius:12px;background:transparent;color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;}
+/* section type picker */
+.sec-type-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.sec-type-btn{padding:9px 16px;border-radius:10px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;}
+.sec-type-btn:hover{border-color:var(--or);color:var(--or);}
+
+/* PLAYER */
+.player-wrap{background:var(--s2);border-radius:14px;padding:12px 14px;margin-bottom:0;}
+.player-controls{display:flex;align-items:center;gap:12px;}
+.player-playbtn{width:42px;height:42px;border-radius:50%;background:var(--or);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.player-info{flex:1;min-width:0;}
+.player-fname{font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
+.player-progress{width:100%;height:3px;background:var(--s3);border-radius:2px;cursor:pointer;position:relative;margin-bottom:6px;}
+.player-progress-fill{height:100%;background:var(--or);border-radius:2px;transition:width .1s linear;pointer-events:none;}
+.player-times{display:flex;justify-content:space-between;font-size:10px;color:var(--mu2);font-family:'Golos Text',sans-serif;}
+.player-del{background:none;border:none;color:var(--mu2);font-size:11px;cursor:pointer;padding:4px;flex-shrink:0;}
+.player-vol-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.player-vol-icon{font-size:13px;color:var(--mu2);}
+.player-vol{flex:1;height:3px;background:var(--s3);border-radius:2px;cursor:pointer;position:relative;}
+.player-vol-fill{height:100%;background:var(--mu2);border-radius:2px;pointer-events:none;}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:var(--bg);z-index:30;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.modal.open{transform:translateY(0);}
+.mi{flex:1;overflow-y:auto;padding:22px 16px 60px;scrollbar-width:none;}
+.mi::-webkit-scrollbar{display:none;}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.mt{font-family:'Golos Text',sans-serif;font-size:22px;font-weight:600;letter-spacing:1px;color:var(--tx);}
+.fl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;margin-top:18px;font-weight:400;}
+.fl:first-child{margin-top:0;}
+.fi{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:12px;color:var(--tx);padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
+.fi:focus{border-color:var(--or);}
+select.fi{cursor:pointer;}
+textarea.fi{resize:none;min-height:80px;}
+textarea.fi.tall{min-height:120px;}
+.kg{display:flex;flex-wrap:wrap;gap:6px;}
+.kb{border-radius:8px;padding:5px 10px;font-size:13px;font-family:'Golos Text',sans-serif;font-weight:600;cursor:pointer;border:1px solid var(--br);background:var(--s1);color:var(--tx2);}
+.kb.on{background:var(--or-dim);border-color:var(--or);color:var(--or);}
+.clrs{display:flex;gap:8px;flex-wrap:wrap;}
+.cc{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
+.cc.on{border-color:#fff;transform:scale(1.2);}
+.subbtn{width:100%;padding:11px;border:1px solid var(--or);border-radius:10px;background:transparent;color:var(--or);font-family:'Inter',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:22px;}
+.delbtn{width:100%;padding:12px;border:1px solid #e05252;border-radius:12px;background:transparent;color:#e05252;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;}
+
+/* STATUS SELECTOR */
+.status-row{display:flex;gap:8px;flex-wrap:wrap;}
+.st-btn{padding:7px 14px;border-radius:10px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--br);background:var(--s1);color:var(--tx2);transition:all .15s;letter-spacing:.5px;}
+.st-btn.on-ready{background:rgba(42,157,143,.2);border-color:#2a9d8f;color:#2a9d8f;}
+.st-btn.on-learning{background:var(--or-dim);border-color:var(--or);color:var(--or);}
+
+.st-btn.on-idea{background:rgba(155,142,168,.2);border-color:#9b8ea8;color:#9b8ea8;}
+
+/* CTX */
+.cxov{position:fixed;inset:0;z-index:49;}
+.cxm{position:fixed;background:var(--s2);border:1px solid var(--br);border-radius:14px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;}
+@keyframes cxi{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+.cxi{display:flex;align-items:center;gap:10px;padding:13px 17px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
+.cxi:hover{background:var(--s3);}
+.cxi.red{color:#e05252;}
+.cxi.off{opacity:.3;cursor:default;pointer-events:none;}
+.cxi+.cxi{border-top:1px solid var(--br);}
+
+/* OVERFLOW MENU */
+.overflow-menu{position:fixed;right:16px;top:68px;background:var(--s2);border:1px solid var(--br);border-radius:14px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;display:none;}
+.overflow-menu.open{display:block;}
+.om-item{display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
+.om-item:hover{background:var(--s3);}
+.om-item+.om-item{border-top:1px solid var(--br);}
+
+/* ADD FROM REPERTOIRE MODAL */
+.rep-pick-row{display:flex;align-items:center;gap:10px;padding:11px 14px;margin-bottom:6px;background:var(--s1);border-radius:12px;cursor:pointer;}
+.rep-pick-row:hover{background:var(--s2);}
+.rep-pick-row.picked{border:1px solid var(--or);}
+.rpr-info{flex:1;min-width:0;}
+.rpr-title{font-family:'Golos Text',sans-serif;font-size:16px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rpr-sub{font-size:10px;color:var(--tx2);margin-top:2px;letter-spacing:1px;text-transform:uppercase;}
+
+
+/* PERFORMANCE MODE */
+.perf-overlay{position:fixed;inset:0;background:#0d0d0f;z-index:100;display:none;flex-direction:column;}
+.perf-overlay.open{display:flex;}
+.perf-hdr{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #1a1a1f;}
+.perf-meta{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333;}
+.perf-key-info{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--or);}
+.perf-exit{background:none;border:none;color:#333;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;padding:4px 0;}
+.perf-body{flex:1;overflow-y:auto;padding:16px 24px 40px;scrollbar-width:none;}
+.perf-body::-webkit-scrollbar{display:none;}
+.perf-section{margin-bottom:28px;}
+.perf-lhd{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--or);margin-bottom:10px;opacity:0.8;}
+.perf-line{font-size:22px;font-weight:500;line-height:1.65;color:#f0ece4;letter-spacing:0.2px;}
+.perf-footer{display:flex;align-items:center;gap:10px;padding:10px 20px;border-top:1px solid #2a2a34;flex-shrink:0;background:#111114;}
+.perf-font-lbl{font-family:'Inter',sans-serif;font-size:13px;color:#888;letter-spacing:1px;text-transform:uppercase;}
+.perf-fbtn{background:none;border:1px solid #3a3a46;border-radius:6px;color:#c0bbb5;font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.perf-fbtn:hover{border-color:#888;color:#fff;}
+.perf-scroll{margin-left:auto;background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;cursor:pointer;transition:all .2s;}
+.perf-scroll.on{border-color:var(--or);color:var(--or);background:rgba(212,121,63,0.08);}
+
+
+/* SONG MAP */
+.map-canvas{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;padding-bottom:20px;}
+.map-blk-grp{display:flex;flex-direction:column;gap:3px;flex-shrink:0;}
+.map-blk-lbl{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding-left:1px;white-space:nowrap;}
+.map-blk-row{display:flex;gap:3px;align-items:center;}
+.map-blk{width:44px;height:44px;border-radius:7px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;}
+.map-blk:active{transform:scale(.88);}
+.map-blk-num{font-size:8px;font-weight:600;color:rgba(0,0,0,0.3);position:absolute;top:3px;left:4px;}
+.map-blk-note{position:absolute;bottom:3px;right:3px;font-size:7px;font-weight:700;color:rgba(0,0,0,0.5);max-width:38px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.map-blk-del{width:18px;height:18px;border-radius:50%;border:none;background:#2a2a34;color:#555;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:1px;}
+.map-blk-add{width:44px;height:44px;border-radius:7px;border:1.5px dashed #3a3a46;background:transparent;color:#555;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.map-blk-add:active{border-color:#D4793F;color:#D4793F;}
+.mc-intro {background:#E8C49A;}
+.mc-verse {background:#B8D4A8;}
+.mc-chorus{background:#9BB5D8;}
+.mc-pre   {background:#C4A8D8;}
+.mc-bridge{background:#C4B8D8;}
+.mc-solo  {background:#F0D4A0;}
+.mc-break {background:#D4C4A0;}
+.mc-outro {background:#D4A8A8;}
+.mc-coda  {background:#A8C4D4;}
+.mc-other {background:#C8C8C8;}
+
+/* MAP SHEET */
+.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#1e1e26;border-radius:16px 16px 0 0;z-index:100;padding:14px 16px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.map-sheet.open{transform:translateY(0);}
+.map-sheet-handle{width:36px;height:4px;background:#3a3a46;border-radius:2px;margin:0 auto 12px;}
+.map-sheet-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
+.map-sec-list{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;max-height:40vh;overflow-y:auto;}
+.map-sec-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;}
+.map-sec-row.sel{background:#2a2a34;border-color:#D4793F;}
+.map-sec-dot{width:26px;height:26px;border-radius:6px;flex-shrink:0;}
+.map-sec-name{font-size:14px;font-weight:400;color:#f0ece4;}
+.map-sec-chk{margin-left:auto;color:#D4793F;opacity:0;}
+.map-sec-row.sel .map-sec-chk{opacity:1;}
+.map-bars-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.map-bars-lbl{font-size:12px;color:#888;flex:1;}
+.map-bars-btn{width:32px;height:32px;border-radius:8px;border:1px solid #3a3a46;background:none;color:#c0bbb5;font-size:16px;cursor:pointer;}
+.map-bars-val{font-size:20px;font-weight:600;color:#fff;min-width:30px;text-align:center;}
+.map-sheet-ok{width:100%;padding:11px;border:1px solid #D4793F;border-radius:10px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.map-sheet-ov{position:fixed;inset:0;z-index:99;display:none;}
+.map-sheet-ov.open{display:block;}
+
+/* MAP NOTE */
+.map-note-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:110;display:none;align-items:flex-end;}
+.map-note-ov.open{display:flex;}
+.map-note-box{background:#22222a;border-radius:16px 16px 0 0;padding:18px 16px 36px;width:100%;}
+.map-note-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
+.map-note-inp{width:100%;background:#1a1a1f;border:1px solid #D4793F;border-radius:8px;color:#fff;padding:10px 12px;font-size:16px;font-family:'Inter',sans-serif;outline:none;}
+.map-note-btns{display:flex;gap:8px;margin-top:10px;}
+.map-note-ok{flex:1;padding:10px;border:1px solid #D4793F;border-radius:8px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
+.map-note-cancel{padding:10px 14px;border:1px solid #3a3a46;border-radius:8px;background:transparent;color:#888;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;}
+
+@media (orientation:landscape){
+  .pb{overflow:hidden!important;}
+  .map-canvas{flex-wrap:wrap;}
+}
+
+/* PRINT */
+@media print{
+  .hdr,.nav-tabs,.ctabs,.divl,.panel,.modal,.cxm,.cxov,.add-sec-row,.sec-acts,.dh,.sdel,.search-wrap,.overflow-menu,.status-filter{display:none!important;}
+  html,body{height:auto!important;overflow:auto!important;}
+  .lw{overflow:visible!important;height:auto!important;}
+  .row{break-inside:avoid;margin:0 0 4px!important;}
+  body{background:#fff!important;color:#000!important;}
+  .st{color:#000!important;}
+  .sec-name,.sk{color:#D4793F!important;}
+  .ss,.snum{color:#555!important;}
+  .phdr-print{display:block!important;}
+}
+.phdr-print{display:none;text-align:center;padding:16px 0 10px;font-family:'Golos Text',sans-serif;font-size:22px;letter-spacing:4px;border-bottom:2px solid #000;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<input type="file" id="trackFileInput" accept="audio/*" style="display:none">
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;">
+        <rect x="1" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
+        <rect x="5" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
+        <rect x="9" y="2" width="2" height="16" rx="1" fill="#D4793F"/>
+        <rect x="13" y="5" width="2" height="10" rx="1" fill="#D4793F"/>
+        <rect x="17" y="8" width="2" height="4" rx="1" fill="#D4793F"/>
+      </svg>
+      <span>Bandlist</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s;align-self:center;" title="Офлайн"></div>
+      <button id="langToggleBtn" onclick="toggleAppLang()" style="background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:300;letter-spacing:2px;color:#707070;cursor:pointer;padding:0;transition:color .15s;">EN</button>
+      <button class="more-btn" onclick="toggleOverflow()">···</button>
+      <button class="add-btn" id="mainAddBtn" onclick="mainAdd()">+</button>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab on" id="navSetlist" onclick="switchView('setlist')">Сетлист</button>
+    <button class="nav-tab" id="navRep" onclick="switchView('rep')">Репертуар</button>
+  </div>
+</div>
+
+<div class="overflow-menu" id="overflowMenu">
+  <button class="om-item" id="omPDF" onclick="doPDF();toggleOverflow()">⎙ &nbsp;Скачать PDF</button>
+  <button class="om-item" id="omNewConcert" onclick="openConcert();toggleOverflow()">＋ &nbsp;Новый концерт</button>
+</div>
+<div class="cxov" id="omOverlay" style="display:none" onclick="toggleOverflow()"></div>
+
+<!-- SETLIST VIEW -->
+<div id="viewSetlist" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+  <div class="ctabs" id="ctabs"></div>
+  <div class="divl"></div>
+  <div class="search-wrap">
+    <div class="search-inner">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <circle cx="6.5" cy="6.5" r="5" stroke="#555" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input class="search-inp" id="srch" placeholder="Поиск..." oninput="rList()">
+    </div>
+  </div>
+  <div class="lw" id="lw">
+    <div class="phdr-print" id="phdrp"></div>
+    <div id="list"></div>
+    <div id="staticAddSec" style="padding:8px 12px 20px;display:none;">
+      <button class="add-sec-btn" onclick="openAddSec()">+ Добавить отделение</button>
+
+    </div>
+    <div id="secDialog" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#1a1a1f;z-index:200;padding:30px 20px;box-sizing:border-box;">
+      <div style="font-family:'Golos Text',sans-serif;font-size:22px;color:#fff;margin-bottom:20px;" id="secDialogTitle">Новое отделение</div>
+      <div style="font-size:10px;letter-spacing:2px;color:#b0aaa4;margin-bottom:8px;text-transform:uppercase;">Название</div>
+      <input id="secDialogInp" style="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:12px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;" placeholder="1 отделение">
+      <button id="secDialogOkBtn" style="width:100%;margin-top:16px;padding:14px;background:#D4793F;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">ДОБАВИТЬ</button>
+      <button id="secDialogCancelBtn" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid #32323e;border-radius:12px;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">ОТМЕНА</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPERTOIRE VIEW -->
+<div id="viewRep" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+  <div class="status-filter" id="statusFilter"></div>
+  <div class="divl"></div>
+  <div class="search-wrap">
+    <div class="search-inner">
+      <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <circle cx="6.5" cy="6.5" r="5" stroke="#555" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input class="search-inp" id="srchRep" placeholder="Поиск в репертуаре..." oninput="rRep()">
+    </div>
+  </div>
+  <div class="lw" id="repList"></div>
+</div>
+
+<div class="panel" id="panel" style="display:none">
+  <div class="ph" id="ph"></div>
+  <div class="ctrls" id="ctrls"></div>
+  <div class="ctrls-compact" id="ctrlsCompact"></div>
+  <div id="playerSlot" style="padding:0 12px;flex-shrink:0;"></div>
+  <div class="pb" id="pb"></div>
+</div>
+
+<div class="modal" id="mSong" style="display:none"><div class="mi" id="mSongI"></div></div>
+<div class="modal" id="mConcert" style="display:none"><div class="mi" id="mConcertI"></div></div>
+<div class="modal" id="mSection" style="display:none"><div class="mi" id="mSectionI"></div></div>
+<div class="modal" id="mAddFrom" style="display:none"><div class="mi" id="mAddFromI"></div></div>
+
+<script>
+
+var LANG = "ru";
+var TR = {
+  ru: {
+    setlist:"Сетлист", repertoire:"Репертуар",
+    search:"Поиск...", searchRep:"Поиск в репертуаре...",
+    newConcert:"Новый концерт", downloadPDF:"Скачать PDF",
+    addSection:"+ Добавить отделение", newSection:"Новое отделение",
+    sectionName:"Название", add:"ДОБАВИТЬ", cancel:"ОТМЕНА",
+    addToSetlist:"В сетлист", delete:"Удалить",
+    form:"Форма", lyrics:"Текст", chords:"Аккорды", notes:"Заметки", edit:"Изменить",
+    key:"Тональность", tempo:"Темп · BPM", bars:"Такты",
+    tap:"Tap", loadTrack:"♫  Загрузить бэкинг-трек",
+    noSections:"Нет разделов. Добавь структуру песни.",
+    addSection2:"+ Добавить раздел",
+    status:"Статус", title:"Название", artist:"Исполнитель",
+    tempoBPM:"Темп BPM", tonality:"Тональность",
+    formHint:"Форма · каждый раздел с новой строки",
+    lyricsLabel:"Текст", save:"Сохранить", deleteFromRep:"Удалить из репертуара",
+    newSong:"Новая песня", addToRep:"Добавить в репертуар",
+    addToSetlistTitle:"Добавить в сетлист", section:"Отделение", searchLabel:"Поиск",
+    searchInRep:"Поиск по репертуару...", newSongInRep:"＋ Новая песня в репертуар",
+    statusReady:"Готово", statusLearning:"Учим", statusIdea:"Идея",
+    rename:"✏️ Переименовать", deleteBtn:"🗑 Удалить",
+    newSetlist:"Новый сетлист", create:"СОЗДАТЬ",
+    addSectionTitle:"Добавить раздел", customName:"Своё название...",
+    personalNotes:"Личные заметки", editLyrics:"✏️ Редактировать",
+    lyricsHint:"Используй [Куплет 1], [Припев] для заголовков",
+    phTitle:"Название песни", phArtist:"Группа или автор",
+    phForm:"Вступление\nКуплет 1\nПрипев", phLyrics:"[Куплет 1]\nТекст...",
+    chordsHint:"Что добавить?", addChordSection:"+ Добавить раздел",
+    allSongs:"Все", online:"Онлайн · синхронизировано", offline:"Офлайн",
+    deleteConfirm:"Удалить", cancelConfirm:"Отмена",
+    intro:"Интро", verse:"Куплет", chorus:"Припев", bridge:"Бридж",
+    solo:"Соло", outro:"Аутро", pre:"Пре-хорус"
+  },
+  en: {
+    setlist:"Setlist", repertoire:"Song List",
+    search:"Search...", searchRep:"Search songs...",
+    newConcert:"New concert", downloadPDF:"Download PDF",
+    addSection:"+ Add section", newSection:"New section",
+    sectionName:"Name", add:"ADD", cancel:"CANCEL",
+    addToSetlist:"Add", delete:"Delete",
+    form:"Form", lyrics:"Lyrics", chords:"Chords", notes:"Notes", edit:"Edit",
+    key:"Key", tempo:"Tempo · BPM", bars:"Bars",
+    tap:"Tap", loadTrack:"♫  Load backing track",
+    noSections:"No sections. Add song structure.",
+    addSection2:"+ Add section",
+    status:"Status", title:"Title", artist:"Artist",
+    tempoBPM:"Tempo BPM", tonality:"Key",
+    formHint:"Form · each section on new line",
+    lyricsLabel:"Lyrics", save:"Save", deleteFromRep:"Delete from repertoire",
+    newSong:"New song", addToRep:"Add to repertoire",
+    addToSetlistTitle:"Add to setlist", section:"Section", searchLabel:"Search",
+    searchInRep:"Search songs...", newSongInRep:"＋ New song to repertoire",
+    statusReady:"Ready", statusLearning:"Learning", statusIdea:"Idea",
+    rename:"✏️ Rename", deleteBtn:"🗑 Delete",
+    newSetlist:"New setlist", create:"CREATE",
+    addSectionTitle:"Add section", customName:"Custom name...",
+    personalNotes:"Personal notes", editLyrics:"✏️ Edit",
+    lyricsHint:"Use [Verse 1], [Chorus] for headings",
+    phTitle:"Song title", phArtist:"Band or artist",
+    phForm:"Intro\nVerse 1\nChorus", phLyrics:"[Verse 1]\nLyrics...",
+    chordsHint:"What to add?", addChordSection:"+ Add section",
+    allSongs:"All", online:"Online · synced", offline:"Offline",
+    deleteConfirm:"Delete", cancelConfirm:"Cancel",
+    intro:"Intro", verse:"Verse", chorus:"Chorus", bridge:"Bridge",
+    solo:"Solo", outro:"Outro", pre:"Pre-chorus"
+  }
+};
+
+function t(key){ return TR[LANG][key] || TR.ru[key] || key; }
+
+function toggleAppLang(){
+  LANG = LANG === "ru" ? "en" : "ru";
+  var btn = document.getElementById("langToggleBtn");
+  if(btn) btn.textContent = LANG === "ru" ? "EN" : "RU";
+  applyLang();
+}
+
+function applyLang(){
+  // nav tabs
+  var ns = document.getElementById("navSetlist");
+  var nr = document.getElementById("navRep");
+  if(ns) ns.textContent = t("setlist");
+  if(nr) nr.textContent = t("repertoire");
+  // search placeholders
+  var sr = document.getElementById("srch");
+  var srr = document.getElementById("srchRep");
+  if(sr) sr.placeholder = t("search");
+  if(srr) srr.placeholder = t("searchRep");
+  // sync dot title
+  var dot = document.getElementById("syncDot");
+  if(dot) dot.title = dot.style.background === "#D4793F" ? t("online") : t("offline");
+  // overflow menu
+  var omPDF = document.getElementById("omPDF");
+  var omNC = document.getElementById("omNewConcert");
+  if(omPDF) omPDF.innerHTML = "⎙ &nbsp;" + t("downloadPDF");
+  if(omNC) omNC.innerHTML = "＋ &nbsp;" + t("newConcert");
+  // re-render lists
+  rList(); rRep(); rStatusFilter();
+  // if panel open, re-render
+  if(panel.id) rPanel();
+  // save lang preference
+  try{ localStorage.setItem("bandlist_lang", LANG); }catch(e){}
+}
+
+var KEYS=["C","Cm","D","Dm","E","Em","F","Fm","G","Gm","A","Am","B","Bm"];
+var COLORS=["#D4793F","#e87070","#7db3d8","#2a9d8f","#9b8ea8","#90be6d","#c77dff","#f4a261"];
+var CHR=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+var CHRm=["Cm","C#m","Dm","D#m","Em","Fm","F#m","Gm","G#m","Am","A#m","Bm"];
+var STATUSES=[
+  {id:"ready",ruLabel:"Готово",enLabel:"Ready",cls:"on-ready",dot:"status-ready"},
+  {id:"learning",ruLabel:"Учим",enLabel:"Learning",cls:"on-learning",dot:"status-learning"},
+  {id:"idea",ruLabel:"Идея",enLabel:"Idea",cls:"on-idea",dot:"status-idea"}
+];
+Object.defineProperty(STATUSES,"label",{get:function(){return this.map(function(s){s.label=LANG==="en"?s.enLabel:s.ruLabel;return s;});}});
+function getStatuses(){return STATUSES.map(function(s){return Object.assign({},s,{label:LANG==="en"?s.enLabel:s.ruLabel});});}
+
+var DEF={
+  concerts:[{id:1,name:"Репетиция 1"}],
+  active:1,
+  sections:{1:[{id:11,name:"1 отделение",songs:[]}]},
+  repertoire:[
+    {id:201,title:'Файне місто Тернопіль',artist:'Брати Гадюкіни',key:'A',tempo:130,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:202,title:'Ветер',artist:'Брейнсторм',key:'Bm',tempo:105,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:203,title:'45 лет',artist:'Валентин Стрикало',key:'B',tempo:130,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:204,title:'Районы-кварталы',artist:'Звери',key:'Am',tempo:91,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:205,title:'Кукушка',artist:'Кино',key:'Am',tempo:109,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:206,title:'Мама Анархия',artist:'Кино',key:'C',tempo:155,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:207,title:'Бабочки',artist:'Люмен',key:'G',tempo:120,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:208,title:'Сид и Ненси',artist:'Люмен',key:'Em',tempo:125,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:209,title:'Яблони',artist:'Ляпис Трубецкой',key:'Em',tempo:120,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:210,title:'Повод',artist:'Моргенштерн',key:'Fm',tempo:130,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:211,title:'Дом (Лондон, Прага, Ницца)',artist:'Моргенштерн',key:'Am',tempo:100,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:212,title:'Крошка моя',artist:'Руки вверх',key:'Bm',tempo:133,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:213,title:'Мы сидели и курили',artist:'Сплин',key:'Em',tempo:100,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:214,title:'Выхода нет',artist:'Сплин',key:'Em',tempo:85,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:215,title:'Моё сердце',artist:'Сплин',key:'D',tempo:130,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:216,title:'Серебро',artist:'БИ-2',key:'Am',tempo:85,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:217,title:'Это всё',artist:'ДДТ',key:'G',tempo:96,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:218,title:'Батарейка',artist:'Жуки',key:'Am',tempo:75,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:219,title:'Танкист',artist:'Жуки',key:'Am',tempo:120,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:220,title:'Сансара',artist:'Каста',key:'C',tempo:78,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:221,title:'Владивосток 2000',artist:'Мумий Тролль',key:'Am',tempo:134,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:222,title:'Медведица',artist:'Мумий Тролль',key:'Am',tempo:120,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:223,title:'Стюардесса по имени Жанна',artist:'Пресняков',key:'Am',tempo:120,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:224,title:'Вечная молодость',artist:'Чиж & Co',key:'G',tempo:125,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:225,title:'Как на войне',artist:'Агата Кристи',key:'Am',tempo:135,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:226,title:'Все идет по плану',artist:'ГрОб',key:'Am',tempo:95,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:227,title:'О любви',artist:'Чиж & Co',key:'C',tempo:75,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:228,title:'Zombie',artist:'The Cranberries',key:'Em',tempo:77,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''},
+    {id:229,title:'RockAndRoll Queen',artist:'The Subways',key:'Am',tempo:145,color:'#D4793F',status:'ready',form:[],lyrics:'',chordBlocks:[],notes:''}
+  ]
+};
+
+var D;
+try{
+  D=JSON.parse(localStorage.getItem("bandlist_v3"));
+  if(!D||!D.concerts||!D.repertoire)throw 0;
+  // version check: if any song still has old chordsBySection but no chordBlocks, migrate
+  D.repertoire.forEach(function(s){
+    if(!s.chordBlocks){
+      s.chordBlocks=[];
+      if(s.chordsBySection){
+        Object.keys(s.chordsBySection).forEach(function(k){
+          var val=s.chordsBySection[k];
+          if(val&&val.trim()){
+            var name=s.form&&s.form[+k]?s.form[+k].n:("Раздел "+(+k+1));
+            s.chordBlocks.push({name:name,chords:val});
+          }
+        });
+      }
+    }
+  });
+}
+catch(e){D=JSON.parse(JSON.stringify(DEF));}
+
+var panel={id:null,tab:"form"};
+var editSong=null;
+var nSong={title:"",artist:"",key:"Am",tempo:100,color:"#D4793F",status:"idea",form:"",lyrics:"",notes:""};
+var nConcert={name:""};
+var nSection={name:"",editId:null};
+var renId=null;
+var dragState={idx:null,secId:null};
+var taps=[];
+var audioObj=null;
+var audioVolume=0.8;
+var _trackTargetSongId=null;
+var currentView="setlist";
+var repStatusFilter="all";
+var pickedForSection=null;
+var _remoteIgnore=false;
+
+function save(){
+  var toSave=JSON.parse(JSON.stringify(D));
+  toSave.repertoire.forEach(function(s){delete s.trackData;});
+  try{localStorage.setItem("bandlist_v3",JSON.stringify(toSave));}catch(e){}
+  if(db){
+    try{
+      _remoteIgnore=true;
+      db.ref("bandlist").set(toSave,function(){
+        setTimeout(function(){_remoteIgnore=false;},3000);
+      });
+    }catch(e){_remoteIgnore=false;}
+  }
+}
+
+// Firebase listeners — only if db available
+function initFirebase(){
+  if(!db)return;
+  db.ref(".info/connected").on("value",function(snap){
+    var dot=document.getElementById("syncDot");if(!dot)return;
+    dot.style.background=snap.val()?"#D4793F":"#555";
+    dot.title=snap.val()?"Онлайн · синхронизировано":"Офлайн";
+  });
+  db.ref("bandlist").on("value",function(snap){
+    var remote=snap.val();if(!remote||_remoteIgnore)return;
+    var localTracks={};
+    D.repertoire.forEach(function(s){if(s.trackData)localTracks[s.id]={data:s.trackData,name:s.trackName};});
+    D=remote;
+    if(!D.repertoire)D.repertoire=[];
+    D.repertoire.forEach(function(s){if(localTracks[s.id]){s.trackData=localTracks[s.id].data;s.trackName=localTracks[s.id].name;}});
+    try{localStorage.setItem("bandlist_v3",JSON.stringify(D));}catch(e){}
+    rConcerts();rList();rRep();
+    if(panel.id){var ps=findR(panel.id);if(ps)rPanel();else closePanel();}
+  });
+}
+
+// helpers
+function secs(){return D.sections[D.active]||[];}
+function findR(id){return D.repertoire.find(function(s){return +s.id===+id;});}
+function findSecOf(sid){return secs().find(function(sec){return sec.songs.some(function(s){return s===sid;});});}
+function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function statusDotClass(st){var s=getStatuses().find(function(x){return x.id===st;});return s?s.dot:"";}
+
+/* VIEW SWITCHING */
+function switchView(v){
+  currentView=v;
+  document.getElementById("viewSetlist").style.display=v==="setlist"?"flex":"none";
+  document.getElementById("viewRep").style.display=v==="rep"?"flex":"none";
+  document.getElementById("navSetlist").classList.toggle("on",v==="setlist");
+  document.getElementById("navRep").classList.toggle("on",v==="rep");
+  var addBtn=document.getElementById("mainAddBtn");
+  if(v==="rep"){rRep();rStatusFilter();}
+}
+function mainAdd(){
+  var repTab=document.getElementById("navRep");
+  if(repTab&&repTab.classList.contains("on")) openAddSong();
+  else openAddFrom();
+}
+
+/* TRANSPOSE */
+function txKey(key,st){
+  var minor=key.length>1&&key.endsWith("m");var sc=minor?CHRm:CHR;var idx=sc.indexOf(key);
+  if(idx<0){var en={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#","Dbm":"C#m","Ebm":"D#m","Gbm":"F#m","Abm":"G#m","Bbm":"A#m"};var e=en[key];idx=e?sc.indexOf(e):0;}
+  return sc[((idx+st)%12+12)%12];
+}
+function shiftKey(st){var s=findR(panel.id);if(!s)return;s.key=txKey(s.key,st);save();rPanel();rList();rRep();}
+function shiftTempo(d){var s=findR(panel.id);if(!s)return;s.tempo=Math.max(40,Math.min(240,s.tempo+d));save();rPanel();rList();}
+function tapTempo(){
+  var now=Date.now();taps.push(now);taps=taps.filter(function(t){return now-t<3000;});
+  if(taps.length<2)return;
+  var sum=0;for(var i=1;i<taps.length;i++)sum+=taps[i]-taps[i-1];
+  var s=findR(panel.id);if(!s)return;
+  s.tempo=Math.max(40,Math.min(240,Math.round(60000/(sum/(taps.length-1)))));
+  save();rPanel();rList();
+}
+function shiftFT(sid,fi,d){var s=findR(sid);if(!s)return;s.form[fi].b=Math.max(1,Math.min(256,(s.form[fi].b||4)+d));save();rPanel();}
+
+/* OVERFLOW */
+function toggleOverflow(){
+  var m=document.getElementById("overflowMenu");var o=document.getElementById("omOverlay");
+  var open=m.classList.toggle("open");o.style.display=open?"block":"none";
+}
+
+/* CONCERTS */
+function rConcerts(){
+  var w=document.getElementById("ctabs");w.innerHTML="";
+  D.concerts.forEach(function(c){
+    var b=document.createElement("button");b.className="ctab"+(c.id===D.active?" on":"");
+    if(renId===c.id){
+      var inp=document.createElement("input");inp.value=c.name;
+      inp.onclick=function(e){e.stopPropagation();};
+      inp.onblur=function(){var v=inp.value.trim();if(v)c.name=v;renId=null;save();rConcerts();};
+      inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){renId=null;rConcerts();}};
+      b.appendChild(inp);b.onclick=function(e){e.stopPropagation();};
+      w.appendChild(b);requestAnimationFrame(function(){inp.focus();inp.select();});
+    } else {
+      b.textContent=c.name;b.onclick=function(){D.active=c.id;save();rConcerts();rList();};
+      var pt;
+      b.addEventListener("touchstart",function(e){pt=setTimeout(function(){showCtx(c.id,e.touches[0].clientX,e.touches[0].clientY);},480);},{passive:true});
+      b.addEventListener("touchend",function(){clearTimeout(pt);});b.addEventListener("touchmove",function(){clearTimeout(pt);});
+      b.addEventListener("contextmenu",function(e){e.preventDefault();showCtx(c.id,e.clientX,e.clientY);});
+      w.appendChild(b);
+    }
+  });
+  var p=document.createElement("button");p.className="cadd";p.textContent="+";p.onclick=function(){openConcert();};w.appendChild(p);
+}
+function showCtx(id,x,y){
+  closeCtx();
+  var ov=document.createElement("div");ov.className="cxov";ov.onclick=closeCtx;document.body.appendChild(ov);
+  var m=document.createElement("div");m.className="cxm";m.id="cxm";
+  var canDel=D.concerts.length>1;
+  var b1=document.createElement("button");b1.className="cxi";b1.innerHTML="✏️ Переименовать";
+  (function(cid){b1.addEventListener("click",function(){startRen(cid);});})(id);
+  var b2=document.createElement("button");b2.className="cxi red"+(canDel?"":" off");b2.innerHTML="🗑 Удалить";
+  (function(cid){b2.addEventListener("click",function(){delConcert(cid);});})(id);
+  m.appendChild(b1);m.appendChild(b2);
+  var vw=window.innerWidth,vh=window.innerHeight,lx=x,ly=y+8;
+  if(lx+200>vw)lx=vw-210;if(ly+110>vh)ly=y-110;
+  m.style.left=lx+"px";m.style.top=ly+"px";document.body.appendChild(m);
+}
+function closeCtx(){var m=document.getElementById("cxm");if(m)m.remove();var o=document.querySelector(".cxov");if(o)o.remove();}
+function startRen(id){closeCtx();renId=id;rConcerts();}
+function delConcert(id){
+  closeCtx();if(D.concerts.length<=1)return;
+  D.concerts=D.concerts.filter(function(c){return c.id!==id;});delete D.sections[id];
+  if(D.active===id)D.active=D.concerts[0].id;
+  save();rConcerts();rList();
+}
+function openConcert(){
+  nConcert={name:""};
+  var old=document.getElementById("concertDialogOv");if(old)old.remove();
+  var ov=document.createElement("div");ov.id="concertDialogOv";
+  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#1a1a1f;z-index:200;padding:30px 20px;box-sizing:border-box;";
+  var ttl=document.createElement("div");ttl.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;color:#fff;margin-bottom:20px;";ttl.textContent="Новый сетлист";
+  var lbl=document.createElement("div");lbl.style.cssText="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b0aaa4;margin-bottom:8px;";lbl.textContent="Название";
+  var inp=document.createElement("input");
+  inp.style.cssText="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:12px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;";
+  inp.placeholder="Репетиция 1";
+  var okBtn=document.createElement("button");
+  okBtn.style.cssText="width:100%;margin-top:16px;padding:14px;background:#D4793F;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  okBtn.textContent="СОЗДАТЬ";
+  var cancelBtn=document.createElement("button");
+  cancelBtn.style.cssText="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid #32323e;border-radius:12px;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.textContent="ОТМЕНА";
+  okBtn.addEventListener("click",function(){
+    var name=inp.value.trim();if(!name)return;
+    nConcert.name=name;ov.remove();doSubmitConcert(null);
+  });
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"){var name=inp.value.trim();if(!name)return;nConcert.name=name;ov.remove();doSubmitConcert(null);}});
+  cancelBtn.addEventListener("click",function(){ov.remove();});
+  ov.appendChild(ttl);ov.appendChild(lbl);ov.appendChild(inp);ov.appendChild(okBtn);ov.appendChild(cancelBtn);
+  document.body.appendChild(ov);
+  setTimeout(function(){inp.focus();},100);
+}
+function submitConcert(){doSubmitConcert(null);}
+function doSubmitConcert(ov){
+  var name=nConcert.name.trim();if(!name)return;
+  var nid=Math.max.apply(null,D.concerts.map(function(c){return c.id;}))+1;
+  var secId=Date.now();
+  D.concerts.push({id:nid,name:name});
+  D.sections[nid]=[{id:secId,name:"1 отделение",songs:[]}];
+  D.active=nid;
+  save();
+  if(ov)ov.remove();
+  closeM("mConcert");rConcerts();rList();
+}
+
+/* SECTIONS */
+function buildSecModal(title,btnText,defaultName,editId){
+  nSection={name:defaultName,editId:editId||null};
+  // Remove old overlay if exists
+  var old=document.getElementById("secModalOv");if(old)old.remove();
+  // Create fullscreen overlay
+  var ov=document.createElement("div");ov.id="secModalOv";
+  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#1a1a1f;z-index:100;padding:22px 16px;box-sizing:border-box;";
+  // header
+  var hdr=document.createElement("div");hdr.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;";
+  var ttl=document.createElement("div");ttl.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;font-weight:600;color:#f0ece4;";ttl.textContent=title;
+  var cls=document.createElement("button");cls.style.cssText="background:#2a2a34;border:none;color:#d0ccc4;border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer;";cls.textContent="✕";
+  cls.addEventListener("click",function(){ov.remove();});
+  hdr.appendChild(ttl);hdr.appendChild(cls);ov.appendChild(hdr);
+  // label
+  var lbl=document.createElement("div");lbl.style.cssText="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b0aaa4;margin-bottom:7px;";lbl.textContent="Название";ov.appendChild(lbl);
+  // input
+  var inp=document.createElement("input");
+  inp.style.cssText="width:100%;background:#2a2a34;border:1px solid #D4793F;border-radius:12px;color:#f0ece4;padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;box-sizing:border-box;";
+  inp.value=defaultName;inp.placeholder="2 отделение";
+  nSection._inp=inp;
+  inp.addEventListener("input",function(){nSection.name=inp.value;});
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"){doSubmitSec(ov);}});
+  ov.appendChild(inp);
+  // button
+  var btn=document.createElement("button");
+  btn.style.cssText="width:100%;padding:13px;border:none;border-radius:12px;background:#D4793F;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;";
+  btn.textContent=btnText;
+  btn.addEventListener("click",function(){doSubmitSec(ov);});
+  ov.appendChild(btn);
+  document.body.appendChild(ov);
+  setTimeout(function(){inp.focus();if(editId)inp.select();},100);
+}
+function doSubmitSec(ov){
+  // always read directly from input element if available
+  if(nSection._inp)nSection.name=nSection._inp.value;
+  var name=nSection.name.trim();if(!name)return;
+  if(nSection.editId){
+    var sec=secs().find(function(s){return s.id===nSection.editId;});
+    if(sec)sec.name=name;
+  } else {
+    secs().push({id:Date.now(),name:name,songs:[]});
+  }
+  save();
+  if(ov)ov.remove();else{var o=document.getElementById("secModalOv");if(o)o.remove();}
+  closeM("mSection");
+  rList();
+}
+function openAddSec(){
+  var d=document.getElementById("secDialog");
+  var inp=document.getElementById("secDialogInp");
+  var key=D.active;
+  var n=(D.sections[key]||[]).length+1;
+  inp.value=n+" отделение";
+  d.dataset.editId="";
+  document.getElementById("secDialogTitle").textContent="Новое отделение";
+  d.style.display="block";
+  setTimeout(function(){inp.focus();inp.select();},100);
+}
+function openRenameSec(secId){
+  var sec=secs().find(function(s){return s.id===secId;});if(!sec)return;
+  var d=document.getElementById("secDialog");
+  var inp=document.getElementById("secDialogInp");
+  inp.value=sec.name;
+  d.dataset.editId=String(secId);
+  document.getElementById("secDialogTitle").textContent="Переименовать";
+  d.style.display="block";
+  setTimeout(function(){inp.focus();inp.select();},100);
+}
+function secDialogOk(){
+  var inp=document.getElementById("secDialogInp");
+  var name=inp.value.trim();if(!name)name="1 отделение";
+  var d=document.getElementById("secDialog");
+  d.style.display="none";
+  var editId=d.dataset.editId;
+  if(editId){
+    for(var xi=0;xi<secs().length;xi++){if(String(secs()[xi].id)===editId){secs()[xi].name=name;break;}}
+  } else {
+    var key=D.active;
+    if(!D.sections[key])D.sections[key]=[];
+    D.sections[key].push({id:Date.now(),name:name,songs:[]});
+    // force save to localStorage immediately
+    try{
+      var ts=JSON.parse(JSON.stringify(D));
+      ts.repertoire.forEach(function(s){delete s.trackData;});
+      localStorage.setItem("bandlist_v3",JSON.stringify(ts));
+    }catch(e){}
+  }
+  // re-read from localStorage to confirm
+  try{
+    var check=JSON.parse(localStorage.getItem("bandlist_v3"));
+    if(check&&check.sections&&check.sections[key]){
+      D=check;
+      D.active=+D.active;
+    }
+  }catch(e){}
+  rList();
+}
+function secDialogCancel(){
+  document.getElementById("secDialog").style.display="none";
+}
+
+function delSec(secId){
+  var ss=secs();if(ss.length<=1)return;
+  var idx=ss.findIndex(function(s){return s.id===secId;});if(idx<0)return;
+  if(ss[idx].songs.length>0){
+    showConfirm("Удалить «"+ss[idx].name+"» с "+ss[idx].songs.length+" песнями?",function(){
+      ss.splice(idx,1);save();rList();
+    });return;
+  }
+  ss.splice(idx,1);save();rList();
+}
+
+/* ADD FROM REPERTOIRE */
+function openAddFrom(){
+  var key=D.active;
+  var ss=D.sections[key]||D.sections[String(key)]||D.sections[+key];
+  if(!ss){ss=[];D.sections[key]=ss;}
+  if(ss.length===0){
+    ss.push({id:Date.now(),name:"1 отделение",songs:[]});
+    D.sections[key]=ss;
+    save();rList();
+  }
+  pickedForSection=ss[0].id;
+  var m=document.getElementById("mAddFrom");
+  m.style.cssText="display:flex;flex-direction:column;position:fixed;inset:0;background:var(--bg);z-index:30;transform:none;";
+  rAddFromModal();
+}
+function rAddFromModal(searchVal){
+  var container=document.getElementById("mAddFromI");
+  if(!container)return;
+  try{
+    container.innerHTML="";
+
+    var mh=document.createElement("div");mh.className="mh";
+    var mt2=document.createElement("div");mt2.className="mt";mt2.textContent=t('addToSetlistTitle');
+    var closeBtn=document.createElement("button");closeBtn.className="pcl";closeBtn.textContent="✕";
+    closeBtn.addEventListener("click",function(){closeM("mAddFrom");});
+    mh.appendChild(mt2);mh.appendChild(closeBtn);
+    container.appendChild(mh);
+
+    var fl1=document.createElement("div");fl1.className="fl";fl1.textContent=t('section');
+    container.appendChild(fl1);
+    var ss2=D.sections[D.active]||[];
+    var sel=document.createElement("select");sel.className="fi";sel.id="secPicker";
+    for(var si=0;si<ss2.length;si++){
+      var opt=document.createElement("option");
+      opt.value=String(ss2[si].id);opt.textContent=ss2[si].name;
+      if(+pickedForSection===+ss2[si].id)opt.selected=true;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener("change",function(){pickedForSection=+sel.value;});
+    container.appendChild(sel);
+
+    var fl2=document.createElement("div");fl2.className="fl";fl2.textContent=t('searchLabel');
+    container.appendChild(fl2);
+    var srch=document.createElement("input");srch.className="fi";srch.id="srchAddFrom";
+    srch.placeholder=t('searchInRep');srch.style.marginBottom="10px";
+    if(searchVal){srch.value=searchVal;}
+    srch.addEventListener("input",function(){
+      var val=this.value;
+      rAddFromModal(val);
+    });
+    container.appendChild(srch);
+    if(searchVal){setTimeout(function(){var el=document.getElementById("srchAddFrom");if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},30);}
+
+    var inSetlist={};
+    var activeSecs=D.sections[D.active]||[];
+    for(var ai=0;ai<activeSecs.length;ai++){
+      var asongs=activeSecs[ai].songs||[];
+      for(var aj=0;aj<asongs.length;aj++){inSetlist[+asongs[aj]]=true;}
+    }
+
+    var _sq=(searchVal||"").toLowerCase().trim();
+    var rep=[];
+    for(var di=0;di<D.repertoire.length;di++){
+      var _s=D.repertoire[di];
+      if(!_sq||_s.title.toLowerCase().includes(_sq)||_s.artist.toLowerCase().includes(_sq)){
+        rep.push(_s);
+      }
+    }
+
+
+  for(var ri=0;ri<rep.length;ri++){
+    (function(s){
+      var already=inSetlist[+s.id];
+      var row=document.createElement("div");
+      row.className="rep-pick-row"+(already?" picked":"");
+      var dot=document.createElement("div");dot.className="status-dot "+statusDotClass(s.status);
+      var info=document.createElement("div");info.className="rpr-info";
+      var t2=document.createElement("div");t2.className="rpr-title";t2.textContent=s.title;
+      var sub=document.createElement("div");sub.className="rpr-sub";sub.textContent=s.artist+" · "+s.key;
+      info.appendChild(t2);info.appendChild(sub);
+      row.appendChild(dot);row.appendChild(info);
+      if(already){
+        var badge=document.createElement("span");
+        badge.style.cssText="font-size:10px;color:var(--or);letter-spacing:1px;flex-shrink:0;";
+        badge.textContent=LANG==="en"?"In setlist":"В сетлисте";
+        row.appendChild(badge);
+      } else {
+        var addBtn=document.createElement("button");addBtn.className="rep-add-btn";addBtn.textContent=LANG==="en"?"+ Add":"+ Добавить";
+        addBtn.addEventListener("click",function(e){e.stopPropagation();addToSetlist(s.id);});
+        row.appendChild(addBtn);
+      }
+      container.appendChild(row);
+    })(rep[ri]);
+  }
+
+    var div2=document.createElement("div");div2.style.cssText="margin-top:16px;padding-top:14px;border-top:1px solid var(--br);";
+    var newBtn=document.createElement("button");newBtn.className="subbtn";newBtn.style.marginTop="0";
+    newBtn.textContent="＋ Новая песня в репертуар";
+    newBtn.addEventListener("click",function(){switchView("rep");closeM("mAddFrom");});
+    div2.appendChild(newBtn);container.appendChild(div2);
+  }catch(err){console.log("ERROR:",err.message);}
+}
+function addToSetlist(songId){
+  try{
+    var picker=document.getElementById("secPicker");
+    var secId=picker?+picker.value:pickedForSection;
+    var allSecs=D.sections[D.active]||[];
+    if(!secId&&allSecs.length)secId=+allSecs[0].id;
+    var sec=null;
+    for(var i=0;i<allSecs.length;i++){if(+allSecs[i].id===+secId){sec=allSecs[i];break;}}
+    if(!sec){
+      sec={id:Date.now(),name:"1 отделение",songs:[]};
+      if(!D.sections[D.active])D.sections[D.active]=[];
+      D.sections[D.active].push(sec);
+    }
+    if(!sec.songs)sec.songs=[];
+    var sid4=+songId;
+    var found=false;
+    for(var j=0;j<sec.songs.length;j++){if(+sec.songs[j]===sid4){found=true;break;}}
+    if(!found)sec.songs.push(sid4);
+    save();
+    // rebuild modal to show updated state
+    rAddFromModal();
+    // update setlist in background
+    rList();
+  }catch(e){console.log("addToSetlist error:",e.message);}
+}
+
+/* SETLIST LIST */
+function rList(){
+  var q=(document.getElementById("srch")||{}).value||"";q=q.toLowerCase().trim();
+  var el=document.getElementById("list");el.innerHTML="";
+  var sa0=document.getElementById("staticAddSec");if(sa0)sa0.style.display="none";
+  var ss=secs();
+  // if no sections at all, show empty state with add button
+  if(!ss||ss.length===0){
+    var sa=document.getElementById("staticAddSec");if(sa)sa.style.display="block";
+    return;
+  }
+
+  var gn=0;
+  ss.forEach(function(sec){
+    var songObjs=[];
+    if(!sec.songs)sec.songs=[];for(var si=0;si<sec.songs.length;si++){
+      var found=findR(sec.songs[si]);
+      if(found)songObjs.push(found);
+    }
+    var filtered=q?songObjs.filter(function(s){return s.title.toLowerCase().includes(q)||s.artist.toLowerCase().includes(q)||s.key.toLowerCase().includes(q);}):songObjs;
+    var hdr=document.createElement("div");hdr.className="sec-hdr";
+    var snDiv=document.createElement("div");snDiv.className="sec-name";snDiv.textContent=sec.name;
+    var saDiv=document.createElement("div");saDiv.className="sec-acts";
+    var renBtn=document.createElement("button");renBtn.className="sec-btn";renBtn.textContent="✏️";
+    var delBtn2=document.createElement("button");delBtn2.className="sec-btn red";delBtn2.textContent="✕";
+    (function(sid){
+      renBtn.onclick=function(){openRenameSec(sid);};
+      delBtn2.onclick=function(){delSec(sid);};
+    })(sec.id);
+    saDiv.appendChild(renBtn);saDiv.appendChild(delBtn2);
+    hdr.appendChild(snDiv);hdr.appendChild(saDiv);
+    el.appendChild(hdr);
+    filtered.forEach(function(s,i){
+      gn++;
+      var row=document.createElement("div");row.className="row";row.dataset.secId=sec.id;row.dataset.songId=s.id;
+      var dh=document.createElement("div");dh.className="dh";dh.innerHTML="<span></span><span></span><span></span>";
+      var dot=document.createElement("div");dot.className="status-dot "+statusDotClass(s.status);
+    dot.style.cssText="cursor:pointer;width:10px;height:10px;border-radius:50%;flex-shrink:0;";
+    dot.title="Сменить статус";
+      var num=document.createElement("div");num.className="snum";num.textContent=gn;
+      var si=document.createElement("div");si.className="si";
+      var titleEl=document.createElement("div");titleEl.className="st";titleEl.textContent=s.title;
+      var subEl=document.createElement("div");subEl.className="ss";subEl.textContent=s.artist+" · ♩"+s.tempo;
+      si.appendChild(titleEl);si.appendChild(subEl);
+      var sk=document.createElement("div");sk.className="sk";sk.textContent=s.key;
+      var del=document.createElement("button");del.className="sdel";del.textContent="✕";
+      row.appendChild(dh);row.appendChild(dot);row.appendChild(num);row.appendChild(si);row.appendChild(sk);row.appendChild(del);
+      var cSongId=s.id,cSecId=sec.id;
+      si.addEventListener("click",function(e){e.stopPropagation();openSong(cSongId);});
+      sk.addEventListener("click",function(e){e.stopPropagation();openSong(cSongId);});
+      del.addEventListener("click",function(e){e.stopPropagation();removeSongFromSetlist(cSecId,cSongId);});
+      setupDrag(row,cSecId,cSongId);
+      el.appendChild(row);
+    });
+  });
+  var sa2=document.getElementById("staticAddSec");if(sa2)sa2.style.display="block";
+}
+function removeSongFromSetlist(secId,songId){
+  var sec=secs().find(function(s){return s.id===secId;});if(!sec)return;
+  sec.songs=sec.songs.filter(function(id){return +id!==+songId;});
+  if(panel.id===songId)closePanel();
+  // ensure sections array persists even when empty
+  if(!D.sections[D.active])D.sections[D.active]=[{id:Date.now(),name:"1 отделение",songs:[]}];
+  save();rList();
+}
+
+/* REPERTOIRE LIST */
+function rStatusFilter(){
+  var el=document.getElementById("statusFilter");if(!el)return;
+  var counts={all:D.repertoire.length};
+  getStatuses().forEach(function(st){counts[st.id]=D.repertoire.filter(function(s){return s.status===st.id;}).length;});
+  var btns=[{id:"all",label:t("allSongs")}].concat(getStatuses());
+  el.innerHTML="";
+  var countsCopy=counts;
+  for(var sfi=0;sfi<btns.length;sfi++){
+    (function(sf,countsCopy){
+      var count=countsCopy[sf.id]||0;
+      var btn=document.createElement("button");
+      btn.className="sf-btn"+(repStatusFilter===sf.id?" on":"");
+      
+      if(sf.id!=="all"){
+        var dot=document.createElement("span");
+        dot.style.cssText="display:inline-block;width:6px;height:6px;border-radius:50%;background:"+statusColor(sf.id)+";flex-shrink:0;";
+        btn.appendChild(dot);
+      }
+      var cnum=document.createElement("span");cnum.style.cssText="font-size:12px;font-family:'Inter',sans-serif;font-weight:600;";cnum.textContent=String(count);
+      btn.appendChild(cnum);
+      var lbl=document.createElement("span");lbl.textContent=" "+(sf.label||sf.id);
+      btn.appendChild(lbl);
+      btn.addEventListener("click",function(){setRepFilter(sf.id);});
+      el.appendChild(btn);
+    })(btns[sfi],countsCopy);
+  }
+}
+function setRepFilter(f){repStatusFilter=f;rStatusFilter();rRep();}
+function rRep(){
+  var q=(document.getElementById("srchRep")||{}).value||"";q=q.toLowerCase().trim();
+  var el=document.getElementById("repList");if(!el)return;
+  el.innerHTML="";
+  var songs=D.repertoire.filter(function(s){
+    if(repStatusFilter!=="all"&&s.status!==repStatusFilter)return false;
+    if(q)return s.title.toLowerCase().includes(q)||s.artist.toLowerCase().includes(q)||s.key.toLowerCase().includes(q);
+    return true;
+  });
+  if(!songs.length){el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--mu2);font-size:13px;">Ничего не найдено</div>';return;}
+  songs.forEach(function(s){
+    var sid=s.id;
+    var dc=statusDotClass(s.status);
+    var row=document.createElement("div");
+    row.className="rep-row";
+    row.dataset.songId=String(sid);
+    row.innerHTML=
+      '<div class="rep-dh"><span></span><span></span><span></span></div>'
+      +'<div class="status-dot '+dc+'" onclick="event.stopPropagation();repDotClick('+sid+',this)"></div>'
+      +'<div class="rep-info" onclick="openSong('+sid+')">'
+        +'<div class="rep-title">'+esc(s.title)+'</div>'
+        +'<div class="rep-sub">'+esc(s.artist)+' · ♩'+s.tempo+'</div>'
+      +'</div>'
+      +'<div class="rep-key" onclick="openSong('+sid+')">'+esc(s.key)+'</div>'
+      +'<div class="rep-actions">'
+        +'<button class="rep-add-btn" onclick="event.stopPropagation();quickAddToSetlist('+sid+')">'+t('addToSetlist')+'</button>'
+        +'<button class="rep-del" onclick="event.stopPropagation();repDel('+sid+')">✕</button>'
+      +'</div>';
+    setupRepDrag(row,sid);
+    el.appendChild(row);
+  });
+}
+function quickAddToSetlist(songId){
+  var sid=+songId;
+  // ensure sections exist
+  if(!D.sections[D.active]||!D.sections[D.active].length){
+    D.sections[D.active]=[{id:101,name:"1 отделение",songs:[]}];
+  }
+  var allSecs=D.sections[D.active];
+  if(allSecs.length===1){
+    doAddSong(allSecs[0].id,sid);
+  } else {
+    showSecPickerFor(sid);
+  }
+}
+function doAddSong(secId,sid,concertId){
+  var cid=concertId||D.active;
+  var allSecs=D.sections[cid]||[];
+  var sec=null;
+  for(var i=0;i<allSecs.length;i++){if(+allSecs[i].id===+secId){sec=allSecs[i];break;}}
+  if(!sec&&allSecs.length)sec=allSecs[0];
+  if(!sec){
+    sec={id:Date.now(),name:"1 отделение",songs:[]};
+    if(!D.sections[cid])D.sections[cid]=[];
+    D.sections[cid].push(sec);
+  }
+  if(!sec.songs)sec.songs=[];
+  var already=false;
+  for(var j=0;j<sec.songs.length;j++){if(+sec.songs[j]===+sid){already=true;break;}}
+  if(!already)sec.songs.push(sid);
+  D.active=cid;
+  save();
+  switchView("setlist");
+  rList();
+}
+function showSecPickerFor(sid){
+  var existing=document.getElementById("secPickOv");if(existing)existing.remove();
+  var ov=document.createElement("div");ov.id="secPickOv";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(10,10,10,.92);z-index:100;display:flex;flex-direction:column;padding:30px 20px;";
+  var title=document.createElement("div");
+  title.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;color:var(--tx);margin-bottom:20px;";
+  title.textContent="Добавить в отделение:";
+  ov.appendChild(title);
+  D.sections[D.active].forEach(function(sec){
+    var btn=document.createElement("button");
+    btn.style.cssText="width:100%;padding:14px;margin-bottom:10px;border:1px solid var(--br);border-radius:12px;background:var(--s1);color:var(--tx);font-family:'Golos Text',sans-serif;font-size:18px;cursor:pointer;text-align:left;padding-left:20px;";
+    btn.textContent=sec.name;
+    btn.addEventListener("click",function(){ov.remove();doAddSong(sec.id,sid);});
+    ov.appendChild(btn);
+  });
+  var cancel=document.createElement("button");
+  cancel.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:12px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:6px;";
+  cancel.textContent="Отмена";
+  cancel.addEventListener("click",function(){ov.remove();});
+  ov.appendChild(cancel);
+  document.body.appendChild(ov);
+}
+function statusColor(id){
+  if(id==="ready")return"#2a9d8f";
+  if(id==="learning")return"#D4793F";
+  if(id==="idea")return"#9b8ea8";
+  return"#555";
+}
+
+function cycleStatus(id,dotEl){
+  var s=findR(id);if(!s)return;
+  // clean up old
+  ["statusMenu","statusMenuOv"].forEach(function(eid){var e=document.getElementById(eid);if(e)e.remove();});
+
+  var ov=document.createElement("div");ov.id="statusMenuOv";
+  ov.style.cssText="position:fixed;inset:0;z-index:98;background:transparent;";
+
+  var menu=document.createElement("div");menu.id="statusMenu";
+  menu.style.cssText="position:fixed;z-index:99;background:#2a2a34;border:1px solid #32323e;border-radius:14px;overflow:hidden;min-width:150px;box-shadow:0 8px 32px rgba(0,0,0,.7);";
+
+  getStatuses().forEach(function(st,i){
+    var item=document.createElement("button");
+    var isCurrent=s.status===st.id;
+    item.style.cssText="display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:14px;font-family:'Montserrat',sans-serif;font-weight:"+(isCurrent?"500":"300")+";cursor:pointer;border:none;background:"+(isCurrent?"#32323e":"transparent")+";color:#f0ece4;width:100%;text-align:left;"+(i>0?"border-top:1px solid #32323e;":"");
+    var dot2=document.createElement("span");
+    dot2.style.cssText="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:"+statusColor(st.id)+";display:inline-block;";
+    item.appendChild(dot2);
+    item.appendChild(document.createTextNode(st.label));
+    (function(stId){item.addEventListener("click",function(e){
+      e.stopPropagation();
+      s.status=stId;save();rRep();rList();
+      menu.remove();ov.remove();
+    });})(st.id);
+    menu.appendChild(item);
+  });
+
+  // position
+  var rect=dotEl.getBoundingClientRect();
+  var vw=window.innerWidth,vh=window.innerHeight;
+  var menuH=STATUSES.length*46;
+  var left=rect.left+rect.width+6;
+  var top=rect.top-menuH/2;
+  if(left+160>vw)left=rect.left-166;
+  if(top<10)top=10;
+  if(top+menuH>vh-10)top=vh-menuH-10;
+  menu.style.left=left+"px";menu.style.top=top+"px";
+
+  ov.addEventListener("click",function(){menu.remove();ov.remove();});
+  document.body.appendChild(ov);
+  document.body.appendChild(menu);
+}
+function setStatus(id,statusId){
+  var s=findR(id);if(!s)return;
+  s.status=statusId;save();rRep();rList();
+}
+function repDel(id){
+  var s=findR(+id);if(!s)return;
+  // if filtered by status - just move to "ready", don't delete
+  if(repStatusFilter!=="all"){
+    s.status="ready";
+    save();rRep();rList();
+  } else {
+    // in "all" view - delete permanently
+    delFromRep(+id);
+  }
+}
+function repDotClick(id,el){cycleStatus(+id,el);}
+function delFromRep(id){
+  showConfirm("Удалить из репертуара?",function(){
+  D.repertoire=D.repertoire.filter(function(s){return s.id!==id;});
+  // also remove from all setlists
+  Object.values(D.sections).forEach(function(ss){
+    ss.forEach(function(sec){sec.songs=sec.songs.filter(function(sid){return sid!==id;});});
+  });
+  save();rRep();rList();
+  });
+}
+
+/* DRAG */
+function setupDrag(row,secId,songId){
+  var handle=row.querySelector(".dh");
+  var active=false,moved=false,startY=0,curRow=null;
+  function allRows(){return Array.from(document.querySelectorAll(".row"));}
+  function rowCenter(r){var rc=r.getBoundingClientRect();return rc.top+rc.height/2;}
+  function start(y){active=true;moved=false;startY=y;curRow=null;dragState={secId:secId,songId:songId};document.body.style.userSelect="none";row.classList.add("dover");}
+  function move(y){
+    if(!active)return;if(Math.abs(y-startY)<10)return;
+    moved=true;row.classList.add("dragging");row.classList.remove("dover");
+    var others=allRows().filter(function(r){return !r.classList.contains("dragging");});
+    others.forEach(function(r){r.classList.remove("dover");});
+    var best=null,bd=999999;
+    others.forEach(function(r){var d=Math.abs(rowCenter(r)-y);if(d<bd){bd=d;best=r;}});
+    if(best){best.classList.add("dover");curRow=best;}
+  }
+  function end(){
+    if(!active)return;active=false;
+    row.classList.remove("dragging");row.classList.remove("dover");
+    allRows().forEach(function(r){r.classList.remove("dover");});
+    document.body.style.userSelect="";
+    if(moved&&curRow&&curRow!==row){
+      var toSecId=+curRow.dataset.secId;var toSongId=+curRow.dataset.songId;
+      var fromSec=secs().find(function(s){return s.id===secId;});
+      var toSec=secs().find(function(s){return s.id===toSecId;});
+      if(fromSec&&toSec){
+        var fi=fromSec.songs.indexOf(songId);var ti=toSec.songs.indexOf(toSongId);
+        if(fi>-1&&ti>-1){fromSec.songs.splice(fi,1);toSec.songs.splice(ti,0,songId);save();rList();}
+      }
+    }
+    dragState={idx:null,secId:null};curRow=null;
+  }
+  handle.addEventListener("touchstart",function(e){start(e.touches[0].clientY);e.preventDefault();},{passive:false});
+  handle.addEventListener("touchmove",function(e){move(e.touches[0].clientY);e.preventDefault();},{passive:false});
+  handle.addEventListener("touchend",function(){end();});
+  handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
+}
+
+/* REP DRAG */
+function setupRepDrag(row,songId){
+  var handle=row.querySelector(".rep-dh");
+  var active=false,moved=false,startY=0,curRow=null;
+  function allRepRows(){return Array.from(document.querySelectorAll(".rep-row"));}
+  function rowCenter(r){var rc=r.getBoundingClientRect();return rc.top+rc.height/2;}
+  function start(y){active=true;moved=false;startY=y;curRow=null;document.body.style.userSelect="none";row.classList.add("dover");}
+  function move(y){
+    if(!active)return;if(Math.abs(y-startY)<10)return;
+    moved=true;row.classList.add("dragging");row.classList.remove("dover");
+    var others=allRepRows().filter(function(r){return !r.classList.contains("dragging");});
+    others.forEach(function(r){r.classList.remove("dover");});
+    var best=null,bd=999999;
+    others.forEach(function(r){var d=Math.abs(rowCenter(r)-y);if(d<bd){bd=d;best=r;}});
+    if(best){best.classList.add("dover");curRow=best;}
+  }
+  function end(){
+    if(!active)return;active=false;
+    row.classList.remove("dragging");row.classList.remove("dover");
+    allRepRows().forEach(function(r){r.classList.remove("dover");});
+    document.body.style.userSelect="";
+    if(moved&&curRow&&curRow!==row){
+      var toSongId=+curRow.dataset.songId;
+      var fi=D.repertoire.findIndex(function(s){return s.id===songId;});
+      var ti=D.repertoire.findIndex(function(s){return s.id===toSongId;});
+      if(fi>-1&&ti>-1){
+        var moved2=D.repertoire.splice(fi,1)[0];
+        D.repertoire.splice(ti,0,moved2);
+        save();rRep();
+      }
+    }
+    curRow=null;
+  }
+  handle.addEventListener("touchstart",function(e){start(e.touches[0].clientY);e.preventDefault();},{passive:false});
+  handle.addEventListener("touchmove",function(e){move(e.touches[0].clientY);e.preventDefault();},{passive:false});
+  handle.addEventListener("touchend",function(){end();});
+  handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
+}
+
+/* PANEL */
+function openSong(id){
+  panel.id=id;panel.tab="form";taps=[];
+  var p=document.getElementById("panel");
+  p.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1f;z-index:20;transform:none !important;overflow:hidden;";
+  rPanel();
+}
+function closePanel(){
+  if(audioObj){audioObj.pause();audioObj=null;}
+  var p=document.getElementById("panel");
+  p.style.cssText="display:none;";
+  panel.id=null;
+}
+function setTab(tabName){panel.tab=tabName;rPanel();}
+
+function rPanel(){
+  var s=findR(panel.id);if(!s)return;var tab=panel.tab;
+  var totalBars=(s.form||[]).reduce(function(a,f){return a+(f.b||4);},0);
+  document.getElementById("ph").innerHTML=
+    '<div class="ph-top"><div>'
+    +'<div class="pa"><span style="cursor:pointer;border-bottom:1px dashed var(--mu2);padding-bottom:1px;" onclick="editArtistInline('+s.id+')">'+esc(s.artist)+'</span></div>'
+    +'<div class="pt" style="cursor:pointer;" onclick="editTitleInline('+s.id+')" title="Нажми чтобы изменить">'+esc(s.title)+'</div>'
+    +'</div><button class="pcl" onclick="closePanel()">✕</button></div>'
+    +'<div class="ptabs">'
+    +'<button class="ptab'+(tab==="form"?" on":"")+'" onclick="setTab(\'form\')">' + t('form') + '</button>'
+    +'<button class="ptab'+(tab==="lyrics"?" on":"")+'" onclick="setTab(\'lyrics\')">' + t('lyrics') + '</button>'
+    +'<button class="ptab'+(tab==="chords"?" on":"")+'" onclick="setTab(\'chords\')">' + t('chords') + '</button>'
+    +'<button class="ptab'+(tab==="notes"?" on":"")+'" onclick="setTab(\'notes\')">' + t('notes') + '</button>'
+    +'<button class="ptab'+(tab==="edit"?" on":"")+'" onclick="setTab(\'edit\')">' + t('edit') + '</button>'
+    +'</div>';
+  // toggle landscape compact mode
+var panelEl=document.getElementById('panel');
+if(panelEl){
+  if(tab==='form') panelEl.classList.add('panel-form-active');
+  else panelEl.classList.remove('panel-form-active');
+}
+// compact bar
+var cc=document.getElementById('ctrlsCompact');
+if(cc){
+  cc.innerHTML='<span class="ctrls-compact-item">Key<span class="ctrls-compact-val">'+esc(s.key)+'</span></span>'
+    +'<span class="ctrls-compact-item">BPM<span class="ctrls-compact-val">'+s.tempo+'</span></span>'
+    +'<span class="ctrls-compact-item">Bars<span class="ctrls-compact-val" id="compactBars">'+totalBars+'</span></span>';
+}
+document.getElementById("ctrls").innerHTML=
+    '<div class="cb"><div class="cl">'+t('key')+'</div><div class="cr">'
+    +'<button class="cbtn" onclick="shiftKey(-1)">−</button><div class="cv or">'+esc(s.key)+'</div><button class="cbtn" onclick="shiftKey(+1)">+</button>'
+    +'</div></div>'
+    +'<div class="cb"><div class="cl">'+t('tempo')+'</div><div class="cr">'
+    +'<button class="cbtn" onclick="shiftTempo(-2)">−</button><div class="cv">'+s.tempo+'</div><button class="cbtn" onclick="shiftTempo(+2)">+</button>'
+    +'</div><button class="tapbtn" onclick="tapTempo()">Tap</button></div>'
+    +'<div class="cb" style="align-items:center;justify-content:center;">'
+    +'<div class="cl">'+t("bars")+'</div><div class="cv" style="font-size:20px">'+totalBars+'</div></div>';
+  rPlayer(s);
+  var pb=document.getElementById("pb");pb.scrollTop=0;
+  if(tab==="form") rFormTab(s);
+  else if(tab==="lyrics") rLyricsTab(s);
+  else if(tab==="chords") rChordsTab(s);
+  else if(tab==="notes"){
+    pb.innerHTML='<div class="ta-hint">'+t('personalNotes')+'</div>'
+      +'<textarea class="ta notes" id="taN" oninput="saveTA()">'+esc(s.notes||"")+'</textarea>';
+  }
+  else if(tab==="edit") rEditTab(s);
+}
+// rFormTab replaced by map version above
+function updateFN(sid,fi,val){var s=findR(sid);if(s&&s.form[fi])s.form[fi].n=val;save();}
+function removeFF(sid,fi){var s=findR(sid);if(!s)return;s.form.splice(fi,1);save();rPanel();}
+function addFF(sid){
+  var s=findR(sid);if(!s)return;
+  showFormSectionPicker(sid);
+}
+function showFormSectionPicker(sid){
+  var existing=document.getElementById("formSecPickOv");if(existing)existing.remove();
+  var ov=document.createElement("div");ov.id="formSecPickOv";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(10,10,10,.93);z-index:100;display:flex;flex-direction:column;padding:28px 20px 40px;overflow-y:auto;";
+
+  var title=document.createElement("div");
+  title.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;color:#f0ece4;margin-bottom:20px;letter-spacing:1px;";
+  title.textContent=t("addSectionTitle");
+  ov.appendChild(title);
+
+  var grid=document.createElement("div");
+  grid.style.cssText="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;";
+
+  var types=["Интро","Вступление","Куплет","Куплет 2","Куплет 3","Пре-хорус","Припев","Бридж","Соло","Проигрыш","Кода","Аутро","Инструментал","Outro"];
+  types.forEach(function(type){
+    var btn=document.createElement("button");
+    btn.textContent=type;
+    btn.style.cssText="padding:10px 18px;border-radius:10px;border:1px solid #32323e;background:#22222a;color:#d0ccc4;font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;";
+    btn.addEventListener("click",function(){
+      var s=findR(sid);if(!s)return;
+      if(!s.form)s.form=[];
+      s.form.push({n:type,b:4});
+      save();ov.remove();rPanel();
+      setTimeout(function(){var pb=document.getElementById("pb");if(pb)pb.scrollTop=pb.scrollHeight;},60);
+    });
+    grid.appendChild(btn);
+  });
+  ov.appendChild(grid);
+
+  // custom input row
+  var customRow=document.createElement("div");
+  customRow.style.cssText="display:flex;gap:8px;margin-bottom:16px;";
+  var inp=document.createElement("input");
+  inp.placeholder="Своё название...";
+  inp.style.cssText="flex:1;background:#22222a;border:1px solid #32323e;border-radius:10px;color:#f0ece4;padding:11px 13px;font-size:14px;font-family:'Montserrat',sans-serif;outline:none;";
+  var okBtn=document.createElement("button");
+  okBtn.textContent="Добавить";
+  okBtn.style.cssText="background:#D4793F;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:11px 16px;cursor:pointer;white-space:nowrap;";
+  okBtn.addEventListener("click",function(){
+    var val=inp.value.trim();if(!val)return;
+    var s=findR(sid);if(!s)return;
+    if(!s.form)s.form=[];
+    s.form.push({n:val,b:4});
+    save();ov.remove();rPanel();
+  });
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")okBtn.click();});
+  customRow.appendChild(inp);customRow.appendChild(okBtn);
+  ov.appendChild(customRow);
+
+  var cancelBtn=document.createElement("button");
+  cancelBtn.textContent="Отмена";
+  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid #32323e;border-radius:12px;background:none;color:#b0aaa4;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.addEventListener("click",function(){ov.remove();});
+  ov.appendChild(cancelBtn);
+
+  document.body.appendChild(ov);
+}
+
+function rLyricsTab(s){
+  var pb=document.getElementById("pb");
+  var editing=pb.dataset.lyricsEdit==="1";
+  if(editing){
+    pb.innerHTML='<div class="ta-hint">'+t('lyricsHint')+'</div>'
+      +'<textarea class="ta notes" id="taL" style="min-height:300px" oninput="saveLyrics()">'+esc(s.lyrics||"")+'</textarea>'
+      +'<button onclick="doneLyricsEdit()" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--or);border-radius:10px;background:transparent;color:var(--or);font-family:Inter,sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+( LANG==='en'?'Done':'Готово' )+'</button>';
+    return;
+  }
+  var h='<div style="display:flex;gap:8px;margin-bottom:14px;">'
+    +'<button onclick="switchLyricsEdit()" style="background:none;border:1px solid var(--br);border-radius:8px;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;cursor:pointer;">'+t('editLyrics')+'</button>'
+    +'<button onclick="enterPerfMode()" style="background:rgba(212,121,63,0.1);border:1px solid var(--or);border-radius:8px;color:var(--or);font-family:Inter,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;cursor:pointer;">▶ '+( LANG==='en'?'Stage':'Сцена' )+'</button>'
+    +'</div>';
+  h+='<div class="lyr">';
+  (s.lyrics||"").split("\n").forEach(function(line){
+    if(line.startsWith("["))h+='<div class="lhd">'+line.replace(/[\[\]]/g,"")+'</div>';
+    else if(!line.trim())h+='<div style="height:6px"></div>';
+    else h+='<div>'+esc(line)+'</div>';
+  });
+  pb.innerHTML=h+'</div>';
+}
+function switchLyricsEdit(){var pb=document.getElementById("pb");pb.dataset.lyricsEdit="1";var s=findR(panel.id);if(s)rLyricsTab(s);}
+function doneLyricsEdit(){saveLyrics();var pb=document.getElementById("pb");pb.dataset.lyricsEdit="0";var s=findR(panel.id);if(s)rLyricsTab(s);}
+function saveLyrics(){var s=findR(panel.id);if(!s)return;var ta=document.getElementById("taL");if(ta){s.lyrics=ta.value;save();}}
+
+var SECTION_TYPES=["Интро","Вступление","Куплет","Куплет 2","Куплет 3","Пре-хорус","Припев","Бридж","Соло","Проигрыш","Кода","Аутро","Инструментал"];
+
+function rChordsTab(s){
+  var pb=document.getElementById("pb");
+  if(!s.chordBlocks)s.chordBlocks=[];
+  pb.innerHTML="";
+
+  s.chordBlocks.forEach(function(block,i){
+    var wrap=document.createElement("div");wrap.className="chord-sec";
+    // header
+    var hdr=document.createElement("div");hdr.className="chord-sec-hdr";
+    var nameDiv=document.createElement("div");nameDiv.className="chord-sec-name";
+    var num=document.createElement("span");num.className="fi2";num.textContent=i+1;
+    var lbl=document.createElement("span");lbl.textContent=block.name;
+    nameDiv.appendChild(num);nameDiv.appendChild(lbl);
+    var delBtn=document.createElement("button");delBtn.className="chord-sec-del";delBtn.textContent="✕";
+    (function(idx){delBtn.addEventListener("click",function(){s.chordBlocks.splice(idx,1);save();rChordsTab(s);});})(i);
+    hdr.appendChild(nameDiv);hdr.appendChild(delBtn);
+    // textarea
+    var ta=document.createElement("textarea");ta.className="chord-sec-ta";
+    ta.value=block.chords||"";ta.placeholder="Am  F  C  G";
+    (function(b){ta.addEventListener("input",function(){b.chords=ta.value;save();});})(block);
+    wrap.appendChild(hdr);wrap.appendChild(ta);
+    pb.appendChild(wrap);
+  });
+
+  // ADD button
+  var addBtn=document.createElement("button");addBtn.className="chord-add-btn";
+  addBtn.textContent=t("addSection2");
+  addBtn.addEventListener("click",function(){showSectionPicker(s);});
+  pb.appendChild(addBtn);
+}
+
+function showSectionPicker(s){
+  var existing=document.getElementById("secPickerOverlay");
+  if(existing)existing.remove();
+
+  var ov=document.createElement("div");ov.id="secPickerOverlay";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(10,10,10,.92);z-index:100;display:flex;flex-direction:column;padding:28px 20px 40px;overflow-y:auto;";
+
+  var title=document.createElement("div");
+  title.style.cssText="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mu);margin-bottom:20px;font-family:'Montserrat',sans-serif;";
+  title.textContent=t("chordsHint");
+
+  var grid=document.createElement("div");
+  grid.style.cssText="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;";
+
+  SECTION_TYPES.forEach(function(type){
+    var btn=document.createElement("button");
+    btn.style.cssText="padding:10px 18px;border-radius:10px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;";
+    btn.textContent=type;
+    btn.addEventListener("click",function(){
+      if(!s.chordBlocks)s.chordBlocks=[];
+      s.chordBlocks.push({name:type,chords:""});
+      save();ov.remove();rChordsTab(s);
+      setTimeout(function(){var pb=document.getElementById("pb");if(pb)pb.scrollTop=pb.scrollHeight;},60);
+    });
+    grid.appendChild(btn);
+  });
+
+  // custom input
+  var customRow=document.createElement("div");customRow.style.cssText="display:flex;gap:8px;margin-bottom:16px;";
+  var inp=document.createElement("input");inp.className="fi";inp.placeholder="Своё название...";inp.style.flex="1";
+  var okBtn=document.createElement("button");okBtn.className="subbtn";okBtn.style.cssText="margin-top:0;width:auto;padding:11px 20px;flex-shrink:0;";okBtn.textContent="Добавить";
+  okBtn.addEventListener("click",function(){
+    var val=inp.value.trim();if(!val)return;
+    if(!s.chordBlocks)s.chordBlocks=[];
+    s.chordBlocks.push({name:val,chords:""});
+    save();ov.remove();rChordsTab(s);
+    setTimeout(function(){var pb=document.getElementById("pb");if(pb)pb.scrollTop=pb.scrollHeight;},60);
+  });
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")okBtn.click();});
+  customRow.appendChild(inp);customRow.appendChild(okBtn);
+
+  var cancelBtn=document.createElement("button");
+  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:12px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.textContent="Отмена";
+  cancelBtn.addEventListener("click",function(){ov.remove();});
+
+  ov.appendChild(title);ov.appendChild(grid);ov.appendChild(customRow);ov.appendChild(cancelBtn);
+  document.body.appendChild(ov);
+}
+
+function saveCS(sid,fi,val){var s=findR(sid);if(!s)return;if(!s.chordsBySection)s.chordsBySection={};s.chordsBySection[fi]=val;save();}
+function saveTA(){var s=findR(panel.id);if(!s)return;var tn=document.getElementById("taN");if(tn){s.notes=tn.value;save();}}
+
+function editTitleInline(sid){
+  var s=findR(sid);if(!s)return;
+  var ptEl=document.querySelector(".pt");if(!ptEl)return;
+  var inp=document.createElement("input");
+  inp.value=s.title;
+  inp.style.cssText="font-family:'Golos Text',sans-serif;font-size:24px;font-weight:600;line-height:1.1;color:var(--tx);background:none;border:none;border-bottom:2px solid var(--or);outline:none;width:100%;padding:2px 0;";
+  ptEl.replaceWith(inp);
+  inp.focus();inp.select();
+  function done(){
+    var val=inp.value.trim();
+    if(val){s.title=val;save();}
+    rPanel();rList();rRep();
+  }
+  inp.onblur=done;
+  inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){rPanel();}};
+}
+function editArtistInline(sid){
+  var s=findR(sid);if(!s)return;
+  var paEl=document.querySelector(".pa");if(!paEl)return;
+  var inp=document.createElement("input");
+  inp.value=s.artist;
+  inp.style.cssText="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--or);background:none;border:none;border-bottom:1px solid var(--or);outline:none;width:100%;padding:1px 0;font-family:'Montserrat',sans-serif;";
+  paEl.innerHTML="";paEl.appendChild(inp);
+  inp.focus();inp.select();
+  function done(){
+    var val=inp.value.trim();
+    if(val){s.artist=val;save();}
+    rPanel();rList();rRep();
+  }
+  inp.onblur=done;
+  inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){rPanel();}};
+}
+
+function rEditTab(s){
+  var pb=document.getElementById("pb");
+  editSong={title:s.title,artist:s.artist,key:s.key,tempo:s.tempo,status:s.status,lyrics:s.lyrics};
+  pb.innerHTML=
+    '<div class="fl" style="margin-top:0">'+t('status')+'</div>'
+    +'<div class="status-row">'+getStatuses().map(function(st){return '<button class="st-btn'+(s.status===st.id?" "+st.cls:"")+'" onclick="editStatus(\''+st.id+'\')">'+st.label+'</button>';}).join("")+'</div>'
+    +'<div class="fl">'+t('title')+'</div><input class="fi" value="'+esc(s.title)+'" oninput="editSong.title=this.value">'
+    +'<div class="fl">'+t('artist')+'</div><input class="fi" value="'+esc(s.artist)+'" oninput="editSong.artist=this.value">'
+    +'<div class="fl">'+t('tempoBPM')+'</div><input class="fi" type="number" value="'+s.tempo+'" oninput="editSong.tempo=+this.value">'
+    +'<div class="fl">'+t('tonality')+'</div>'
+    +'<div class="kg">'+KEYS.map(function(k){return '<button class="kb'+(s.key===k?" on":"")+'" onclick="editKey(\''+k+'\')">'+k+'</button>';}).join("")+'</div>'
+    +'<div class="fl">'+t('lyricsLabel')+'</div>'
+    +'<textarea class="fi tall" oninput="editSong.lyrics=this.value">'+esc(s.lyrics||"")+'</textarea>'
+    +'<button class="subbtn" onclick="saveEdit()">'+t('save').toUpperCase()+'</button>'
+    +'<button class="delbtn" onclick="delFromPanelRep()">'+t('deleteFromRep').toUpperCase()+'</button>';
+}
+function editStatus(st){
+  editSong.status=st;
+  document.querySelectorAll("#pb .st-btn").forEach(function(b){
+    STATUSES.forEach(function(s){b.classList.remove(s.cls);});
+    if(b.textContent===getStatuses().find(function(x){return x.id===st;}).label)b.classList.add(getStatuses().find(function(x){return x.id===st;}).cls);
+  });
+}
+function editKey(k){editSong.key=k;document.querySelectorAll("#pb .kb").forEach(function(b){b.classList.toggle("on",b.textContent===k);});}
+function saveEdit(){
+  var s=findR(panel.id);if(!s||!editSong)return;
+  s.title=editSong.title||s.title;s.artist=editSong.artist||s.artist;
+  s.key=editSong.key||s.key;s.tempo=+editSong.tempo||s.tempo;
+  s.status=editSong.status||s.status;s.lyrics=editSong.lyrics;
+  editSong=null;save();rPanel();rList();rRep();
+}
+function delFromPanelRep(){
+  var s=findR(panel.id);if(!s)return;
+  showConfirm("Удалить «"+s.title+"» из репертуара?",function(){
+  delFromRep(s.id);closePanel();
+  });
+}
+
+/* ADD NEW SONG TO REPERTOIRE */
+function openAddSong(){
+  nSong={title:"",artist:"",key:"Am",tempo:100,color:"#D4793F",status:"idea",form:"",lyrics:"",notes:""};
+  var m=document.getElementById("mSong");
+  if(m){
+    m.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1f;z-index:100;overflow-y:auto;transform:none !important;";
+    rSongModal();
+  }
+}
+function nsk(k,v){nSong[k]=v;rSongModal();}
+function rSongModal(){
+  var n=nSong;
+  document.getElementById("mSongI").innerHTML=
+    '<div class="mh"><div class="mt">'+t('newSong')+'</div><button class="pcl" onclick="closeM(\'mSong\')">✕</button></div>'
+    +'<div class="fl">Статус</div>'
+    +'<div class="status-row">'+getStatuses().map(function(st){return '<button class="st-btn'+(n.status===st.id?" "+st.cls:"")+'" onclick="nsk(\'status\',\''+st.id+'\')">'+st.label+'</button>';}).join("")+'</div>'
+    +'<div class="fl">'+t('title')+'</div><input class="fi" value="'+esc(n.title)+'" oninput="nSong.title=this.value" placeholder="'+t('phTitle')+'">'
+    +'<div class="fl">'+t('artist')+'</div><input class="fi" value="'+esc(n.artist)+'" oninput="nSong.artist=this.value" placeholder="'+t('phArtist')+'">'
+    +'<div class="fl">'+t('tempoBPM')+'</div><input class="fi" type="number" value="'+n.tempo+'" oninput="nSong.tempo=+this.value">'
+    +'<div class="fl">'+t('tonality')+'</div>'
+    +'<div class="kg">'+KEYS.map(function(k){return '<button class="kb'+(n.key===k?" on":"")+'" onclick="nsk(\'key\',\''+k+'\')">'+k+'</button>';}).join("")+'</div>'
+    +'<div class="fl">'+t('formHint')+'</div>'
+    +'<textarea class="fi" oninput="nSong.form=this.value" placeholder="'+t('phForm').replace(/\\n/g,'&#10;')+'">'+esc(n.form)+'</textarea>'
+    +'<div class="fl">'+t('lyricsLabel')+'</div>'
+    +'<textarea class="fi tall" oninput="nSong.lyrics=this.value" placeholder="'+t('phLyrics').replace(/\\n/g,'&#10;')+'">'+esc(n.lyrics)+'</textarea>'
+    +'<button class="subbtn" onclick="submitSong()">'+t('addToRep').toUpperCase()+'</button>';
+}
+function submitSong(){
+  var s=nSong;if(!s.title.trim())return;
+  var allIds=D.repertoire.map(function(x){return x.id;});
+  var nid=allIds.length?Math.max.apply(null,allIds)+1:1;
+  D.repertoire.push({
+    id:nid,title:s.title.trim(),artist:s.artist.trim()||"—",key:s.key,
+    tempo:s.tempo||100,color:s.color,status:s.status,
+    form:s.form.split("\n").filter(function(l){return l.trim();}).map(function(name){return {n:name,b:4};}),
+    lyrics:s.lyrics,chordsBySection:{},notes:""
+  });
+  save();
+  var m=document.getElementById("mSong");if(m)m.setAttribute("style","display:none;");
+  rRep();
+}
+
+/* PLAYER */
+function rPlayer(s){
+  var slot=document.getElementById("playerSlot");if(!slot)return;
+  slot.innerHTML="";
+  var wrap=document.createElement("div");wrap.className="player-wrap";slot.appendChild(wrap);
+  if(!s.trackName||!s.trackData){
+    var btn=document.createElement("button");
+    btn.style.cssText="display:block;width:100%;padding:10px;border:1px dashed var(--s3);border-radius:10px;background:none;color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+    btn.textContent=t("loadTrack");
+    btn.addEventListener("click",function(e){e.preventDefault();_trackTargetSongId=s.id;document.getElementById("trackFileInput").value="";document.getElementById("trackFileInput").click();});
+    wrap.appendChild(btn);
+  } else {
+    var ctrl=document.createElement("div");ctrl.className="player-controls";
+    var pb2=document.createElement("button");pb2.className="player-playbtn";pb2.id="playBtn";pb2.textContent="▶";pb2.addEventListener("click",togglePlay);
+    var info=document.createElement("div");info.className="player-info";
+    var fname=document.createElement("div");fname.className="player-fname";fname.textContent=s.trackName;
+    var prog=document.createElement("div");prog.className="player-progress";prog.id="progBar";
+    var fill=document.createElement("div");fill.className="player-progress-fill";fill.id="progFill";fill.style.width="0%";
+    prog.appendChild(fill);prog.addEventListener("click",seekAudio);
+    var times=document.createElement("div");times.className="player-times";
+    var cur=document.createElement("span");cur.id="curTime";cur.textContent="0:00";
+    var dur2=document.createElement("span");dur2.id="durTime";dur2.textContent="0:00";
+    times.appendChild(cur);times.appendChild(dur2);
+    info.appendChild(fname);info.appendChild(prog);info.appendChild(times);
+    var del=document.createElement("button");del.className="player-del";del.textContent="✕";del.addEventListener("click",function(){removeTrack(s.id);});
+    ctrl.appendChild(pb2);ctrl.appendChild(info);ctrl.appendChild(del);wrap.appendChild(ctrl);
+    var vr=document.createElement("div");vr.className="player-vol-row";
+    var vi=document.createElement("span");vi.className="player-vol-icon";vi.textContent="♪";
+    var vb=document.createElement("div");vb.className="player-vol";vb.id="volBar";
+    var vf=document.createElement("div");vf.className="player-vol-fill";vf.id="volFill";vf.style.width=(audioVolume*100)+"%";
+    vb.appendChild(vf);vb.addEventListener("click",setVolume);
+    vr.appendChild(vi);vr.appendChild(vb);wrap.appendChild(vr);
+    initAudio(s);
+  }
+}
+function fmtTime(t){if(isNaN(t))return"0:00";var m=Math.floor(t/60);var s=Math.floor(t%60);return m+":"+(s<10?"0":"")+s;}
+function initAudio(s){
+  if(audioObj){audioObj.pause();audioObj=null;}
+  audioObj=new Audio(s.trackData);audioObj.volume=audioVolume;
+  audioObj.ontimeupdate=function(){var pf=document.getElementById("progFill");var ct=document.getElementById("curTime");if(pf&&audioObj.duration)pf.style.width=(audioObj.currentTime/audioObj.duration*100)+"%";if(ct)ct.textContent=fmtTime(audioObj.currentTime);};
+  audioObj.onloadedmetadata=function(){var dt=document.getElementById("durTime");if(dt)dt.textContent=fmtTime(audioObj.duration);};
+  audioObj.onended=function(){var btn=document.getElementById("playBtn");if(btn)btn.textContent="▶";};
+}
+function togglePlay(){if(!audioObj)return;var btn=document.getElementById("playBtn");if(audioObj.paused){audioObj.play();if(btn)btn.textContent="⏸";}else{audioObj.pause();if(btn)btn.textContent="▶";}}
+function seekAudio(e){if(!audioObj||!audioObj.duration)return;var bar=document.getElementById("progBar");var rect=bar.getBoundingClientRect();audioObj.currentTime=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width))*audioObj.duration;}
+function setVolume(e){var bar=document.getElementById("volBar");var rect=bar.getBoundingClientRect();audioVolume=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));if(audioObj)audioObj.volume=audioVolume;var vf=document.getElementById("volFill");if(vf)vf.style.width=(audioVolume*100)+"%";}
+function loadTrack(sid,input){
+  var file=input.files[0];if(!file)return;
+  var s=findR(sid);if(!s)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var mb=(e.target.result.length*0.75/1024/1024).toFixed(1);
+    if(parseFloat(mb)>20){if(!confirm("Файл "+mb+" MB. Продолжить?"))return;}
+    s.trackData=e.target.result;s.trackName=file.name;
+    save();rPlayer(s);
+  };
+  reader.readAsDataURL(file);
+}
+function removeTrack(sid){
+  var s=findR(sid);if(!s)return;
+  if(!confirm("Удалить бэкинг-трек?"))return;
+  if(audioObj){audioObj.pause();audioObj=null;}
+  delete s.trackData;delete s.trackName;save();rPlayer(s);
+}
+
+
+/* PDF */
+function doPDF(){var c=D.concerts.find(function(x){return x.id===D.active;});document.getElementById("phdrp").textContent=c?c.name:"Bandlist";window.print();}
+
+/* MODAL */
+function openM(id){
+  var m=document.getElementById(id);
+  if(!m)return;
+  m.setAttribute("style","display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1f;z-index:30;overflow:hidden;");
+}
+function closeM(id){
+  var m=document.getElementById(id);if(!m)return;
+  m.setAttribute("style","display:none;");
+}
+
+/* CONFIRM DIALOG */
+function showConfirm(msg,onOk){
+  var old=document.getElementById("confirmOv");if(old)old.remove();
+  var ov=document.createElement("div");ov.id="confirmOv";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;";
+  var box=document.createElement("div");
+  box.style.cssText="background:#22222a;border-radius:16px;padding:24px 20px;width:100%;max-width:320px;";
+  var txt=document.createElement("div");
+  txt.style.cssText="font-family:'Golos Text',sans-serif;font-size:18px;color:#f0ece4;margin-bottom:20px;text-align:center;line-height:1.4;";
+  txt.textContent=msg;
+  var btns=document.createElement("div");btns.style.cssText="display:flex;gap:10px;";
+  var cancelBtn=document.createElement("button");
+  cancelBtn.style.cssText="flex:1;padding:12px;background:none;border:1px solid #32323e;border-radius:10px;color:#888;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.textContent="Отмена";
+  cancelBtn.addEventListener("click",function(){ov.remove();});
+  var okBtn=document.createElement("button");
+  okBtn.style.cssText="flex:1;padding:12px;background:#e05252;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:600;";
+  okBtn.textContent="Удалить";
+  okBtn.addEventListener("click",function(){ov.remove();onOk();});
+  btns.appendChild(cancelBtn);btns.appendChild(okBtn);
+  box.appendChild(txt);box.appendChild(btns);ov.appendChild(box);
+  document.body.appendChild(ov);
+}
+
+/* INIT */
+document.addEventListener("DOMContentLoaded",function(){
+  var okBtn=document.getElementById("secDialogOkBtn");
+  var cancelBtn=document.getElementById("secDialogCancelBtn");
+  var inp=document.getElementById("secDialogInp");
+  if(okBtn)okBtn.addEventListener("click",secDialogOk);
+  if(cancelBtn)cancelBtn.addEventListener("click",secDialogCancel);
+  if(inp)inp.addEventListener("keydown",function(e){if(e.key==="Enter")secDialogOk();});
+  document.getElementById("trackFileInput").addEventListener("change",function(){
+    if(_trackTargetSongId!==null){loadTrack(_trackTargetSongId,this);_trackTargetSongId=null;}
+  });
+});
+try{ var _sl=localStorage.getItem("bandlist_lang"); if(_sl) LANG=_sl; }catch(e){}
+var _lb=document.getElementById("langToggleBtn"); if(_lb) _lb.textContent=LANG==="ru"?"EN":"RU";
+
+var perfFontSz = 22;
+var perfScrollOn = false;
+var perfScrollTimer = null;
+
+function enterPerfMode(){
+  var s = findR(panel.id); if(!s) return;
+  var ov = document.getElementById('perfOverlay');
+  var body = document.getElementById('perfBody');
+  var meta = document.getElementById('perfMeta');
+  var keyInfo = document.getElementById('perfKeyInfo');
+  meta.textContent = s.title + ' · ' + s.artist;
+  keyInfo.textContent = s.key + ' · ' + s.tempo + ' BPM';
+  body.innerHTML = '';
+  perfFontSz = 22;
+  // parse lyrics into sections
+  var lines = (s.lyrics || '').split('\n');
+  var currentSection = null;
+  lines.forEach(function(line){
+    if(line.startsWith('[')){
+      currentSection = document.createElement('div');
+      currentSection.className = 'perf-section';
+      var lhd = document.createElement('div');
+      lhd.className = 'perf-lhd';
+      lhd.textContent = line.replace(/[\[\]]/g,'');
+      currentSection.appendChild(lhd);
+      body.appendChild(currentSection);
+    } else if(line.trim()) {
+      if(!currentSection){ currentSection = document.createElement('div'); currentSection.className='perf-section'; body.appendChild(currentSection); }
+      var ln = document.createElement('div');
+      ln.className = 'perf-line';
+      ln.textContent = line;
+      currentSection.appendChild(ln);
+    }
+  });
+  if(!s.lyrics || !s.lyrics.trim()){
+    body.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#333;font-family:Inter,sans-serif;font-size:13px;letter-spacing:1px;">No lyrics yet</div>';
+  }
+  ov.classList.add('open');
+  body.scrollTop = 0;
+  if(navigator.wakeLock) navigator.wakeLock.request('screen').catch(function(){});
+}
+
+function exitPerfMode(){
+  stopPerfScroll();
+  document.getElementById('perfOverlay').classList.remove('open');
+}
+
+function perfFontSize(d){
+  perfFontSz = Math.max(14, Math.min(38, perfFontSz + d));
+  document.querySelectorAll('.perf-line').forEach(function(el){ el.style.fontSize = perfFontSz + 'px'; });
+}
+
+function togglePerfScroll(){
+  perfScrollOn = !perfScrollOn;
+  var btn = document.getElementById('perfScrollBtn');
+  btn.classList.toggle('on', perfScrollOn);
+  btn.textContent = perfScrollOn ? '■ Stop' : '↓ Auto scroll';
+  if(perfScrollOn){
+    perfScrollTimer = setInterval(function(){
+      var b = document.getElementById('perfBody');
+      b.scrollTop += 1;
+      if(b.scrollTop + b.clientHeight >= b.scrollHeight){ stopPerfScroll(); }
+    }, 50);
+  } else { stopPerfScroll(); }
+}
+
+function stopPerfScroll(){
+  perfScrollOn = false;
+  if(perfScrollTimer){ clearInterval(perfScrollTimer); perfScrollTimer=null; }
+  var btn = document.getElementById('perfScrollBtn');
+  if(btn){ btn.classList.remove('on'); btn.textContent='↓ Auto scroll'; }
+}
+
+
+var MAP_SECS=[
+  {id:'intro', name:'Интро',      enName:'Intro',      color:'#E8C49A', cls:'mc-intro'},
+  {id:'verse', name:'Куплет',     enName:'Verse',      color:'#B8D4A8', cls:'mc-verse'},
+  {id:'chorus',name:'Припев',     enName:'Chorus',     color:'#9BB5D8', cls:'mc-chorus'},
+  {id:'pre',   name:'Пре-хорус',  enName:'Pre-chorus', color:'#C4A8D8', cls:'mc-pre'},
+  {id:'bridge',name:'Бридж',      enName:'Bridge',     color:'#C4B8D8', cls:'mc-bridge'},
+  {id:'solo',  name:'Соло',       enName:'Solo',       color:'#F0D4A0', cls:'mc-solo'},
+  {id:'break', name:'Сбивка',     enName:'Break',      color:'#D4C4A0', cls:'mc-break'},
+  {id:'outro', name:'Аутро',      enName:'Outro',      color:'#D4A8A8', cls:'mc-outro'},
+  {id:'coda',  name:'Кода',       enName:'Coda',       color:'#A8C4D4', cls:'mc-coda'},
+];
+var mapPickerSel='intro', mapPickerBars=4, mapPickerSongId=null;
+var mapNoteTarget=null;
+
+function getMapSec(name){
+  // match by id or name
+  var sec=MAP_SECS.find(function(s){return s.id===name||s.name===name||s.enName===name;});
+  if(sec)return sec;
+  // fuzzy match
+  var nl=name.toLowerCase();
+  sec=MAP_SECS.find(function(s){return nl.includes(s.id)||s.name.toLowerCase().includes(nl)||nl.includes(s.name.toLowerCase());});
+  return sec||{id:'other',name:name,enName:name,color:'#C8C8C8',cls:'mc-other'};
+}
+
+function rFormTab(s){
+  var pb=document.getElementById('pb');
+  pb.innerHTML='';
+  pb.style.overflow='auto';
+  var sid=s.id;
+  var canvas=document.createElement('div');
+  canvas.className='map-canvas';
+  canvas.id='mapCanvas_'+sid;
+  pb.appendChild(canvas);
+  renderMapCanvas(s, canvas);
+}
+
+function renderMapCanvas(s, canvas){
+  canvas.innerHTML='';
+  canvas.style.transform='';
+  var sid=s.id;
+  var barN=1;
+
+  if(!s.form||s.form.length===0){
+    var empty=document.createElement('div');
+    empty.style.cssText='display:flex;flex-direction:column;align-items:center;padding:30px 16px;gap:12px;width:100%;';
+    var emptyTxt=document.createElement('div');
+    emptyTxt.style.cssText='font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#333;';
+    emptyTxt.textContent=LANG==='en'?'Map is empty':'Карта пустая';
+    var emptyBtn=document.createElement('button');
+    emptyBtn.style.cssText='background:rgba(212,121,63,0.1);border:1px solid rgba(212,121,63,0.5);border-radius:10px;color:#D4793F;font-family:Inter,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;';
+    emptyBtn.textContent=LANG==='en'?'+ Add first section':'+ Добавить секцию';
+    (function(id){emptyBtn.addEventListener('click',function(){openMapSheet(id);});})(sid);
+    empty.appendChild(emptyTxt);empty.appendChild(emptyBtn);
+    canvas.appendChild(empty);
+    return;
+  }
+
+  (s.form||[]).forEach(function(f,gi){
+    var sec=getMapSec(f.n);
+    var grpEl=document.createElement('div');
+    grpEl.className='map-blk-grp';
+    var lbl=document.createElement('div');
+    lbl.className='map-blk-lbl';
+    lbl.style.color=sec.color;
+    lbl.textContent=LANG==='en'?sec.enName:sec.name;
+    grpEl.appendChild(lbl);
+    var row=document.createElement('div');
+    row.className='map-blk-row';
+    var bars=f.b||4;
+    if(!f.notes)f.notes={};
+    for(var b=1;b<=bars;b++){
+      var bl=document.createElement('div');
+      bl.className='map-blk '+sec.cls;
+      var num=document.createElement('div');
+      num.className='map-blk-num';
+      num.textContent=barN;
+      bl.appendChild(num);
+      if(f.notes&&f.notes[b]){
+        var nt=document.createElement('div');
+        nt.className='map-blk-note';
+        nt.textContent=f.notes[b];
+        bl.appendChild(nt);
+      }
+      (function(gIdx,bIdx){
+        bl.addEventListener('click',function(){openMapNote(sid,gIdx,bIdx);});
+      })(gi,b);
+      row.appendChild(bl);
+      barN++;
+    }
+    var del=document.createElement('button');
+    del.className='map-blk-del';
+    del.textContent='✕';
+    (function(gIdx,id){del.addEventListener('click',function(e){
+      e.stopPropagation();
+      var s2=findR(id);if(!s2)return;
+      s2.form.splice(gIdx,1);save();
+      var s3=findR(id);renderMapCanvas(s3,canvas);
+    });})(gi,sid);
+    row.appendChild(del);
+    grpEl.appendChild(row);
+    canvas.appendChild(grpEl);
+  });
+
+  // add button
+  var addW=document.createElement('div');
+  addW.className='map-blk-grp';
+  var addL=document.createElement('div');
+  addL.className='map-blk-lbl';
+  addL.style.color='transparent';
+  addL.textContent='.';
+  var addBtn=document.createElement('button');
+  addBtn.className='map-blk-add';
+  addBtn.textContent='+';
+  (function(id){addBtn.addEventListener('click',function(){openMapSheet(id);});})(sid);
+  addW.appendChild(addL);addW.appendChild(addBtn);
+  canvas.appendChild(addW);
+
+  // landscape scale
+  var landscape=window.innerWidth>window.innerHeight;
+  if(landscape){
+    setTimeout(function(){
+      var pb=document.getElementById('pb');
+      var cw=canvas.scrollWidth;
+      var ch=canvas.scrollHeight;
+      var aw=pb.clientWidth-16;
+      var ah=pb.clientHeight-16;
+      var scale=Math.min(aw/cw,ah/ch,1);
+      if(scale<0.99){
+        canvas.style.transform='scale('+scale+')';
+        canvas.style.transformOrigin='left top';
+        canvas.style.marginBottom=(-(ch*(1-scale)))+'px';
+      }
+    },80);
+  }
+}
+
+function openMapSheet(sid){
+  mapPickerSongId=sid;
+  mapPickerSel='intro';mapPickerBars=4;
+  document.getElementById('mapBarsVal').textContent=4;
+  document.getElementById('mapSheetTitle').textContent=LANG==='en'?'Section type':'Тип секции';
+  var list=document.getElementById('mapSecList');
+  list.innerHTML='';
+  MAP_SECS.forEach(function(sec){
+    var row=document.createElement('div');
+    row.className='map-sec-row'+(mapPickerSel===sec.id?' sel':'');
+    row.id='msr-'+sec.id;
+    var dot=document.createElement('div');dot.className='map-sec-dot';dot.style.background=sec.color;
+    var nm=document.createElement('div');nm.className='map-sec-name';nm.textContent=LANG==='en'?sec.enName:sec.name;
+    var chk=document.createElement('div');chk.className='map-sec-chk';chk.textContent='✓';
+    row.appendChild(dot);row.appendChild(nm);row.appendChild(chk);
+    row.addEventListener('click',function(){
+      mapPickerSel=sec.id;
+      document.querySelectorAll('.map-sec-row').forEach(function(r){r.classList.remove('sel');});
+      row.classList.add('sel');
+    });
+    list.appendChild(row);
+  });
+  document.getElementById('mapSheet').classList.add('open');
+  document.getElementById('mapSheetOv').classList.add('open');
+}
+function closeMapSheet(){
+  document.getElementById('mapSheet').classList.remove('open');
+  document.getElementById('mapSheetOv').classList.remove('open');
+}
+function mapChBars(d){mapPickerBars=Math.max(1,Math.min(16,mapPickerBars+d));document.getElementById('mapBarsVal').textContent=mapPickerBars;}
+function mapDoAdd(){
+  var s=findR(mapPickerSongId);if(!s)return;
+  if(!s.form)s.form=[];
+  var sec=MAP_SECS.find(function(x){return x.id===mapPickerSel;})||MAP_SECS[0];
+  s.form.push({n:LANG==='en'?sec.enName:sec.name,b:mapPickerBars,notes:{}});
+  save();closeMapSheet();
+  var canvas=document.getElementById('mapCanvas_'+mapPickerSongId);
+  if(canvas){var s2=findR(mapPickerSongId);renderMapCanvas(s2,canvas);}
+}
+
+function openMapNote(sid,gi,bi){
+  mapNoteTarget={sid:sid,gi:gi,bi:bi};
+  var s=findR(sid);
+  var cur=(s&&s.form[gi]&&s.form[gi].notes&&s.form[gi].notes[bi])||'';
+  document.getElementById('mapNoteInp').value=cur;
+  document.getElementById('mapNoteOv').classList.add('open');
+  setTimeout(function(){document.getElementById('mapNoteInp').focus();},80);
+}
+function mapSaveNote(){
+  var val=document.getElementById('mapNoteInp').value.trim();
+  var s=findR(mapNoteTarget.sid);if(!s)return;
+  if(!s.form[mapNoteTarget.gi].notes)s.form[mapNoteTarget.gi].notes={};
+  if(val)s.form[mapNoteTarget.gi].notes[mapNoteTarget.bi]=val;
+  else delete s.form[mapNoteTarget.gi].notes[mapNoteTarget.bi];
+  save();mapCloseNote();
+  var canvas=document.getElementById('mapCanvas_'+mapNoteTarget.sid);
+  if(canvas){var s2=findR(mapNoteTarget.sid);renderMapCanvas(s2,canvas);}
+}
+function mapCloseNote(){document.getElementById('mapNoteOv').classList.remove('open');}
+
+window.addEventListener('resize',function(){
+  if(panel.id){var s=findR(panel.id);if(s&&panel.tab==='form'){
+    var canvas=document.getElementById('mapCanvas_'+panel.id);
+    if(canvas)renderMapCanvas(s,canvas);
+  }}
+});
+
+initFirebase();
+rConcerts();rList();rStatusFilter();
+applyLang();
+</script>
+
+<div class="perf-overlay" id="perfOverlay">
+  <div class="perf-hdr">
+    <div class="perf-meta" id="perfMeta"></div>
+    <div class="perf-key-info" id="perfKeyInfo"></div>
+    <button class="perf-exit" onclick="exitPerfMode()">✕</button>
+  </div>
+  <div class="perf-body" id="perfBody"></div>
+  <div class="perf-footer">
+    <span class="perf-font-lbl">A</span>
+    <button class="perf-fbtn" onclick="perfFontSize(-2)">−</button>
+    <button class="perf-fbtn" onclick="perfFontSize(+2)">+</button>
+    <button class="perf-scroll" id="perfScrollBtn" onclick="togglePerfScroll()">↓ Auto scroll</button>
+  </div>
+</div>
+<script>
+// Auto-update: register service worker for background updates
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    reg.addEventListener('updatefound', function(){
+      var newWorker = reg.installing;
+      newWorker.addEventListener('statechange', function(){
+        if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+          // New version available - reload automatically
+          window.location.reload();
+        }
+      });
+    });
+  }).catch(function(){});
+  // Check for updates every time page becomes visible
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible'){
+      navigator.serviceWorker.getRegistration().then(function(reg){
+        if(reg) reg.update();
+      });
+    }
+  });
+}
+</script>
+
+<div class="map-sheet-ov" id="mapSheetOv" onclick="closeMapSheet()"></div>
+<div class="map-sheet" id="mapSheet">
+  <div class="map-sheet-handle"></div>
+  <div class="map-sheet-title" id="mapSheetTitle">Тип секции</div>
+  <div class="map-sec-list" id="mapSecList"></div>
+  <div class="map-bars-row">
+    <span class="map-bars-lbl">Тактов</span>
+    <button class="map-bars-btn" onclick="mapChBars(-1)">−</button>
+    <span class="map-bars-val" id="mapBarsVal">4</span>
+    <button class="map-bars-btn" onclick="mapChBars(+1)">+</button>
+  </div>
+  <button class="map-sheet-ok" onclick="mapDoAdd()">+ Добавить</button>
+</div>
+<div class="map-note-ov" id="mapNoteOv">
+  <div class="map-note-box">
+    <div class="map-note-lbl">Заметка на такт</div>
+    <input class="map-note-inp" id="mapNoteInp" placeholder="X, XX, Только ХЭТ...">
+    <div class="map-note-btns">
+      <button class="map-note-ok" onclick="mapSaveNote()">OK</button>
+      <button class="map-note-cancel" onclick="mapCloseNote()">Отмена</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
