@@ -716,7 +716,11 @@ function secDialogCancel(){
 function delSec(secId){
   var ss=secs();if(ss.length<=1)return;
   var idx=ss.findIndex(function(s){return s.id===secId;});if(idx<0)return;
-  if(ss[idx].songs.length>0&&!confirm("Удалить «"+ss[idx].name+"» с "+ss[idx].songs.length+" песнями?"))return;
+  if(ss[idx].songs.length>0){
+    showConfirm("Удалить «"+ss[idx].name+"» с "+ss[idx].songs.length+" песнями?",function(){
+      ss.splice(idx,1);save();rList();
+    });return;
+  }
   ss.splice(idx,1);save();rList();
 }
 
@@ -1075,13 +1079,14 @@ function setStatus(id,statusId){
   s.status=statusId;save();rRep();rList();
 }
 function delFromRep(id){
-  if(!confirm("Удалить из репертуара?"))return;
+  showConfirm("Удалить из репертуара?",function(){
   D.repertoire=D.repertoire.filter(function(s){return s.id!==id;});
   // also remove from all setlists
   Object.values(D.sections).forEach(function(ss){
     ss.forEach(function(sec){sec.songs=sec.songs.filter(function(sid){return sid!==id;});});
   });
   save();rRep();rList();
+  });
 }
 
 /* DRAG */
@@ -1472,8 +1477,9 @@ function saveEdit(){
 }
 function delFromPanelRep(){
   var s=findR(panel.id);if(!s)return;
-  if(!confirm("Удалить «"+s.title+"» из репертуара?"))return;
+  showConfirm("Удалить «"+s.title+"» из репертуара?",function(){
   delFromRep(s.id);closePanel();
+  });
 }
 
 /* ADD NEW SONG TO REPERTOIRE */
@@ -1590,6 +1596,30 @@ function openM(id){
 function closeM(id){
   var m=document.getElementById(id);if(!m)return;
   m.setAttribute("style","display:none;");
+}
+
+/* CONFIRM DIALOG */
+function showConfirm(msg,onOk){
+  var old=document.getElementById("confirmOv");if(old)old.remove();
+  var ov=document.createElement("div");ov.id="confirmOv";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;";
+  var box=document.createElement("div");
+  box.style.cssText="background:#22222a;border-radius:16px;padding:24px 20px;width:100%;max-width:320px;";
+  var txt=document.createElement("div");
+  txt.style.cssText="font-family:'Cormorant Garamond',serif;font-size:18px;color:#f0ece4;margin-bottom:20px;text-align:center;line-height:1.4;";
+  txt.textContent=msg;
+  var btns=document.createElement("div");btns.style.cssText="display:flex;gap:10px;";
+  var cancelBtn=document.createElement("button");
+  cancelBtn.style.cssText="flex:1;padding:12px;background:none;border:1px solid #32323e;border-radius:10px;color:#888;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.textContent="Отмена";
+  cancelBtn.addEventListener("click",function(){ov.remove();});
+  var okBtn=document.createElement("button");
+  okBtn.style.cssText="flex:1;padding:12px;background:#e05252;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-weight:600;";
+  okBtn.textContent="Удалить";
+  okBtn.addEventListener("click",function(){ov.remove();onOk();});
+  btns.appendChild(cancelBtn);btns.appendChild(okBtn);
+  box.appendChild(txt);box.appendChild(btns);ov.appendChild(box);
+  document.body.appendChild(ov);
 }
 
 /* INIT */
