@@ -501,7 +501,8 @@ function switchView(v){
   if(v==="rep"){rRep();rStatusFilter();}
 }
 function mainAdd(){
-  if(currentView==="rep") openAddSong();
+  var repTab=document.getElementById("navRep");
+  if(repTab&&repTab.classList.contains("on")) openAddSong();
   else openAddFrom();
 }
 
@@ -1498,8 +1499,10 @@ function delFromPanelRep(){
 function openAddSong(){
   nSong={title:"",artist:"",key:"Am",tempo:100,color:"#E8720C",status:"idea",form:"",lyrics:"",notes:""};
   var m=document.getElementById("mSong");
-  m.setAttribute("style","display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1f;z-index:30;overflow:hidden;");
-  rSongModal();
+  if(m){
+    m.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1f;z-index:100;overflow-y:auto;";
+    rSongModal();
+  }
 }
 function nsk(k,v){nSong[k]=v;rSongModal();}
 function rSongModal(){
