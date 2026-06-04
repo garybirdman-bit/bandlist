@@ -105,6 +105,8 @@ body{display:flex;flex-direction:column;height:100vh;}
 
 /* REPERTOIRE */
 .rep-row{display:flex;align-items:center;gap:10px;padding:12px 14px;margin:0 12px 6px;background:var(--s1);border-radius:14px;cursor:pointer;}
+.rep-row.dover{background:var(--s2);border:1px solid var(--or);}
+.rep-row.dragging{opacity:.3;}
 .rep-row:hover{background:var(--s2);}
 .rep-info{flex:1;min-width:0;}
 .rep-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx);}
@@ -965,7 +967,7 @@ function rRep(){
     info.addEventListener("click",function(){openSong(cid);});
     key.addEventListener("click",function(){openSong(cid);});
     addBtn.addEventListener("click",function(e){e.stopPropagation();quickAddToSetlist(cid);});
-    delBtn.addEventListener("click",function(e){e.stopPropagation();delFromRep(cid);});
+    delBtn.onclick=function(e){e.stopPropagation();delFromRep(cid);};
     setupRepDrag(row,cid);
     el.appendChild(row);
   });
@@ -1078,6 +1080,7 @@ function setStatus(id,statusId){
   var s=findR(id);if(!s)return;
   s.status=statusId;save();rRep();rList();
 }
+function repDel(id){delFromRep(+id);}
 function delFromRep(id){
   showConfirm("Удалить из репертуара?",function(){
   D.repertoire=D.repertoire.filter(function(s){return s.id!==id;});
@@ -1485,7 +1488,9 @@ function delFromPanelRep(){
 /* ADD NEW SONG TO REPERTOIRE */
 function openAddSong(){
   nSong={title:"",artist:"",key:"Am",tempo:100,color:"#E8720C",status:"idea",form:"",lyrics:"",notes:""};
-  rSongModal();openM("mSong");
+  var m=document.getElementById("mSong");
+  m.setAttribute("style","display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#1a1a1f;z-index:30;overflow:hidden;");
+  rSongModal();
 }
 function nsk(k,v){nSong[k]=v;rSongModal();}
 function rSongModal(){
@@ -1515,7 +1520,9 @@ function submitSong(){
     form:s.form.split("\n").filter(function(l){return l.trim();}).map(function(name){return {n:name,b:4};}),
     lyrics:s.lyrics,chordsBySection:{},notes:""
   });
-  save();closeM("mSong");rRep();
+  save();
+  var m=document.getElementById("mSong");if(m)m.setAttribute("style","display:none;");
+  rRep();
 }
 
 /* PLAYER */
