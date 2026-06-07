@@ -207,10 +207,10 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
   #pb{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}
 }
 .ph-top{display:flex;justify-content:space-between;align-items:center;}
-.pa{font-size:13px;color:var(--or);letter-spacing:2px;text-transform:uppercase;}
-.pt{font-family:'Golos Text',sans-serif;font-size:24px;font-weight:500;line-height:1;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pa{font-size:13px;color:var(--or);letter-spacing:2px;text-transform:uppercase;flex-shrink:0;white-space:nowrap;}
+.pt{font-family:'Golos Text',sans-serif;font-size:24px;font-weight:500;line-height:1;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;}
 .pcl{background:transparent;border:none;color:var(--mu);width:auto;height:auto;font-size:14px;font-weight:400;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;line-height:1;}
-.ph-title-row{display:flex;align-items:baseline;gap:0;flex:1;min-width:0;justify-content:space-between;}
+.ph-title-row{display:flex;align-items:baseline;gap:0;width:100%;}
 .ph-sep{font-size:16px;color:#3a3a46;margin:0 8px;flex-shrink:0;font-weight:300;}
 .ptabs{display:flex;margin-top:14px;border-bottom:1px solid var(--br);overflow-x:auto;scrollbar-width:none;}
 .ptabs::-webkit-scrollbar{display:none;}
@@ -351,9 +351,9 @@ textarea.fi.tall{min-height:120px;}
 .perf-overlay{position:fixed;inset:0;background:#0d0d0f;z-index:100;display:none;flex-direction:column;}
 .perf-overlay.open{display:flex;}
 .perf-hdr{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #1a1a1f;}
-.perf-meta{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;}
-.perf-key-info{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--or);}
-.perf-exit{background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;padding:4px 0;}
+.perf-meta{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.perf-key-info{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--or);flex-shrink:0;white-space:nowrap;}
+.perf-exit{background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;padding:4px 0;flex-shrink:0;}
 .perf-body{flex:1;overflow-y:auto;padding:16px 24px 40px;scrollbar-width:none;}
 .perf-body::-webkit-scrollbar{display:none;}
 .perf-section{margin-bottom:28px;}
@@ -363,7 +363,7 @@ textarea.fi.tall{min-height:120px;}
 .perf-font-lbl{font-family:'Inter',sans-serif;font-size:13px;color:#888;letter-spacing:1px;text-transform:uppercase;}
 .perf-fbtn{background:none;border:1px solid #3a3a46;border-radius:6px;color:#c0bbb5;font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .perf-fbtn:hover{border-color:#888;color:#fff;}
-.perf-scroll{margin-left:auto;background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;cursor:pointer;transition:all .2s;}
+.perf-scroll{flex:1;background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 12px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3;height:36px;display:flex;align-items:center;justify-content:center;}
 .perf-scroll.on{border-color:var(--or);color:var(--or);background:rgba(212,121,63,0.08);}
 
 
@@ -2418,15 +2418,29 @@ function togglePerfMetronome(){
     },60000/bpm);
   }
 }
+var perfScrollSpeed=0.5;
+
+function perfScrollSpeedChange(d){
+  perfScrollSpeed=Math.max(0.2,Math.min(10,Math.round((perfScrollSpeed+d*0.2)*10)/10));
+  if(perfScrollOn){
+    clearInterval(perfScrollTimer);perfScrollTimer=null;
+    perfScrollTimer=setInterval(function(){
+      var b=document.getElementById('perfBody');
+      b.scrollTop+=perfScrollSpeed;
+      if(b.scrollTop+b.clientHeight>=b.scrollHeight){stopPerfScroll();}
+    },50);
+  }
+}
+
 function togglePerfScroll(){
   perfScrollOn = !perfScrollOn;
   var btn = document.getElementById('perfScrollBtn');
   btn.classList.toggle('on', perfScrollOn);
-  btn.textContent = perfScrollOn ? '■ Stop' : '↓ Auto scroll';
+  btn.innerHTML = perfScrollOn ? '■ STOP' : 'AUTO<br>SCROLL';
   if(perfScrollOn){
     perfScrollTimer = setInterval(function(){
       var b = document.getElementById('perfBody');
-      b.scrollTop += 1;
+      b.scrollTop += perfScrollSpeed;
       if(b.scrollTop + b.clientHeight >= b.scrollHeight){ stopPerfScroll(); }
     }, 50);
   } else { stopPerfScroll(); }
@@ -2436,7 +2450,7 @@ function stopPerfScroll(){
   perfScrollOn = false;
   if(perfScrollTimer){ clearInterval(perfScrollTimer); perfScrollTimer=null; }
   var btn = document.getElementById('perfScrollBtn');
-  if(btn){ btn.classList.remove('on'); btn.textContent='↓ Auto scroll'; }
+  if(btn){ btn.classList.remove('on'); btn.innerHTML='AUTO<br>SCROLL'; }
 }
 
 
@@ -3239,11 +3253,10 @@ window.addEventListener("popstate", function(e){
     <span class="perf-font-lbl">A</span>
     <button class="perf-fbtn" onclick="perfFontSize(-2)">−</button>
     <button class="perf-fbtn" onclick="perfFontSize(+2)">+</button>
-    <button class="perf-scroll" id="perfScrollBtn" onclick="togglePerfScroll()">↓ Auto scroll</button>
-    <button class="perf-scroll" id="perfMetrBtn" onclick="togglePerfMetronome()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      Click
-    </button>
+    <button class="perf-scroll" id="perfScrollBtn" onclick="togglePerfScroll()">AUTO<br>SCROLL</button>
+    <button class="perf-fbtn" onclick="perfScrollSpeedChange(-1)">−</button>
+    <button class="perf-fbtn" onclick="perfScrollSpeedChange(+1)">+</button>
+    <span class="perf-font-lbl">S</span>
   </div>
 </div>
 <script>
@@ -3330,7 +3343,16 @@ if('serviceWorker' in navigator){
       </div>
     </div>
   </div>
-  <div id="lftContent" style="flex:1;overflow-y:auto;padding:24px 20px 40px;font-size:18px;line-height:1.8;color:#f0ece4;font-family:'Golos Text',sans-serif;"></div>
+  <div id="lftContent" style="flex:1;overflow-y:auto;padding:16px 24px 40px;scrollbar-width:none;font-size:18px;line-height:1.65;color:#f0ece4;font-weight:500;letter-spacing:0.2px;"></div>
+  <div class="perf-footer">
+    <span class="perf-font-lbl">A</span>
+    <button class="perf-fbtn" onclick="lftFontChange(-2)">−</button>
+    <button class="perf-fbtn" onclick="lftFontChange(+2)">+</button>
+    <button class="perf-scroll" id="lftScrollBtn" onclick="toggleLftScroll()">AUTO<br>SCROLL</button>
+    <button class="perf-fbtn" onclick="lftScrollSpeedChange(-1)">−</button>
+    <button class="perf-fbtn" onclick="lftScrollSpeedChange(+1)">+</button>
+    <span class="perf-font-lbl">S</span>
+  </div>
 </div>
 
 <style>
@@ -3591,8 +3613,45 @@ function openLiveFullTab(s,tabId){
   history.pushState({liveTab:true},'','');
 }
 
+var lftFontSz=18;
+var lftScrollInterval=null;
+var lftScrollOn=false;
+var lftScrollSpeed=0.5;
+
+function lftFontChange(d){
+  lftFontSz=Math.max(14,Math.min(36,lftFontSz+d));
+  var c=document.getElementById('lftContent');
+  if(c)c.style.fontSize=lftFontSz+'px';
+}
+
+function lftScrollSpeedChange(d){
+  lftScrollSpeed=Math.max(0.2,Math.min(10,Math.round((lftScrollSpeed+d*0.2)*10)/10));
+  if(lftScrollOn){
+    clearInterval(lftScrollInterval);
+    lftScrollInterval=setInterval(function(){
+      var c=document.getElementById('lftContent');if(c)c.scrollTop+=lftScrollSpeed;
+    },50);
+  }
+}
+
+function toggleLftScroll(){
+  lftScrollOn=!lftScrollOn;
+  var btn=document.getElementById('lftScrollBtn');
+  if(lftScrollOn){
+    if(btn){btn.classList.add('on');btn.innerHTML='■ STOP';}
+    lftScrollInterval=setInterval(function(){
+      var c=document.getElementById('lftContent');if(c)c.scrollTop+=lftScrollSpeed;
+    },50);
+  } else {
+    clearInterval(lftScrollInterval);
+    if(btn){btn.classList.remove('on');btn.innerHTML='AUTO<br>SCROLL';}
+  }
+}
+
 function closeLiveFullTab(){
   document.getElementById('liveFullTab').classList.remove('open');
+  clearInterval(lftScrollInterval);lftScrollOn=false;
+  var sb=document.getElementById('lftScrollBtn');if(sb)sb.classList.remove('on');
 }
 
 window.addEventListener('popstate',function(){
