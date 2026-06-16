@@ -2771,7 +2771,7 @@ function enterPerfMode(){
       var label=nameCounts[n]>1?n+' '+nameIdx[n]:n;
       var btn=document.createElement('button');
       btn.textContent=label;btn.dataset.secIdx=i;
-      btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;margin-right:5px;background:rgba(255,255,255,0.04);border:1px solid #2a2a36;cursor:pointer;font-size:10px;font-family:Inter,sans-serif;color:#666;white-space:nowrap;transition:all .2s;flex-shrink:0;';
+      btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
       btn.addEventListener('click',function(){
         var idx=parseInt(btn.dataset.secIdx);
         var target=perfSecs[idx];
@@ -2812,7 +2812,21 @@ function lftSetActiveNav(secId){
       var navW=navEl.offsetWidth;
       navEl.scrollTo({left:b.offsetLeft-navW/2+b.offsetWidth/2,behavior:'smooth'});
     } else {
-      b.style.background='rgba(255,255,255,0.04)';b.style.border='1px solid #2a2a36';b.style.color='#666';b.style.fontWeight='400';
+      b.style.background='transparent';b.style.border='1.5px solid #606070';b.style.color='#c0bcc0';b.style.fontWeight='500';
+    }
+  });
+}
+
+function lftSetActiveNav2(idx,navEl){
+  if(!navEl)return;
+  var btns=navEl.querySelectorAll('button');
+  btns.forEach(function(b,i){
+    if(i===idx){
+      b.style.background='#D4793F';b.style.border='none';b.style.color='#fff';b.style.fontWeight='700';
+      var navW=navEl.offsetWidth;
+      navEl.scrollTo({left:b.offsetLeft-navW/2+b.offsetWidth/2,behavior:'smooth'});
+    } else {
+      b.style.background='transparent';b.style.border='1.5px solid #606070';b.style.color='#c0bcc0';b.style.fontWeight='500';
     }
   });
 }
@@ -2826,7 +2840,7 @@ function perfSetActiveNav(idx){
       var navW=navEl.offsetWidth;
       navEl.scrollTo({left:b.offsetLeft-navW/2+b.offsetWidth/2,behavior:'smooth'});
     } else {
-      b.style.background='rgba(255,255,255,0.04)';b.style.border='1px solid #2a2a36';b.style.color='#666';b.style.fontWeight='400';
+      b.style.background='transparent';b.style.border='1.5px solid #606070';b.style.color='#c0bcc0';b.style.fontWeight='500';
     }
   });
 }
@@ -2904,7 +2918,7 @@ function togglePerfScroll(){
           if(b&&el){
             var bRect=b.getBoundingClientRect();
             var eRect=el.getBoundingClientRect();
-            var scrollTarget=b.scrollTop+(eRect.top-bRect.top)-40;
+            var scrollTarget=b.scrollTop+(eRect.top-bRect.top)-4;
             b.scrollTo({top:Math.max(0,scrollTarget), behavior:'smooth'});
           }
           // Обновляем активную таблетку — находим глобальный индекс среди всех секций
@@ -3682,6 +3696,9 @@ document.addEventListener('touchstart',function(){
   if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
 },{passive:true});
 requestGlobalWakeLock();
+setInterval(function(){
+  if(document.visibilityState==='visible'&&(!globalWakeLock||globalWakeLock.released)) requestGlobalWakeLock();
+},30000);
 
 function triggerTrackUpload(songId){
   _trackTargetSongId=+songId;
@@ -4346,7 +4363,11 @@ function openLiveFullTab(s,tabId){
   document.getElementById('lftTabLabel').textContent=labels[tabId]||tabId;
   document.getElementById('lftKey').textContent=s.key||'—';
   document.getElementById('lftBpm').textContent=s.tempo||'—';
-  var content=document.getElementById('lftContent');
+  // Сбрасываем nav и скролл перед построением
+  var lftNavReset=document.getElementById('lftSecNav');
+  if(lftNavReset){lftNavReset.style.display='none';lftNavReset.innerHTML='';}
+  if(lftScrollOn){clearInterval(lftScrollInterval);lftScrollOn=false;var sb=document.getElementById('lftScrollBtn');if(sb){sb.classList.remove('on');sb.innerHTML='AUTO<br>SCROLL';}}  var content=document.getElementById('lftContent');
+  content.scrollTop=0;
   content.innerHTML='';
   content.style.cssText='flex:1;overflow-y:auto;padding:24px 20px 40px;font-size:22px;line-height:1.8;color:#f0ece4;font-family:Golos Text,sans-serif;';
   if(tabId==='form'){
@@ -4364,92 +4385,73 @@ function openLiveFullTab(s,tabId){
       });
     }
   } else if(tabId==='lyrics'){
-    content.style.whiteSpace='pre-line';
+    content.style.whiteSpace='';
     if(!s.lyrics){content.innerHTML='<div class="empty-state">'+(LANG==='en'?'No lyrics':'Нет текста')+'</div>';}
     else{
-      var lyrHtml='';
-      var lyrSections=[];
-      var secCount=0;
-      s.lyrics.split('\n').forEach(function(line){
+      content.innerHTML='';
+      var lines=s.lyrics.split('\n');
+      var currentSection=null;
+      var secIdx2=0;
+      lines.forEach(function(line){
         var sec=parseLyricsLine(line);
         if(sec){
-          var secId='lft_sec_'+(secCount++);
-          if(sec.time!==null) lyrSections.push({id:secId,time:sec.time});
-          lyrHtml+='<div id="'+secId+'" style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#D4793F;font-family:Inter,sans-serif;margin-top:24px;margin-bottom:8px;">'+esc(sec.section)+'</div>';
-        } else if(!line.trim()){
-          lyrHtml+='<div style="height:10px;"></div>';
-        } else {
-          lyrHtml+='<div style="margin-bottom:2px;">'+esc(line)+'</div>';
+          currentSection=document.createElement('div');
+          currentSection.className='perf-section';
+          currentSection.id='lft_psec_'+(secIdx2++);
+          if(sec.time!==null) currentSection.dataset.time=sec.time;
+          var lhd=document.createElement('div');
+          lhd.className='perf-lhd';
+          lhd.textContent=sec.section;
+          currentSection.appendChild(lhd);
+          content.appendChild(currentSection);
+        } else if(line.startsWith('[')&&/^\[[А-ЯA-Z]/.test(line)){
+          currentSection=document.createElement('div');
+          currentSection.className='perf-section';
+          currentSection.id='lft_psec_'+(secIdx2++);
+          var lhd=document.createElement('div');
+          lhd.className='perf-lhd';
+          lhd.textContent=line.replace(/[\[\]]/g,'');
+          currentSection.appendChild(lhd);
+          content.appendChild(currentSection);
+        } else if(line.trim()){
+          if(!currentSection){currentSection=document.createElement('div');currentSection.className='perf-section';content.appendChild(currentSection);}
+          var ln=document.createElement('div');
+          ln.className='perf-line';
+          ln.textContent=line;
+          currentSection.appendChild(ln);
         }
       });
-      content.innerHTML=lyrHtml;
-      // Строим навигацию по секциям — через setTimeout чтобы DOM успел обновиться
-      setTimeout(function(){
-        var lftNav=document.getElementById('lftSecNav');
-        var allSecEls=content.querySelectorAll('[id^="lft_sec_"]');
-        if(lftNav && allSecEls.length>1){
-          lftNav.style.display='block'; lftNav.innerHTML='';
-          var lftNameCounts={};
-          allSecEls.forEach(function(el){var n=el.textContent;lftNameCounts[n]=(lftNameCounts[n]||0)+1;});
-          var lftNameIdx={};
-          allSecEls.forEach(function(el,i){
-            var n=el.textContent;lftNameIdx[n]=(lftNameIdx[n]||0)+1;
-            var label=lftNameCounts[n]>1?n+' '+lftNameIdx[n]:n;
-            var btn=document.createElement('button');
-            btn.textContent=label;btn.dataset.secId=el.id;
-            btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;margin-right:5px;background:rgba(255,255,255,0.04);border:1px solid #2a2a36;cursor:pointer;font-size:10px;font-family:Inter,sans-serif;color:#666;white-space:nowrap;transition:all .2s;flex-shrink:0;';
-            btn.addEventListener('click',function(){
-              var target=document.getElementById(btn.dataset.secId);
-              var c3=document.getElementById('lftContent');
-              if(target&&c3){c3.scrollTop=0;c3.scrollTo({top:Math.max(0,target.offsetTop-4),behavior:'smooth'});}
-              lftSetActiveNav(btn.dataset.secId);
-            });
-            lftNav.appendChild(btn);
+      // Навигация — точная копия из режима Сцена
+      var lftNav=document.getElementById('lftSecNav');
+      var lftSecs=content.querySelectorAll('.perf-section');
+      if(lftNav && lftSecs.length>1){
+        lftNav.style.display='block'; lftNav.innerHTML='';
+        var lftNameCounts={};
+        lftSecs.forEach(function(el){var lhd=el.querySelector('.perf-lhd');if(!lhd)return;var n=lhd.textContent;lftNameCounts[n]=(lftNameCounts[n]||0)+1;});
+        var lftNameIdx={};
+        lftSecs.forEach(function(el,i){
+          var lhd=el.querySelector('.perf-lhd');if(!lhd)return;
+          var n=lhd.textContent;lftNameIdx[n]=(lftNameIdx[n]||0)+1;
+          var label=lftNameCounts[n]>1?n+' '+lftNameIdx[n]:n;
+          var btn=document.createElement('button');
+          btn.textContent=label;btn.dataset.secIdx=i;
+          btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
+          btn.addEventListener('click',function(){
+            var idx=parseInt(btn.dataset.secIdx);
+            var target=lftSecs[idx];
+            if(target){
+              var bodyEl=document.getElementById('lftContent');
+              var bodyRect=bodyEl.getBoundingClientRect();
+              var targetRect=target.getBoundingClientRect();
+              var scrollTarget=bodyEl.scrollTop+(targetRect.top-bodyRect.top)-40;
+              bodyEl.scrollTo({top:Math.max(0,scrollTarget),behavior:'smooth'});
+              lftSetActiveNav2(idx,lftNav);
+            }
           });
-          lftSetActiveNav(allSecEls[0]?allSecEls[0].id:null);
-        } else if(lftNav){ lftNav.style.display='none'; }
-      },50);
-      // Умный скролл по таймкодам если есть трек
-      if(lyrSections.length>0){
-        // Подсвечиваем кнопку AUTO SCROLL
-        var lftBtn=document.getElementById('lftScrollBtn');
-        if(lftBtn) lftBtn.classList.add('on');
-        var lftSmartTimer=setInterval(function(){
-          var lft=document.getElementById('liveFullTab');
-          if(!lft||!lft.classList.contains('open')){
-            clearInterval(lftSmartTimer);
-            var lftBtn2=document.getElementById('lftScrollBtn');
-            if(lftBtn2) lftBtn2.classList.remove('on');
-            return;
-          }
-          var ct=null;
-          var states=Object.values(liveCardStates);
-          for(var i=0;i<states.length;i++){
-            var cs=states[i];
-            if(cs&&cs.cardState&&cs.cardState.tPlaying&&cs.cardState.actx){
-              var elapsed=cs.cardState.actx.currentTime-cs.cardState.tStartCtx+cs.cardState.tOffset;
-              if(elapsed>=0) ct=elapsed;
-              break;
-            }
-          }
-          if(ct===null) return;
-          var curSec=null;
-          for(var j=0;j<lyrSections.length;j++){
-            if(ct>=lyrSections[j].time) curSec=lyrSections[j];
-          }
-          if(curSec){
-            var el=document.getElementById(curSec.id);
-            var c2=document.getElementById('lftContent');
-            if(el&&c2&&!lftScrollOn){
-              var target=Math.max(0,el.offsetTop-4);
-              if(Math.abs(c2.scrollTop-target)>60){
-                c2.scrollTo({top:target,behavior:'smooth'});
-              }
-            }
-            lftSetActiveNav(curSec.id);
-          }
-        },300);
-      }
+          lftNav.appendChild(btn);
+        });
+        lftSetActiveNav2(0,lftNav);
+      } else if(lftNav){ lftNav.style.display='none'; }
     }
   } else if(tabId==='chords'){
     var blocks=s.chordBlocks||[];
@@ -4473,6 +4475,16 @@ function openLiveFullTab(s,tabId){
     else{content.textContent=s.notes;}
   }
   document.getElementById('liveFullTab').classList.add('open');
+  content.scrollTop=0;
+  requestGlobalWakeLock();
+  // Автозапуск AUTO SCROLL если трек играет и есть таймкоды — как в режиме Сцена
+  setTimeout(function(){
+    var hasSections=content.querySelectorAll('.perf-section[data-time]').length>0;
+    var trackPlaying=Object.values(liveCardStates).some(function(cs){
+      return cs&&cs.cardState&&cs.cardState.tPlaying;
+    });
+    if(hasSections && trackPlaying && !lftScrollOn) toggleLftScroll();
+  },300);
   if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
   var backBtn=document.getElementById('lftBackBtn');
   if(backBtn)backBtn.textContent=LANG==='en'?'BACK':'НАЗАД';
@@ -4503,14 +4515,63 @@ function lftScrollSpeedChange(d){
 function toggleLftScroll(){
   lftScrollOn=!lftScrollOn;
   var btn=document.getElementById('lftScrollBtn');
+  if(btn){btn.classList.toggle('on',lftScrollOn);btn.innerHTML=lftScrollOn?'■ STOP':'AUTO<br>SCROLL';}
   if(lftScrollOn){
-    if(btn){btn.classList.add('on');btn.innerHTML='■ STOP';}
-    lftScrollInterval=setInterval(function(){
-      var c=document.getElementById('lftContent');if(c)c.scrollTop+=lftScrollSpeed;
-    },50);
+    var c=document.getElementById('lftContent');
+    // Собираем секции с таймкодами
+    var sections=[];
+    if(c) c.querySelectorAll('.perf-section[data-time]').forEach(function(el){
+      sections.push({el:el,time:parseFloat(el.dataset.time)});
+    });
+    // Источник аудио — liveCardStates
+    var getAudioTime=function(){
+      var states=Object.values(liveCardStates);
+      for(var i=0;i<states.length;i++){
+        var cs=states[i];
+        if(cs&&cs.cardState&&cs.cardState.tPlaying&&cs.cardState.actx){
+          return cs.cardState.actx.currentTime-cs.cardState.tStartCtx+cs.cardState.tOffset;
+        }
+      }
+      return null;
+    };
+    if(sections.length>0){
+      // Умный скролл по таймкодам — как в Сцена
+      var lastIdx=-1;
+      var allLftSecs=c?Array.prototype.slice.call(c.querySelectorAll('.perf-section')):[];
+      lftScrollInterval=setInterval(function(){
+        var lft=document.getElementById('liveFullTab');
+        if(!lft||!lft.classList.contains('open')){clearInterval(lftScrollInterval);return;}
+        var ct=getAudioTime();
+        if(ct===null) return;
+        var curIdx=-1;
+        for(var i=0;i<sections.length;i++){
+          if(ct>=sections[i].time) curIdx=i;
+        }
+        if(curIdx!==lastIdx && curIdx>=0){
+          lastIdx=curIdx;
+          var b=document.getElementById('lftContent');
+          var el=sections[curIdx].el;
+          if(b&&el){
+            var bRect=b.getBoundingClientRect();
+            var eRect=el.getBoundingClientRect();
+            var scrollTarget=b.scrollTop+(eRect.top-bRect.top)-4;
+            b.scrollTo({top:Math.max(0,scrollTarget),behavior:'smooth'});
+          }
+          var navIdx=allLftSecs.indexOf(sections[curIdx].el);
+          if(navIdx>=0) lftSetActiveNav2(navIdx,document.getElementById('lftSecNav'));
+          // Держим экран включённым
+          if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
+        }
+      },200);
+    } else {
+      // Нет таймкодов — обычный автоскролл
+      lftScrollInterval=setInterval(function(){
+        var b=document.getElementById('lftContent');
+        if(b){b.scrollTop+=lftScrollSpeed;if(b.scrollTop+b.clientHeight>=b.scrollHeight){toggleLftScroll();}}
+      },50);
+    }
   } else {
-    clearInterval(lftScrollInterval);
-    if(btn){btn.classList.remove('on');btn.innerHTML='AUTO<br>SCROLL';}
+    clearInterval(lftScrollInterval);lftScrollInterval=null;
   }
 }
 
