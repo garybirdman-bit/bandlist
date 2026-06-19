@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="theme-color" content="#0e0e12">
+<meta name="theme-color" content="#0a0a0d">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bandlist">
@@ -35,7 +35,7 @@ try{
 <style>
 :root{
   --or:#D4793F;--or-dim:rgba(212,121,63,0.15);
-  --bg:#0e0e12;--s1:#161620;--s2:#1e1e28;--s3:#262632;
+  --bg:#0a0a0d;--s1:#131318;--s2:#1a1a22;--s3:#22222c;
   --br:#32323e;--tx:#f0ece4;--tx2:#d0ccc4;--mu:#b0aaa4;--mu2:#707070;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -46,7 +46,7 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .hdr{padding:28px 20px 0;flex-shrink:0;background:var(--bg);}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .logo{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:12px;}
-.add-btn{width:34px;height:34px;background:transparent;border:2px solid var(--or);border-radius:50%;color:var(--or);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.add-btn{width:34px;height:34px;background:transparent;border:none;border-radius:50%;color:var(--or);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #undoToast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2a2a36;border:1px solid #3a3a46;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-family:'Golos Text',sans-serif;font-size:13px;color:#f0ece4;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap;transition:opacity .3s;opacity:0;pointer-events:none;}
 #undoToast.show{opacity:1;pointer-events:auto;}
 #undoToastBtn{background:none;border:none;color:#D4793F;font-family:'Golos Text',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:0;}
@@ -95,17 +95,26 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .add-sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 12px 8px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:14px;height:44px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 24px);}
 
 /* SONG ROWS */
-.row{display:flex;align-items:center;gap:10px;padding:0 14px;position:relative;margin:0 12px 6px;background:var(--s1);border-radius:14px;min-height:62px;}
-.row.dragging{opacity:.3;}
-.row.dover{background:var(--s2);border:1px solid var(--or);}
-.dh{display:flex;flex-direction:column;gap:4px;cursor:grab;padding:4px 2px;flex-shrink:0;touch-action:none;}
-.dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:2px;}
+.row{display:flex;align-items:center;gap:13px;padding:8px 12px;position:relative;margin:0 12px;background:transparent;min-height:0;}
+.row:last-child{border-bottom:none;}
+.note-sq{width:46px;height:46px;border-radius:8px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;cursor:grab;touch-action:none;}
+.note-sq svg{color:#888;}
+.status-dot-sq{position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;border:2px solid var(--s2);cursor:pointer;}
 .snum{font-family:'Golos Text',sans-serif;font-size:13px;color:var(--mu);width:16px;text-align:center;flex-shrink:0;}
 .si{flex:1;min-width:0;cursor:pointer;}
-.st{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
-.ss{font-size:10px;color:#888;margin-top:3px;letter-spacing:.5px;text-transform:uppercase;font-family:'Golos Text',sans-serif;}
-.sk{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:600;color:#fff;flex-shrink:0;width:28px;text-align:center;}
-.sdel{background:none;border:none;color:var(--tx2);font-size:12px;cursor:pointer;padding:4px;flex-shrink:0;opacity:.7;}
+.st{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
+.ss{font-size:13px;color:#8a8a8a;margin-top:3px;font-family:'Golos Text',sans-serif;}
+.sk{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:700;color:#888;flex-shrink:0;width:28px;text-align:center;}
+.row-menu-btn{background:none;border:none;color:#777;cursor:pointer;padding:8px;flex-shrink:0;display:flex;flex-direction:column;gap:3.5px;align-items:center;justify-content:center;}
+.row-menu-btn span{display:block;width:4px;height:4px;border-radius:50%;background:#777;}
+.row-menu-popup{display:none;position:absolute;top:48px;right:8px;background:var(--s2);border:1px solid var(--br);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);width:170px;z-index:50;}
+.row-menu-popup.open{display:block;}
+.row-menu-item{padding:13px 16px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Golos Text',sans-serif;}
+.row-menu-item.danger{color:#c0392b;}
+.row-menu-item:not(.danger){color:var(--or);border-bottom:1px solid var(--br);}
+.row.dragging{opacity:.3;}
+.row.dover{background:var(--s2);border:1px solid var(--or);}
+.sdel{background:none;border:none;color:var(--tx2);font-size:12px;cursor:pointer;padding:4px;flex-shrink:0;opacity:.7;display:none;}
 .sdel:hover{color:#e05252;opacity:1;}
 
 /* STATUS BADGE */
@@ -116,13 +125,14 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .status-idea{background:#845EC2;}
 
 /* REPERTOIRE */
-.rep-row{display:flex;align-items:center;gap:10px;padding:0 14px;margin:0 12px 6px;background:var(--s1);border-radius:14px;cursor:pointer;min-height:62px;}
+.rep-row{display:flex;align-items:center;gap:13px;padding:8px 12px;margin:0 12px;background:transparent;cursor:pointer;min-height:0;position:relative;}
+.rep-row:last-child{border-bottom:none;}
 .rep-row.dover{background:var(--s2);border:1px solid var(--or);}
 .rep-row.dragging{opacity:.3;}
 .rep-row:hover{background:var(--s2);}
 .rep-info{flex:1;min-width:0;}
-.rep-title{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
-.rep-sub{font-size:10px;color:#888;margin-top:3px;letter-spacing:.5px;text-transform:uppercase;font-family:'Golos Text',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rep-title{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
+.rep-sub{font-size:13px;color:#8a8a8a;margin-top:3px;font-family:'Golos Text',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rep-key{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:600;color:#fff;flex-shrink:0;width:28px;text-align:center;}
 .rep-actions{display:flex;gap:6px;flex-shrink:0;}
 .rep-add-btn{background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:8px;color:var(--or);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:0;padding:4px 10px;cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
@@ -163,7 +173,7 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
   position:fixed;
   right:0;top:0;bottom:0;
   width:52px;
-  background:#0e0e12;
+  background:#0a0a0d;
   border-left:1px solid #2a2a34;
   flex-direction:column;
   align-items:center;
@@ -426,7 +436,7 @@ textarea.fi.tall{min-height:120px;}
 .map-note-ov.open{display:flex;}
 .map-note-box{background:#22222a;border-radius:16px 16px 0 0;padding:18px 16px 36px;width:100%;}
 .map-note-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
-.map-note-inp{width:100%;background:#0e0e12;border:1px solid #D4793F;border-radius:8px;color:#fff;padding:10px 12px;font-size:16px;font-family:'Inter',sans-serif;outline:none;}
+.map-note-inp{width:100%;background:#0a0a0d;border:1px solid #D4793F;border-radius:8px;color:#fff;padding:10px 12px;font-size:16px;font-family:'Inter',sans-serif;outline:none;}
 .map-note-btns{display:flex;gap:8px;margin-top:10px;}
 .map-note-ok{flex:1;padding:10px;border:1px solid #D4793F;border-radius:8px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
 .map-note-cancel{padding:10px 14px;border:1px solid #3a3a46;border-radius:8px;background:transparent;color:#888;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;}
@@ -516,22 +526,13 @@ textarea.fi.tall{min-height:120px;}
 <div id="viewSetlist" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
   <div class="ctabs" id="ctabs"></div>
   <div class="divl"></div>
-  <div class="search-wrap">
-    <div class="search-inner">
-      <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <circle cx="6.5" cy="6.5" r="5" stroke="#555" stroke-width="1.5"/>
-        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <input class="search-inp" id="srch" placeholder="Поиск..." oninput="rList()">
-    </div>
-  </div>
   <div class="lw" id="lw">
     <div class="phdr-print" id="phdrp"></div>
     <div id="list"></div>
     <div id="staticAddSec" style="display:none;">
       <button class="add-sec-btn" onclick="openAddSec()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="flex-shrink:0"><line x1="5.5" y1="1" x2="5.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5.5" x2="10" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>&nbsp;<span id="addSecBtnTxt">Добавить отделение</span></button>
     </div>
-    <div id="secDialog" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0e0e12;z-index:200;padding:30px 20px;box-sizing:border-box;">
+    <div id="secDialog" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0d;z-index:200;padding:30px 20px;box-sizing:border-box;">
       <div style="font-family:'Golos Text',sans-serif;font-size:22px;color:#fff;margin-bottom:20px;" id="secDialogTitle">Новое отделение</div>
       <div style="font-size:10px;letter-spacing:2px;color:#b0aaa4;margin-bottom:8px;text-transform:uppercase;">Название</div>
       <input id="secDialogInp" style="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:12px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;" placeholder="1 отделение">
@@ -1013,7 +1014,7 @@ function openConcert(){
   nConcert={name:""};
   var old=document.getElementById("concertDialogOv");if(old)old.remove();
   var ov=document.createElement("div");ov.id="concertDialogOv";
-  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#0e0e12;z-index:200;padding:30px 20px;box-sizing:border-box;";
+  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0d;z-index:200;padding:30px 20px;box-sizing:border-box;";
   var ttl=document.createElement("div");ttl.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;color:#fff;margin-bottom:20px;";ttl.textContent=LANG==="en"?"New setlist":"Новый сетлист";
   var lbl=document.createElement("div");lbl.style.cssText="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b0aaa4;margin-bottom:8px;";lbl.textContent=LANG==="en"?"Name":"Название";
   var inp=document.createElement("input");
@@ -1055,7 +1056,7 @@ function buildSecModal(title,btnText,defaultName,editId){
   var old=document.getElementById("secModalOv");if(old)old.remove();
   // Create fullscreen overlay
   var ov=document.createElement("div");ov.id="secModalOv";
-  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#0e0e12;z-index:100;padding:22px 16px;box-sizing:border-box;";
+  ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0d;z-index:100;padding:22px 16px;box-sizing:border-box;";
   // header
   var hdr=document.createElement("div");hdr.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;";
   var ttl=document.createElement("div");ttl.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;font-weight:600;color:#f0ece4;";ttl.textContent=title;
@@ -1221,6 +1222,7 @@ function rAddFromModal(searchVal){
       }
       item.addEventListener("click",function(){
         pickedForSection=+sec.id;
+        var hiddenInput=document.getElementById("secPicker");if(hiddenInput)hiddenInput.value=String(sec.id);
         document.getElementById("secPickerLabel").textContent=sec.name;
         ddList.style.display="none";
         ddBtn.querySelector("svg").style.transform="rotate(0deg)";
@@ -1346,6 +1348,7 @@ function addToSetlist(songId){
 
 /* SETLIST LIST */
 function rList(){
+  document.querySelectorAll(".row-menu-popup.open").forEach(function(p){p.classList.remove("open");});
   var q=(document.getElementById("srchRep")||{}).value||"";q=q.toLowerCase().trim();
   var el=document.getElementById("list");el.innerHTML="";
   var sa0=document.getElementById("staticAddSec");if(sa0)sa0.style.display="none";
@@ -1418,24 +1421,32 @@ function rList(){
     }
     filtered.forEach(function(s,i){
       gn++;
-      var row=document.createElement("div");row.className="row";row.dataset.secId=sec.id;row.dataset.songId=s.id;
-      var dh=document.createElement("div");dh.className="dh";dh.innerHTML="<span></span><span></span><span></span>";
-      if(sec.locked) dh.style.cssText="opacity:0.2;pointer-events:none;cursor:default;";
-      var dot=document.createElement("div");dot.className="status-dot "+statusDotClass(s.status);
-    dot.style.cssText="cursor:pointer;width:10px;height:10px;border-radius:50%;flex-shrink:0;";
-    dot.title="Сменить статус";
-      var num=document.createElement("div");num.className="snum";num.textContent=gn;
+      var row=document.createElement("div");row.className="row";row.dataset.secId=sec.id;row.dataset.songId=s.id;row.style.position="relative";
+      var noteSq=document.createElement("div");noteSq.className="note-sq";
+      noteSq.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg>';
+      noteSq.title="Сменить статус";
+      if(sec.locked) noteSq.style.cssText+="opacity:0.2;pointer-events:none;cursor:default;";
       var si=document.createElement("div");si.className="si";
       var titleEl=document.createElement("div");titleEl.className="st";titleEl.textContent=s.title;
       var subEl=document.createElement("div");subEl.className="ss";subEl.textContent=s.artist+" · ♩"+s.tempo;
       si.appendChild(titleEl);si.appendChild(subEl);
       var sk=document.createElement("div");sk.className="sk";sk.textContent=s.key;
-      var del=document.createElement("button");del.className="sdel";del.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-      row.appendChild(dh);row.appendChild(dot);row.appendChild(num);row.appendChild(si);row.appendChild(sk);row.appendChild(del);
+      var menuBtn=document.createElement("button");menuBtn.className="row-menu-btn";menuBtn.innerHTML="<span></span><span></span><span></span>";
+      var menuPopup=document.createElement("div");menuPopup.className="row-menu-popup";
+      var menuDel=document.createElement("div");menuDel.className="row-menu-item danger";
+      menuDel.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>'+(LANG==='en'?'Remove':'Удалить');
+      menuPopup.appendChild(menuDel);
+      row.appendChild(noteSq);row.appendChild(si);row.appendChild(sk);row.appendChild(menuBtn);row.appendChild(menuPopup);
       var cSongId=s.id,cSecId=sec.id;
       si.addEventListener("click",function(e){e.stopPropagation();openSong(cSongId);});
       sk.addEventListener("click",function(e){e.stopPropagation();openSong(cSongId);});
-      del.addEventListener("click",function(e){e.stopPropagation();removeSongFromSetlist(cSecId,cSongId);});
+      menuBtn.addEventListener("click",function(e){
+        e.stopPropagation();
+        var isOpen=menuPopup.classList.contains("open");
+        document.querySelectorAll(".row-menu-popup.open").forEach(function(p){p.classList.remove("open");});
+        if(!isOpen)menuPopup.classList.add("open");
+      });
+      menuDel.addEventListener("click",function(e){e.stopPropagation();menuPopup.classList.remove("open");removeSongFromSetlist(cSecId,cSongId);});
       setupDrag(row,cSecId,cSongId);
       el.appendChild(row);
     });
@@ -1527,20 +1538,27 @@ function rRep(){
     row.className="rep-row";
     row.dataset.songId=String(sid);
     row.innerHTML=
-      '<div class="rep-dh"><span></span><span></span><span></span></div>'
-      +'<div class="status-dot '+dc+'" onclick="event.stopPropagation();repDotClick('+sid+',this)"></div>'
+      '<div class="note-sq"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg></div>'
       +'<div class="rep-info" onclick="openSong('+sid+')">'
         +'<div class="rep-title">'+esc(s.title)+'</div>'
         +'<div class="rep-sub">'+esc(s.artist)+' · ♩'+s.tempo+'</div>'
       +'</div>'
       +'<div class="rep-key" onclick="openSong('+sid+')">'+esc(s.key)+'</div>'
-      +'<div class="rep-actions">'
-        +'<button class="rep-add-btn" onclick="event.stopPropagation();quickAddToSetlist('+sid+')">'+t('addToSetlist')+'</button>'
-        +'<button class="rep-del" onclick="event.stopPropagation();delRepSong('+sid+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+      +'<button class="row-menu-btn" onclick="event.stopPropagation();toggleRepMenu(this)"><span></span><span></span><span></span></button>'
+      +'<div class="row-menu-popup">'
+        +'<div class="row-menu-item" onclick="event.stopPropagation();this.closest(\'.row-menu-popup\').classList.remove(\'open\');quickAddToSetlist('+sid+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'+t('addToSetlist')+'</div>'
+        +'<div class="row-menu-item danger" onclick="event.stopPropagation();this.closest(\'.row-menu-popup\').classList.remove(\'open\');delRepSong('+sid+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>'+(LANG==='en'?'Remove':'Удалить')+'</div>'
       +'</div>';
+    row.style.position="relative";
     setupRepDrag(row,sid);
     el.appendChild(row);
   });
+}
+function toggleRepMenu(btn){
+  var popup=btn.nextElementSibling;
+  var isOpen=popup.classList.contains("open");
+  document.querySelectorAll(".row-menu-popup.open").forEach(function(p){p.classList.remove("open");});
+  if(!isOpen)popup.classList.add("open");
 }
 function quickAddToSetlist(songId){
   var sid=+songId;
@@ -1684,7 +1702,7 @@ function delFromRep(id){
 
 /* DRAG */
 function setupDrag(row,secId,songId){
-  var handle=row.querySelector(".dh");
+  var handle=row.querySelector(".note-sq");
   var active=false,moved=false,startY=0,curRow=null;
   function allRows(){return Array.from(document.querySelectorAll(".row"));}
   function rowCenter(r){var rc=r.getBoundingClientRect();return rc.top+rc.height/2;}
@@ -1742,6 +1760,7 @@ function setupDrag(row,secId,songId){
     // check if dropped on placeholder
     var touch=e.changedTouches[0];
     var dropped=false;
+    var wasMoved=moved;
     document.querySelectorAll(".drop-placeholder").forEach(function(ph){
       ph.classList.remove("drag-over");
       var r=ph.getBoundingClientRect();
@@ -1752,13 +1771,14 @@ function setupDrag(row,secId,songId){
     });
     if(!dropped)end();
     else{active=false;row.classList.remove("dragging");row.classList.remove("dover");document.body.style.userSelect="";}
+    if(!wasMoved&&!dropped){cycleStatus(songId,handle);}
   });
-  handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
+  handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){var wasMoved=moved;end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);if(!wasMoved){cycleStatus(songId,handle);}};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
 }
 
 /* REP DRAG */
 function setupRepDrag(row,songId){
-  var handle=row.querySelector(".rep-dh");
+  var handle=row.querySelector(".note-sq");
   var active=false,moved=false,startY=0,curRow=null;
   function allRepRows(){return Array.from(document.querySelectorAll(".rep-row"));}
   function rowCenter(r){var rc=r.getBoundingClientRect();return rc.top+rc.height/2;}
@@ -1805,28 +1825,18 @@ function setupRepDrag(row,songId){
     e.preventDefault();
   },{passive:false});
   handle.addEventListener("touchend",function(e){
-    // check if dropped on placeholder
-    var touch=e.changedTouches[0];
-    var dropped=false;
-    document.querySelectorAll(".drop-placeholder").forEach(function(ph){
-      ph.classList.remove("drag-over");
-      var r=ph.getBoundingClientRect();
-      if(touch.clientY>=r.top&&touch.clientY<=r.bottom&&touch.clientX>=r.left&&touch.clientX<=r.right){
-        dropToSection(songId,secId,+ph.dataset.secId);
-        dropped=true;
-      }
-    });
-    if(!dropped)end();
-    else{active=false;row.classList.remove("dragging");row.classList.remove("dover");document.body.style.userSelect="";}
+    var wasMoved=moved;
+    end();
+    if(!wasMoved){cycleStatus(songId,handle);}
   });
-  handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
+  handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){var wasMoved=moved;end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);if(!wasMoved){cycleStatus(songId,handle);}};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
 }
 
 /* PANEL */
 function openSong(id){
   panel.id=id;panel.tab="form";taps=[];
   var p=document.getElementById("panel");
-  p.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0e0e12;z-index:20;transform:none !important;overflow:hidden;";
+  p.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0d;z-index:20;transform:none !important;overflow:hidden;";
   history.pushState({panel:id},"","");
   rPanel();
 }
@@ -2088,7 +2098,7 @@ function enterLyricsTapMode(){
   if(!ov){
     ov=document.createElement('div');
     ov.id='lyricsTapOv';
-    ov.style.cssText='position:fixed;inset:0;background:#0e0e12;z-index:250;display:flex;flex-direction:column;';
+    ov.style.cssText='position:fixed;inset:0;background:#0a0a0d;z-index:250;display:flex;flex-direction:column;';
     document.body.appendChild(ov);
   }
   var h='<div style="padding:14px 16px;border-bottom:1px solid #1e1e26;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">'
@@ -2483,7 +2493,7 @@ function openAddSong(){
   nSong={title:"",artist:"",key:"Am",tempo:100,color:"#D4793F",status:"idea",form:"",lyrics:"",notes:""};
   var m=document.getElementById("mSong");
   if(m){
-    m.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0e0e12;z-index:100;overflow-y:auto;transform:none !important;";
+    m.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0d;z-index:100;overflow-y:auto;transform:none !important;";
     rSongModal();
   }
 }
@@ -2747,7 +2757,7 @@ function doPDF(){var c=D.concerts.find(function(x){return x.id===D.active;});doc
 function openM(id){
   var m=document.getElementById(id);
   if(!m)return;
-  m.setAttribute("style","display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0e0e12;z-index:30;overflow:hidden;");
+  m.setAttribute("style","display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0d;z-index:30;overflow:hidden;");
   history.pushState({modal:id},"","");
 }
 function closeM(id){
@@ -3237,7 +3247,7 @@ function renameMapSection(sid,gi){
   lbl.style.cssText='font-size:11px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:Inter,sans-serif;';
   lbl.textContent=LANG==='en'?'Rename section':'Переименовать секцию';
   var inp=document.createElement('input');
-  inp.style.cssText='width:100%;background:#0e0e12;border:1px solid #D4793F;border-radius:8px;color:#fff;padding:10px 12px;font-size:15px;font-family:Golos Text,sans-serif;outline:none;';
+  inp.style.cssText='width:100%;background:#0a0a0d;border:1px solid #D4793F;border-radius:8px;color:#fff;padding:10px 12px;font-size:15px;font-family:Golos Text,sans-serif;outline:none;';
   inp.value=cur;
   var btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px;margin-top:12px;';
   var ok=document.createElement('button');
@@ -3679,7 +3689,7 @@ function parseChordProText(raw){
 function openImportModal(){
   var old=document.getElementById('importOv');if(old)old.remove();
   var ov=document.createElement('div');ov.id='importOv';
-  ov.style.cssText='position:fixed;inset:0;background:#0e0e12;z-index:200;display:flex;flex-direction:column;padding:22px 16px;overflow-y:auto;';
+  ov.style.cssText='position:fixed;inset:0;background:#0a0a0d;z-index:200;display:flex;flex-direction:column;padding:22px 16px;overflow-y:auto;';
 
   var hdr=document.createElement('div');hdr.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;';
   var ttl=document.createElement('div');ttl.style.cssText='font-family:Golos Text,sans-serif;font-size:20px;font-weight:500;color:#fff;';
@@ -3798,6 +3808,11 @@ initFirebase();
 rConcerts();rList();rStatusFilter();
 loadAllTracksFromIDB();
 applyLang();
+document.addEventListener("click",function(e){
+  if(!e.target.closest(".row-menu-btn")&&!e.target.closest(".row-menu-popup")){
+    document.querySelectorAll(".row-menu-popup.open").forEach(function(p){p.classList.remove("open");});
+  }
+});
 
 // Handle Android back button
 window.addEventListener("popstate", function(e){
@@ -3894,8 +3909,8 @@ if('serviceWorker' in navigator){
 </div>
 
 <!-- ═══ LIVE OVERLAY ═══ -->
-<div id="liveOverlay" style="position:fixed;inset:0;background:#0e0e12;z-index:200;flex-direction:column;overflow:hidden;">
-  <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e26;flex-shrink:0;background:#0e0e12;">
+<div id="liveOverlay" style="position:fixed;inset:0;background:#0a0a0d;z-index:200;flex-direction:column;overflow:hidden;">
+  <div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e26;flex-shrink:0;background:#0a0a0d;">
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="width:8px;height:8px;border-radius:50%;background:#c0392b;box-shadow:0 0 8px #c0392b;"></div>
       <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;color:#c0392b;">LIVE</span>
@@ -3907,7 +3922,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <!-- ═══ LIVE FULLSCREEN TAB ═══ -->
-<div id="liveFullTab" style="position:fixed;inset:0;background:#0e0e12;z-index:210;flex-direction:column;overflow:hidden;">
+<div id="liveFullTab" style="position:fixed;inset:0;background:#0a0a0d;z-index:210;flex-direction:column;overflow:hidden;">
   <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e26;flex-shrink:0;">
     <button onclick="closeLiveFullTab()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
