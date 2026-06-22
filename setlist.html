@@ -17,8 +17,18 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
-var db=null;
+window._jsErr=null;
+window.addEventListener('error',function(e){
+  // "Script error." без деталей — типичный шум от cross-origin скриптов (например Firebase
+  // без сети на content://), не несёт пользы для диагностики плеера, игнорируем
+  if(!e.message||e.message==='Script error.')return;
+  window._jsErr=e.message+' @'+(e.filename||'')+':'+(e.lineno||'');
+});
+var db=null,auth=null;
 try{
   firebase.initializeApp({
     apiKey:"AIzaSyCOUlsS9gumRqtioIPTu7rzV0hVpXgVnRA",
@@ -30,47 +40,95 @@ try{
     appId:"1:946709262652:web:547467b3add1e1d5d6ee39"
   });
   db=firebase.database();
+  auth=firebase.auth();
 }catch(e){console.log("Firebase недоступен — работаем локально");}
 </script>
 <style>
 :root{
   --or:#D4793F;--or-dim:rgba(212,121,63,0.15);
-  --bg:#0a0a0d;--s1:#131318;--s2:#1a1a22;--s3:#22222c;
+  --bg:#0a0a0d;--s1:#131318;--s2:#2a2a2a;--s3:#333333;
   --br:#32323e;--tx:#f0ece4;--tx2:#d0ccc4;--mu:#b0aaa4;--mu2:#707070;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Montserrat',sans-serif;font-weight:300;}
-body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sans-serif;}
+body{display:flex;flex-direction:column;height:100vh;height:100dvh;font-family:'Golos Text',sans-serif;}
 
 /* HEADER */
 .hdr{padding:28px 20px 0;flex-shrink:0;background:var(--bg);}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .logo{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:12px;}
 .add-btn{width:34px;height:34px;background:transparent;border:none;border-radius:50%;color:var(--or);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-#undoToast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2a2a36;border:1px solid #3a3a46;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-family:'Golos Text',sans-serif;font-size:13px;color:#f0ece4;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap;transition:opacity .3s;opacity:0;pointer-events:none;}
+#undoToast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2a2a36;border:1px solid #3a3a46;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-family:'Golos Text',sans-serif;font-size:13px;color:#f0ece4;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap;transition:opacity .3s;opacity:0;pointer-events:none;}
 #undoToast.show{opacity:1;pointer-events:auto;}
 #undoToastBtn{background:none;border:none;color:#D4793F;font-family:'Golos Text',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:0;}
 .more-btn{display:none!important;}
 
-/* NAV TABS (Сетлист / Репертуар) */
+/* NEW PAGE HEADER (replaces logo header) */
+.page-hdr{padding:22px 24px 0;flex-shrink:0;background:var(--bg);}
+.page-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.page-title-txt{font-family:'Golos Text',sans-serif;font-size:26px;font-weight:600;color:#fff;letter-spacing:-.2px;}
+.page-hdr-right{display:flex;align-items:center;gap:14px;}
+.profile-avatar-btn{width:36px;height:36px;border-radius:50%;background:var(--or-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--or);}
+.hero-row{display:flex;gap:10px;margin-bottom:14px;}
+.hero-btn-live{flex:1;height:40px;border-radius:8px;background:var(--s2);border:none;margin:0;padding:0;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:inherit;}
+.hero-btn-live .ld{width:8px;height:8px;border-radius:50%;background:#e74c3c;flex-shrink:0;margin:0;}
+.hero-btn-live span.lbl{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:500;color:#fff;line-height:1;display:flex;align-items:center;margin:0;padding:0;}
+.hero-btn-live.active-live{background:#c0392b;}
+.hero-btn-live.active-live .ld{background:#fff;}
+.hero-btn-add{flex:1;height:40px;border-radius:8px;background:var(--s2);border:none;margin:0;padding:0;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font:inherit;}
+.hero-btn-add svg{flex-shrink:0;display:block;}
+.add-icon-wrap{width:11px;height:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.hero-btn-add span.lbl{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:500;color:#fff;line-height:1;display:flex;align-items:center;margin:0;padding:0;}
+
+/* BOTTOM NAV (replaces top nav-tabs) */
+.bottom-nav{display:flex;align-items:stretch;border-top:1px solid var(--br);background:var(--bg);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,4px);}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 0 6px;cursor:pointer;background:none;border:none;}
+.bnav-item svg{flex-shrink:0;}
+.bnav-item span{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.3px;}
+.bnav-item.on svg *{stroke:#fff;}
+.bnav-item.on span{color:#fff;}
+.bnav-item:not(.on) svg *{stroke:var(--mu2);}
+.bnav-item:not(.on) span{color:var(--mu2);}
+
+/* NAV TABS (Сетлист / Репертуар) — legacy, kept for compat but unused */
 .nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--br);margin-bottom:0;flex-shrink:0;}
 .nav-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
 .nav-tab.on{color:var(--or);border-bottom-color:var(--or);}
 
+/* SIMPLE PROFILE SCREEN */
+.profile-screen{position:fixed;inset:0;background:var(--bg);z-index:30;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.profile-screen.open{transform:translateY(0);}
+.profile-screen-hdr{padding:18px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--br);flex-shrink:0;}
+.profile-screen-hdr button{background:none;border:none;cursor:pointer;color:var(--tx2);display:flex;align-items:center;padding:0;}
+.profile-screen-title{font-family:'Golos Text',sans-serif;font-size:18px;font-weight:600;color:#fff;}
+.profile-screen-body{flex:1;overflow-y:auto;padding:0 20px 30px;}
+.psec-lbl{font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--mu2);margin:22px 0 10px;}
+.psec-box{background:var(--s2);border-radius:8px;}
+.psec-row{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;}
+.psec-row+.psec-row{border-top:1px solid var(--br);}
+.psec-row span.lbl3{flex:1;font-family:'Golos Text',sans-serif;font-size:15px;color:var(--tx2);}
+.psec-row .val3{font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);}
+.psec-row.disabled{opacity:.4;cursor:default;}
+.psec-row.disabled .soon-tag{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);background:var(--s3);padding:2px 7px;border-radius:8px;}
+.lang-switch{display:flex;background:var(--s3);border-radius:8px;padding:3px;gap:3px;}
+.lang-switch button{flex:1;padding:7px 0;border-radius:8px;border:none;background:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--mu2);cursor:pointer;}
+.lang-switch button.on{background:var(--or);color:#fff;}
+
 /* CONCERT TABS */
-.ctabs{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:10px 20px;scrollbar-width:none;background:var(--bg);min-height:44px;flex-shrink:0;}
+.ctabs{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:10px 24px;scrollbar-width:none;background:var(--bg);min-height:44px;flex-shrink:0;}
 .ctabs::-webkit-scrollbar{display:none;}
-.ctab{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid rgba(224,129,58,0.5);background:transparent;color:#E0813A;transition:all .2s;white-space:nowrap;}
-.ctab.on{background:#C86830;border-color:#C86830;color:#fff;font-weight:500;}
+.ctab{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:26px;border-radius:8px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid var(--br);background:transparent;color:var(--mu);transition:all .2s;white-space:nowrap;}
+.ctab.on{background:transparent;border-color:#fff;color:#fff;font-weight:500;}
 .ctab input{background:none;border:none;outline:none;color:#fff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;letter-spacing:1px;width:90px;padding:0;}
-.cadd{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1px solid rgba(212,121,63,0.5);background:transparent;color:#D4793F;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.cadd{flex-shrink:0;width:26px;height:26px;border-radius:8px;border:1px solid #fff;background:transparent;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
 /* SEARCH */
-.search-wrap{padding:8px 12px;background:var(--bg);flex-shrink:0;}
+.search-wrap{padding:8px 24px;background:var(--bg);flex-shrink:0;}
 .search-inner{position:relative;}
-.search-inp{width:100%;background:var(--s1);border:1px solid var(--br);border-radius:12px;color:var(--tx);padding:9px 14px 9px 36px;font-size:13px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
-.search-inp:focus{border-color:var(--or);}
-.search-inp::placeholder{color:var(--mu2);}
+.search-inp{width:100%;background:transparent;border:1px solid #44444f;border-radius:8px;color:var(--tx);padding:9px 14px 9px 36px;font-size:13px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
+.search-inp:focus{border-color:#5a5a66;}
+.search-inp:focus{border-color:var(--mu2);}
+.search-inp::placeholder{color:#8a8a92;}
 .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;}
 
 .divl{height:1px;background:var(--br);flex-shrink:0;}
@@ -80,24 +138,24 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .lw::-webkit-scrollbar{display:none;}
 
 /* SECTIONS */
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;}
-.sec-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--or);font-weight:500;font-family:'Inter',sans-serif;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;margin:0 12px;}
+.sec-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);font-weight:500;font-family:'Inter',sans-serif;}
 .sec-time{font-size:10px;color:#888;font-family:'Inter',sans-serif;letter-spacing:.5px;margin-left:8px;}
 .sec-left{display:flex;align-items:center;}
 .sec-acts{display:flex;gap:2px;padding-right:14px;}
-.sec-btn{background:none;border:none;color:var(--or);font-size:12px;cursor:pointer;padding:3px 6px;border-radius:4px;opacity:.9;}
+.sec-btn{background:none;border:none;color:var(--or);font-size:12px;cursor:pointer;padding:3px 6px;border-radius:8px;opacity:.9;}
 .sec-btn.red{color:var(--or);opacity:.9;}
 .add-sec-row{padding:0 0 20px;}
-.drop-placeholder{display:flex;align-items:center;justify-content:center;margin:0 12px 6px;background:transparent;border:1.5px dashed #3a3a46;border-radius:14px;height:52px;color:#3a3a46;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;}
-.sec-add-song{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 12px 8px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:14px;height:44px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 24px);}
-.sec-add-song:hover,.sec-add-song:active{border-color:#D4793F;color:#D4793F;background:rgba(212,121,63,0.05);}
+.drop-placeholder{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:transparent;border:1.5px dashed var(--br);border-radius:8px;height:44px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;width:calc(100% - 48px);}
+.sec-add-song{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:transparent;border:1px solid var(--br);border-radius:8px;height:44px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
+.sec-add-song:hover,.sec-add-song:active{border-color:var(--mu);color:var(--tx2);background:var(--s2);}
 .drop-placeholder.drag-over{border-color:#D4793F;background:rgba(212,121,63,0.06);color:#D4793F;}
-.add-sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 12px 8px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:14px;height:44px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 24px);}
+.add-sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:transparent;border:1px solid var(--br);border-radius:8px;height:44px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
 
 /* SONG ROWS */
 .row{display:flex;align-items:center;gap:13px;padding:8px 12px;position:relative;margin:0 12px;background:transparent;min-height:0;}
 .row:last-child{border-bottom:none;}
-.note-sq{width:46px;height:46px;border-radius:8px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;cursor:grab;touch-action:none;}
+.note-sq{width:52px;height:52px;border-radius:8px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;cursor:grab;touch-action:none;}
 .note-sq svg{color:#888;}
 .status-dot-sq{position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;border:2px solid var(--s2);cursor:pointer;}
 .snum{font-family:'Golos Text',sans-serif;font-size:13px;color:var(--mu);width:16px;text-align:center;flex-shrink:0;}
@@ -105,9 +163,9 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .st{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
 .ss{font-size:13px;color:#8a8a8a;margin-top:3px;font-family:'Golos Text',sans-serif;}
 .sk{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:700;color:#888;flex-shrink:0;width:28px;text-align:center;}
-.row-menu-btn{background:none;border:none;color:#777;cursor:pointer;padding:8px;flex-shrink:0;display:flex;flex-direction:column;gap:3.5px;align-items:center;justify-content:center;}
-.row-menu-btn span{display:block;width:4px;height:4px;border-radius:50%;background:#777;}
-.row-menu-popup{display:none;position:absolute;top:48px;right:8px;background:var(--s2);border:1px solid var(--br);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);width:170px;z-index:50;}
+.row-menu-btn{background:none;border:none;color:#777;cursor:pointer;padding:8px 6px;flex-shrink:0;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;}
+.row-menu-btn span{display:block;width:3.5px;height:3.5px;border-radius:50%;background:#8a8a8a;}
+.row-menu-popup{display:none;position:absolute;top:48px;right:8px;background:var(--s2);border:1px solid var(--br);border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);width:170px;z-index:50;}
 .row-menu-popup.open{display:block;}
 .row-menu-item{padding:13px 16px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Golos Text',sans-serif;}
 .row-menu-item.danger{color:#c0392b;}
@@ -138,12 +196,12 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .rep-add-btn{background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:8px;color:var(--or);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:0;padding:4px 10px;cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
 .rep-del{background:none;border:none;color:#D4793F;font-size:12px;cursor:pointer;padding:4px;}
 .rep-dh{display:flex;flex-direction:column;gap:4px;cursor:grab;padding:4px 2px;flex-shrink:0;touch-action:none;}
-.rep-dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:2px;}
+.rep-dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:8px;}
 .rep-del:hover{color:#e05252;}
-.status-filter{display:flex;align-items:center;gap:7px;padding:10px 20px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;min-height:44px;background:var(--bg);}
+.status-filter{display:flex;align-items:center;gap:7px;padding:10px 24px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;min-height:44px;background:var(--bg);}
 .status-filter::-webkit-scrollbar{display:none;}
-.sf-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid rgba(224,129,58,0.5);background:transparent;color:#E0813A;transition:all .15s;white-space:nowrap;gap:5px;}
-.sf-btn.on{border-color:#CC6E28;color:#fff;background:#CC6E28;font-weight:500;}
+.sf-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:26px;border-radius:8px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:1px;cursor:pointer;border:1px solid var(--br);background:transparent;color:var(--mu);transition:all .15s;white-space:nowrap;gap:5px;}
+.sf-btn.on{border-color:#fff;color:#fff;font-weight:500;background:transparent;}
 
 /* SLIDE PANEL */
 .panel{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
@@ -161,8 +219,8 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
   flex-shrink:0;
 }
 .lp-play{width:30px;height:30px;border-radius:50%;background:#D4793F;border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.lp-prog{flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;min-width:80px;}
-.lp-prog-fill{height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
+.lp-prog{flex:1;height:4px;background:#2a2a34;border-radius:8px;cursor:pointer;position:relative;min-width:80px;}
+.lp-prog-fill{height:100%;background:#D4793F;border-radius:8px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
 .lp-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
 @media (orientation:landscape){
   .ph{padding:6px 12px 0;}
@@ -184,8 +242,8 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 }
 .lp-play{width:36px;height:36px;border-radius:50%;background:#D4793F;border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .lp-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;padding:0 10px;}
-.lp-prog{width:6px;flex:1;background:#2a2a34;border-radius:3px;cursor:pointer;position:relative;max-height:160px;}
-.lp-prog-fill{width:100%;background:#D4793F;border-radius:3px;position:absolute;bottom:0;left:0;transition:height .1s linear;}
+.lp-prog{width:6px;flex:1;background:#2a2a34;border-radius:8px;cursor:pointer;position:relative;max-height:160px;}
+.lp-prog-fill{width:100%;background:#D4793F;border-radius:8px;position:absolute;bottom:0;left:0;transition:height .1s linear;}
 .lp-time{font-family:'Inter',sans-serif;font-size:8px;color:#555;letter-spacing:.5px;writing-mode:vertical-rl;transform:rotate(180deg);}
 .lp-notrack{font-size:18px;color:#2a2a34;}
 @media (orientation:landscape){
@@ -200,8 +258,8 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
   flex-shrink:0;
 }
 .lp-play{width:30px;height:30px;border-radius:50%;background:#D4793F;border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.lp-prog{flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;min-width:80px;}
-.lp-prog-fill{height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
+.lp-prog{flex:1;height:4px;background:#2a2a34;border-radius:8px;cursor:pointer;position:relative;min-width:80px;}
+.lp-prog-fill{height:100%;background:#D4793F;border-radius:8px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
 .lp-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
 @media (orientation:landscape){
   .ph{padding:18px 12px 4px;}
@@ -240,7 +298,7 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
   .panel-form-active .ctrls-compact{display:flex;}
   .panel-form-active #playerSlot{display:none;}
 }
-.cb{flex:1;background:var(--s2);border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.cb{flex:1;background:var(--s2);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
 .cl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--tx2);font-weight:400;text-align:center;width:100%;display:block;}
 .cr{display:flex;align-items:center;justify-content:space-between;gap:4px;}
 .cv{font-family:'Golos Text',sans-serif;font-size:20px;font-weight:600;min-width:40px;text-align:center;color:var(--tx);}
@@ -255,58 +313,58 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .pb::-webkit-scrollbar{display:none;}
 
 /* FORM TAB */
-.fr{display:flex;align-items:center;gap:6px;padding:10px 10px;margin-bottom:6px;background:var(--s1);border-radius:12px;}
+.fr{display:flex;align-items:center;gap:6px;padding:10px 10px;margin-bottom:6px;background:var(--s1);border-radius:8px;}
 .fi2{font-family:'Golos Text',sans-serif;font-size:12px;color:var(--or);width:14px;text-align:center;flex-shrink:0;}
 .fn-inp{background:none;border:none;border-bottom:1px solid var(--br);color:var(--tx);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:300;outline:none;flex:1;padding:2px 0;min-width:0;}
 .fn-inp:focus{border-bottom-color:var(--or);}
-.ftbtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--br);background:var(--s2);color:var(--tx2);font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ftbtn{width:26px;height:26px;border-radius:8px;border:1px solid var(--br);background:var(--s2);color:var(--tx2);font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .ftval{font-family:'Golos Text',sans-serif;font-size:17px;color:var(--tx);min-width:26px;text-align:center;flex-shrink:0;font-weight:600;}
-.form-add-btn{width:100%;padding:14px;border:1px dashed var(--or);border-radius:12px;background:var(--or-dim);color:var(--or);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-weight:500;}
+.form-add-btn{width:100%;padding:14px;border:1px dashed var(--or);border-radius:8px;background:var(--or-dim);color:var(--or);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-weight:500;}
 
 /* LYRICS */
 .lyr{font-size:14px;line-height:2;font-weight:300;color:var(--tx2);}
 .lhd{font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--or);margin-top:20px;margin-bottom:5px;cursor:pointer;display:flex;align-items:center;gap:8px;}
 .lhd:first-child{margin-top:0;}
-.lhd-tap{border-radius:6px;padding:4px 10px;transition:all .1s;}
+.lhd-tap{border-radius:8px;padding:4px 10px;transition:all .1s;}
 .lhd-tapped{background:rgba(212,121,63,0.1);border:1px solid rgba(212,121,63,0.4);}
 .lhd-tap:active{background:rgba(212,121,63,0.4);}
 .tap-sec-btn{transition:border .1s;}
 .tap-sec-btn:active{background:transparent!important;border:2px solid #D4793F!important;transform:scale(0.98);}
 .lhd-time{font-size:10px;color:#555;font-family:'Inter',sans-serif;letter-spacing:1px;}
-.lhd-active{color:#fff;background:rgba(212,121,63,0.2);border-radius:4px;padding:2px 6px;}
+.lhd-active{color:#fff;background:rgba(212,121,63,0.2);border-radius:8px;padding:2px 6px;}
 
 /* CHORDS + NOTES */
-.ta{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:12px;color:var(--tx);padding:12px;font-size:14px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:160px;line-height:1.9;}
+.ta{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:8px;color:var(--tx);padding:12px;font-size:14px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:160px;line-height:1.9;}
 .ta.notes{font-family:'Montserrat',sans-serif;font-weight:300;font-size:13px;line-height:1.8;}
 .ta:focus{border-color:var(--or);}
 .ta-hint{font-size:10px;color:var(--tx2);letter-spacing:1px;margin-bottom:8px;}
-.chord-sec{margin-bottom:8px;background:var(--s1);border-radius:12px;overflow:hidden;}
+.chord-sec{margin-bottom:8px;background:var(--s1);border-radius:8px;overflow:hidden;}
 .chord-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;}
 .chord-sec-name{font-size:13px;color:var(--tx2);display:flex;align-items:center;gap:8px;letter-spacing:.3px;}
 .chord-sec-del{background:none;border:none;color:var(--mu2);font-size:12px;cursor:pointer;padding:2px 6px;}
 .chord-sec-ta{background:none;border:none;border-top:1px solid var(--br);color:#ffffff !important;padding:10px 14px;font-size:18px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:44px;line-height:1.7;width:100%;opacity:1;-webkit-text-fill-color:#ffffff;}
 .chord-sec-ta:focus{background:var(--s2);}
-.chord-add-btn{width:100%;padding:11px;border:1px dashed var(--s3);border-radius:12px;background:transparent;color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;}
+.chord-add-btn{width:100%;padding:11px;border:1px dashed var(--s3);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;}
 /* section type picker */
 .sec-type-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
-.sec-type-btn{padding:9px 16px;border-radius:10px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;}
+.sec-type-btn{padding:9px 16px;border-radius:8px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;}
 .sec-type-btn:hover{border-color:var(--or);color:var(--or);}
 
 /* PLAYER */
-.player-wrap{background:var(--s2);border-radius:14px;padding:12px 14px;margin-bottom:0;}
+.player-wrap{background:var(--s2);border-radius:8px;padding:12px 14px;margin-bottom:0;}
 .player-controls{display:flex;align-items:center;gap:12px;}
 .player-playbtn{width:42px;height:42px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;}
 .player-info{flex:1;min-width:0;}
 .player-fname{font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;}
-.player-progress{width:100%;height:3px;background:var(--s3);border-radius:2px;cursor:pointer;position:relative;margin-bottom:6px;}
-.player-progress-fill{height:100%;background:var(--or);border-radius:2px;transition:width .1s linear;pointer-events:none;position:relative;}
+.player-progress{width:100%;height:3px;background:var(--s3);border-radius:8px;cursor:pointer;position:relative;margin-bottom:6px;}
+.player-progress-fill{height:100%;background:var(--or);border-radius:8px;transition:width .1s linear;pointer-events:none;position:relative;}
 .player-progress-fill::after{content:'';position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--or);}
 .player-times{display:flex;justify-content:space-between;font-size:10px;color:var(--mu2);font-family:'Golos Text',sans-serif;}
 .player-del{background:none;border:none;color:var(--mu2);font-size:11px;cursor:pointer;padding:4px;flex-shrink:0;}
 .player-vol-row{display:flex;align-items:center;gap:12px;margin-top:10px;}
 .player-vol-icon{display:flex;align-items:center;justify-content:center;width:42px;flex-shrink:0;}
-.player-vol{flex:1;height:3px;background:var(--s3);border-radius:2px;cursor:pointer;position:relative;}
-.player-vol-fill{height:100%;background:var(--mu2);border-radius:2px;pointer-events:none;position:relative;}
+.player-vol{flex:1;height:3px;background:var(--s3);border-radius:8px;cursor:pointer;position:relative;}
+.player-vol-fill{height:100%;background:var(--mu2);border-radius:8px;pointer-events:none;position:relative;}
 .player-vol-fill::after{content:'';position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#888;}
 .player-vol-spacer{width:22px;flex-shrink:0;}
 
@@ -319,7 +377,7 @@ body{display:flex;flex-direction:column;height:100vh;font-family:'Golos Text',sa
 .mt{font-family:'Golos Text',sans-serif;font-size:22px;font-weight:600;letter-spacing:1px;color:var(--tx);}
 .fl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;margin-top:18px;font-weight:400;}
 .fl:first-child{margin-top:0;}
-.fi{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:12px;color:var(--tx);padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
+.fi{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:8px;color:var(--tx);padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
 .fi:focus{border-color:var(--or);}
 select.fi{cursor:pointer;}
 textarea.fi{resize:none;min-height:80px;}
@@ -330,12 +388,12 @@ textarea.fi.tall{min-height:120px;}
 .clrs{display:flex;gap:8px;flex-wrap:wrap;}
 .cc{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
 .cc.on{border-color:#fff;transform:scale(1.2);}
-.subbtn{display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .2s;}
-.delbtn{width:100%;padding:12px;border:1px solid #e05252;border-radius:12px;background:transparent;color:#e05252;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;}
+.subbtn{display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:8px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .2s;}
+.delbtn{width:100%;padding:12px;border:1px solid #e05252;border-radius:8px;background:transparent;color:#e05252;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;}
 
 /* STATUS SELECTOR */
 .status-row{display:flex;gap:8px;flex-wrap:wrap;}
-.st-btn{padding:7px 14px;border-radius:10px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--br);background:var(--s1);color:var(--tx2);transition:all .15s;letter-spacing:.5px;}
+.st-btn{padding:7px 14px;border-radius:8px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--br);background:var(--s1);color:var(--tx2);transition:all .15s;letter-spacing:.5px;}
 .st-btn.on-ready{background:rgba(0,180,166,.2);border-color:#00B4A6;color:#00B4A6;}
 .st-btn.on-learning{background:rgba(240,146,43,.2);border-color:#F0922B;color:#F0922B;}
 
@@ -343,7 +401,7 @@ textarea.fi.tall{min-height:120px;}
 
 /* CTX */
 .cxov{position:fixed;inset:0;z-index:49;}
-.cxm{position:fixed;background:var(--s2);border:1px solid var(--br);border-radius:14px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;}
+.cxm{position:fixed;background:var(--s2);border:1px solid var(--br);border-radius:8px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;}
 @keyframes cxi{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
 .cxi{display:flex;align-items:center;gap:10px;padding:13px 17px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .cxi:hover{background:var(--s3);}
@@ -352,16 +410,16 @@ textarea.fi.tall{min-height:120px;}
 .cxi+.cxi{border-top:1px solid var(--br);}
 
 /* OVERFLOW MENU */
-.overflow-menu{position:fixed;right:16px;top:68px;background:var(--s2);border:1px solid var(--br);border-radius:14px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;display:none;}
+.overflow-menu{position:fixed;right:16px;top:68px;background:var(--s2);border:1px solid var(--br);border-radius:8px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;display:none;}
 .overflow-menu.open{display:block;}
 .om-item{display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .om-item:hover{background:var(--s3);}
 .om-item+.om-item{border-top:1px solid var(--br);}
 
 /* ADD FROM REPERTOIRE MODAL */
-.rep-pick-row{display:flex;align-items:center;gap:10px;padding:11px 14px;margin-bottom:6px;background:var(--s1);border-radius:12px;cursor:pointer;}
+.rep-pick-row{display:flex;align-items:center;gap:10px;padding:11px 14px;margin-bottom:6px;background:var(--s1);border-radius:8px;cursor:pointer;}
 .rep-pick-row:hover{background:var(--s2);}
-.rep-pick-row.picked{border:1px solid var(--or);}
+.rep-pick-row.picked{background:var(--s1);opacity:0.7;}
 .rpr-info{flex:1;min-width:0;}
 .rpr-title{font-family:'Golos Text',sans-serif;font-size:16px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rpr-sub{font-size:10px;color:var(--tx2);margin-top:2px;letter-spacing:1px;text-transform:uppercase;}
@@ -381,7 +439,7 @@ textarea.fi.tall{min-height:120px;}
 .perf-line{font-size:22px;font-weight:500;line-height:1.65;color:#f0ece4;letter-spacing:0.2px;}
 .perf-footer{display:flex;align-items:center;gap:10px;padding:10px 20px;border-top:1px solid #2a2a34;flex-shrink:0;background:#111114;}
 .perf-font-lbl{font-family:'Inter',sans-serif;font-size:13px;color:#888;letter-spacing:1px;text-transform:uppercase;}
-.perf-fbtn{background:none;border:1px solid #3a3a46;border-radius:6px;color:#c0bbb5;font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.perf-fbtn{background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .perf-fbtn:hover{border-color:#888;color:#fff;}
 .perf-scroll{flex:1;background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 12px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3;height:36px;display:flex;align-items:center;justify-content:center;}
 .perf-scroll.on{border-color:var(--or);color:var(--or);background:rgba(212,121,63,0.08);}
@@ -393,12 +451,12 @@ textarea.fi.tall{min-height:120px;}
 .map-blk-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding-left:1px;white-space:nowrap;}
 @media (orientation:landscape){.map-blk-lbl{font-size:13px!important;font-weight:700!important;letter-spacing:1.5px!important;}}
 .map-blk-row{display:flex;gap:3px;align-items:center;}
-.map-blk{width:44px;height:44px;border-radius:7px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;}
+.map-blk{width:44px;height:44px;border-radius:8px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;}
 .map-blk:active{transform:scale(.88);}
 .map-blk-num{font-size:8px;font-weight:600;color:rgba(0,0,0,0.3);position:absolute;top:3px;left:4px;}
 .map-blk-note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(0,0,0,0.5);text-align:center;padding:2px;line-height:1.2;}
 .map-blk-del{width:18px;height:18px;border-radius:50%;border:none;background:#2a2a34;color:#555;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:1px;}
-.map-blk-add{width:44px;height:44px;border-radius:7px;border:1.5px dashed #3a3a46;background:transparent;color:#555;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.map-blk-add{width:44px;height:44px;border-radius:8px;border:1.5px dashed #3a3a46;background:transparent;color:#555;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .map-blk-add:active{border-color:#D4793F;color:#D4793F;}
 .mc-intro {background:#E8C49A;}
 .mc-verse {background:#B8D4A8;}
@@ -412,14 +470,14 @@ textarea.fi.tall{min-height:120px;}
 .mc-other {background:#C8C8C8;}
 
 /* MAP SHEET */
-.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#1e1e26;border-radius:16px 16px 0 0;z-index:100;padding:14px 16px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#1e1e26;border-radius:8px 16px 0 0;z-index:100;padding:14px 16px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
 .map-sheet.open{transform:translateY(0);}
-.map-sheet-handle{width:36px;height:4px;background:#3a3a46;border-radius:2px;margin:0 auto 12px;}
+.map-sheet-handle{width:36px;height:4px;background:#3a3a46;border-radius:8px;margin:0 auto 12px;}
 .map-sheet-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
 .map-sec-list{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;max-height:40vh;overflow-y:auto;}
-.map-sec-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;}
+.map-sec-row{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;}
 .map-sec-row.sel{background:#2a2a34;border-color:#D4793F;}
-.map-sec-dot{width:26px;height:26px;border-radius:6px;flex-shrink:0;}
+.map-sec-dot{width:26px;height:26px;border-radius:8px;flex-shrink:0;}
 .map-sec-name{font-size:14px;font-weight:400;color:#f0ece4;}
 .map-sec-chk{margin-left:auto;color:#D4793F;opacity:0;}
 .map-sec-row.sel .map-sec-chk{opacity:1;}
@@ -427,14 +485,14 @@ textarea.fi.tall{min-height:120px;}
 .map-bars-lbl{font-size:12px;color:#888;flex:1;}
 .map-bars-btn{width:32px;height:32px;border-radius:8px;border:1px solid #3a3a46;background:none;color:#c0bbb5;font-size:16px;cursor:pointer;}
 .map-bars-val{font-size:20px;font-weight:600;color:#fff;min-width:30px;text-align:center;}
-.map-sheet-ok{width:100%;padding:11px;border:1px solid #D4793F;border-radius:10px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.map-sheet-ok{width:100%;padding:11px;border:1px solid #D4793F;border-radius:8px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 .map-sheet-ov{position:fixed;inset:0;z-index:99;display:none;}
 .map-sheet-ov.open{display:block;}
 
 /* MAP NOTE */
 .map-note-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:110;display:none;align-items:flex-end;}
 .map-note-ov.open{display:flex;}
-.map-note-box{background:#22222a;border-radius:16px 16px 0 0;padding:18px 16px 36px;width:100%;}
+.map-note-box{background:#22222a;border-radius:8px 16px 0 0;padding:18px 16px 36px;width:100%;}
 .map-note-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
 .map-note-inp{width:100%;background:#0a0a0d;border:1px solid #D4793F;border-radius:8px;color:#fff;padding:10px 12px;font-size:16px;font-family:'Inter',sans-serif;outline:none;}
 .map-note-btns{display:flex;gap:8px;margin-top:10px;}
@@ -458,14 +516,14 @@ textarea.fi.tall{min-height:120px;}
   min-width:0;
 }
 .lp-inline-play{width:24px;height:24px;border-radius:50%;background:#D4793F;border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;}
-.lp-inline-prog{flex:1;height:5px;background:#2a2a34;border-radius:3px;cursor:pointer;position:relative;min-width:60px;}
-.lp-inline-fill{height:100%;background:#D4793F;border-radius:3px;position:absolute;left:0;top:0;pointer-events:none;transition:width .1s linear;}
+.lp-inline-prog{flex:1;height:5px;background:#2a2a34;border-radius:8px;cursor:pointer;position:relative;min-width:60px;}
+.lp-inline-fill{height:100%;background:#D4793F;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;transition:width .1s linear;}
 .lp-inline-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;flex-shrink:0;white-space:nowrap;}
 
 
 /* Map block context menu */
 .map-ctx-ov{position:fixed;inset:0;z-index:149;}
-.map-ctx{position:fixed;background:#22222a;border:1px solid #3a3a46;border-radius:12px;overflow:hidden;z-index:150;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:cxi .14s ease;}
+.map-ctx{position:fixed;background:#22222a;border:1px solid #3a3a46;border-radius:8px;overflow:hidden;z-index:150;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:cxi .14s ease;}
 .map-ctx-item{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .map-ctx-item:hover{background:var(--s3);}
 .map-ctx-item+.map-ctx-item{border-top:1px solid var(--br);}
@@ -484,35 +542,224 @@ textarea.fi.tall{min-height:120px;}
   .phdr-print{display:block!important;}
 }
 .phdr-print{display:none;text-align:center;padding:16px 0 10px;font-family:'Golos Text',sans-serif;font-size:22px;letter-spacing:4px;border-bottom:2px solid #000;margin-bottom:8px;}
+
+/* AUTH / ONBOARDING */
+#authScreen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;overflow-y:auto;padding:0;}
+.auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;max-width:420px;margin:0 auto;width:100%;box-sizing:border-box;}
+.auth-logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:8px;}
+.auth-logo span{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;}
+.auth-tagline{text-align:center;color:var(--mu);font-size:13px;font-family:'Golos Text',sans-serif;margin-bottom:36px;}
+.auth-field{margin-bottom:14px;}
+.auth-field label{display:block;font-size:10px;letter-spacing:2px;color:var(--mu);margin-bottom:7px;text-transform:uppercase;font-family:'Inter',sans-serif;}
+.auth-field input{width:100%;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;color:var(--tx);padding:14px;font-size:15px;outline:none;box-sizing:border-box;font-family:'Golos Text',sans-serif;transition:border-color .15s;}
+.auth-field input:focus{border-color:var(--or);}
+.auth-btn-primary{width:100%;padding:15px;background:var(--or);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-family:'Inter',sans-serif;transition:opacity .15s;}
+.auth-btn-primary:active{opacity:.8;}
+.auth-btn-primary:disabled{opacity:.5;cursor:default;}
+.auth-btn-google{width:100%;padding:13px;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;font-family:'Golos Text',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s;}
+.auth-btn-google:active{background:var(--s3);}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--mu2);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--br);}
+.auth-switch{text-align:center;margin-top:24px;font-size:13px;color:var(--mu);font-family:'Golos Text',sans-serif;}
+.auth-switch a{color:var(--or);cursor:pointer;font-weight:600;}
+.auth-error{background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.35);color:#e87070;font-size:12.5px;padding:10px 12px;border-radius:8px;margin-bottom:14px;font-family:'Golos Text',sans-serif;display:none;}
+.auth-error.show{display:block;}
+.auth-guest{text-align:center;margin-top:18px;}
+.auth-guest a{color:var(--mu);font-size:12.5px;cursor:pointer;text-decoration:underline;font-family:'Golos Text',sans-serif;}
+
+/* ONBOARDING STEPS */
+.ob-step{display:none;}
+.ob-step.on{display:flex;flex-direction:column;}
+.ob-feature{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px;}
+.ob-feature-icon{width:38px;height:38px;border-radius:8px;background:var(--or-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--or);}
+.ob-feature-text h4{font-size:14px;color:var(--tx);margin-bottom:3px;font-family:'Golos Text',sans-serif;font-weight:600;}
+.ob-feature-text p{font-size:12.5px;color:var(--mu);font-family:'Golos Text',sans-serif;line-height:1.4;}
+.ob-instrument-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;}
+.ob-instrument{padding:16px 10px;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;text-align:center;cursor:pointer;font-size:13px;color:var(--tx2);font-family:'Golos Text',sans-serif;transition:all .15s;}
+.ob-instrument.sel{border-color:var(--or);background:var(--or-dim);color:#fff;}
+.ob-code-tabs{display:flex;gap:0;border-bottom:1px solid var(--br);margin-bottom:18px;}
+.ob-code-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;}
+.ob-code-tab.on{color:var(--or);border-bottom-color:var(--or);}
+.ob-code-pane{display:none;}
+.ob-code-pane.on{display:flex;flex-direction:column;}
+.ob-skip{text-align:center;margin-top:16px;color:var(--mu2);font-size:12px;cursor:pointer;text-decoration:underline;font-family:'Golos Text',sans-serif;}
+#qrReaderWrap{width:100%;border-radius:8px;overflow:hidden;background:#000;margin-bottom:14px;}
+.group-card{background:var(--s2);border:1.5px solid var(--br);border-radius:8px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.group-card:active{background:var(--s3);}
+.group-card-icon{width:40px;height:40px;border-radius:8px;background:var(--or-dim);display:flex;align-items:center;justify-content:center;color:var(--or);font-weight:700;font-size:16px;flex-shrink:0;}
+.group-card-info h4{font-size:14px;color:var(--tx);font-family:'Golos Text',sans-serif;}
+.group-card-info span{font-size:11.5px;color:var(--mu);font-family:'Inter',sans-serif;letter-spacing:.5px;}
+#groupCodeDisplay{text-align:center;padding:24px;background:var(--s2);border:1.5px dashed var(--or);border-radius:8px;margin:18px 0;}
+#groupCodeDisplay .code{font-family:'Inter',sans-serif;font-size:24px;font-weight:700;letter-spacing:4px;color:var(--or);margin-bottom:12px;}
+.auth-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:auth-spin .7s linear infinite;}
+@keyframes auth-spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <input type="file" id="trackFileInput" accept="audio/*" style="position:fixed;left:0;top:0;width:100%;height:100%;opacity:0;z-index:-1;pointer-events:none;">
 
-<div class="hdr">
-  <div class="hdr-top">
-    <div class="logo">
-      <svg width="26" height="26" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;">
-        <rect x="1" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
-        <rect x="5" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
-        <rect x="9" y="2" width="2" height="16" rx="1" fill="#D4793F"/>
-        <rect x="13" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
-        <rect x="17" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
-      </svg>
-      <span>Bandlist</span>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <div id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s;align-self:center;" title="Офлайн"></div>
-      <button id="langToggleBtn" onclick="toggleAppLang()" style="background:none;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:300;letter-spacing:2px;color:#707070;cursor:pointer;padding:0;transition:color .15s;">EN</button>
-      <button id="liveModeBtn" onclick="toggleLiveMode()" style="background:transparent;border:1.5px solid rgba(255,255,255,0.8);border-radius:4px;padding:2px 6px;cursor:pointer;display:flex;align-items:center;justify-content:center;height:18px;transition:all .2s;flex-shrink:0;">
-        <span style="font-family:'Inter',sans-serif;font-size:10px;font-weight:700;line-height:1;color:rgba(255,255,255,0.9);letter-spacing:1px;">LIVE</span>
+<!-- AUTH SCREEN -->
+<div id="authScreen" style="display:none;">
+  <div class="auth-wrap">
+
+    <!-- LOGIN -->
+    <div class="ob-step on" id="authLogin">
+      <div class="auth-logo">
+        <svg width="26" height="26" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;">
+          <rect x="1" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
+          <rect x="5" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
+          <rect x="9" y="2" width="2" height="16" rx="1" fill="#D4793F"/>
+          <rect x="13" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
+          <rect x="17" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
+        </svg>
+        <span>Bandlist</span>
+      </div>
+      <div class="auth-tagline" id="authLoginTagline">Войдите, чтобы синхронизировать сетлисты</div>
+      <div class="auth-error" id="authLoginError"></div>
+      <div class="auth-field">
+        <label id="lblEmail">Email</label>
+        <input type="email" id="authEmailInp" autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="auth-field">
+        <label id="lblPass">Пароль</label>
+        <input type="password" id="authPassInp" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="auth-btn-primary" id="authLoginBtn" onclick="doEmailLogin()">Войти</button>
+      <div class="auth-divider" id="authDividerTxt">или</div>
+      <button class="auth-btn-google" onclick="doGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.61z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.36 0-4.36-1.6-5.07-3.74H.92v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.93 10.68A5.4 5.4 0 0 1 3.64 9c0-.58.1-1.15.29-1.68V4.99H.92A9 9 0 0 0 0 9c0 1.45.35 2.83.92 4.01z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.57-2.57A8.6 8.6 0 0 0 9 0 9 9 0 0 0 .92 4.99l3.01 2.33C4.64 5.18 6.64 3.58 9 3.58z"/></svg>
+        <span id="authGoogleTxt">Войти с Google</span>
       </button>
-      <button class="add-btn" id="mainAddBtn" onclick="mainAdd()">+</button>
+      <div class="auth-switch" id="authSwitchToReg">Нет аккаунта? <a onclick="showAuthScreen('register')">Зарегистрироваться</a></div>
+      <div class="auth-guest"><a onclick="continueAsGuest()" id="authGuestLink">Продолжить как гость (только просмотр)</a></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="ob-step" id="authRegister">
+      <div class="auth-logo">
+        <svg width="26" height="26" viewBox="0 0 20 20" fill="none" style="flex-shrink:0;">
+          <rect x="1" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
+          <rect x="5" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
+          <rect x="9" y="2" width="2" height="16" rx="1" fill="#D4793F"/>
+          <rect x="13" y="4" width="2" height="12" rx="1" fill="#D4793F"/>
+          <rect x="17" y="7" width="2" height="6" rx="1" fill="#D4793F"/>
+        </svg>
+        <span>Bandlist</span>
+      </div>
+      <div class="auth-tagline" id="authRegTagline">Создайте аккаунт за 10 секунд</div>
+      <div class="auth-error" id="authRegError"></div>
+      <div class="auth-field">
+        <label id="lblName">Имя</label>
+        <input type="text" id="authNameInp" autocomplete="name" placeholder="Игорь">
+      </div>
+      <div class="auth-field">
+        <label id="lblEmail2">Email</label>
+        <input type="email" id="authRegEmailInp" autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="auth-field">
+        <label id="lblPass2">Пароль</label>
+        <input type="password" id="authRegPassInp" autocomplete="new-password" placeholder="Минимум 6 символов">
+      </div>
+      <button class="auth-btn-primary" id="authRegBtn" onclick="doEmailRegister()">Зарегистрироваться</button>
+      <div class="auth-divider" id="authDividerTxt2">или</div>
+      <button class="auth-btn-google" onclick="doGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.61z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.36 0-4.36-1.6-5.07-3.74H.92v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.93 10.68A5.4 5.4 0 0 1 3.64 9c0-.58.1-1.15.29-1.68V4.99H.92A9 9 0 0 0 0 9c0 1.45.35 2.83.92 4.01z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.57-2.57A8.6 8.6 0 0 0 9 0 9 9 0 0 0 .92 4.99l3.01 2.33C4.64 5.18 6.64 3.58 9 3.58z"/></svg>
+        <span id="authGoogleTxt2">Войти с Google</span>
+      </button>
+      <div class="auth-switch" id="authSwitchToLogin">Уже есть аккаунт? <a onclick="showAuthScreen('login')">Войти</a></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ONBOARDING SCREEN -->
+<div id="onboardingScreen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:500;overflow-y:auto;">
+  <div class="auth-wrap">
+
+    <!-- Step: pick instrument -->
+    <div class="ob-step" id="obInstrument">
+      <div class="auth-tagline" style="margin-bottom:22px;font-size:15px;color:#fff;" id="obInstrTitle">Какой ты музыкант?</div>
+      <div class="ob-instrument-grid" id="obInstrGrid">
+        <div class="ob-instrument" data-instr="vocal" onclick="pickInstrument(this)">🎤 Вокал</div>
+        <div class="ob-instrument" data-instr="guitar" onclick="pickInstrument(this)">🎸 Гитара</div>
+        <div class="ob-instrument" data-instr="bass" onclick="pickInstrument(this)">🎸 Бас</div>
+        <div class="ob-instrument" data-instr="drums" onclick="pickInstrument(this)">🥁 Барабаны</div>
+        <div class="ob-instrument" data-instr="keys" onclick="pickInstrument(this)">🎹 Клавиши</div>
+        <div class="ob-instrument" data-instr="other" onclick="pickInstrument(this)">🎵 Другое</div>
+      </div>
+      <button class="auth-btn-primary" id="obInstrNextBtn" onclick="obGoToGroupStep()" disabled>Далее</button>
+    </div>
+
+    <!-- Step: create or join group -->
+    <div class="ob-step" id="obGroupChoice">
+      <div class="auth-tagline" style="margin-bottom:18px;font-size:15px;color:#fff;" id="obGroupTitle">Группа</div>
+
+      <div id="obExistingGroups"></div>
+
+      <div class="ob-code-tabs" id="obCodeTabs">
+        <button class="ob-code-tab on" id="obTabCreate" onclick="obSwitchTab('create')">Создать</button>
+        <button class="ob-code-tab" id="obTabJoin" onclick="obSwitchTab('join')">Войти по коду</button>
+      </div>
+
+      <div class="ob-code-pane on" id="obPaneCreate">
+        <div class="auth-field">
+          <label id="obGroupNameLbl">Название группы</label>
+          <input type="text" id="obGroupNameInp" placeholder="Время Назад">
+        </div>
+        <div class="auth-error" id="obCreateError"></div>
+        <button class="auth-btn-primary" id="obCreateBtn" onclick="obCreateGroupClick()">Создать группу</button>
+      </div>
+
+      <div class="ob-code-pane" id="obPaneJoin">
+        <div class="auth-field">
+          <label id="obCodeLbl">Код приглашения</label>
+          <input type="text" id="obJoinCodeInp" placeholder="VETER-2024" style="text-transform:uppercase;letter-spacing:2px;">
+        </div>
+        <button class="auth-btn-google" id="obScanQrBtn" onclick="obStartQrScan()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7V4a1 1 0 0 1 1-1h3M21 7V4a1 1 0 0 0-1-1h-3M3 17v3a1 1 0 0 0 1 1h3M21 17v3a1 1 0 0 1-1 1h-3" stroke="#f0ece4" stroke-width="1.7" stroke-linecap="round"/><rect x="7" y="7" width="10" height="10" rx="1" stroke="#f0ece4" stroke-width="1.7"/></svg>
+          <span id="obScanQrTxt">Сканировать QR</span>
+        </button>
+        <div id="qrReaderWrap" style="display:none;"><div id="qrReaderEl" style="width:100%;"></div></div>
+        <div class="auth-error" id="obJoinError"></div>
+        <button class="auth-btn-primary" id="obJoinBtn" onclick="obJoinGroupClick()">Войти в группу</button>
+      </div>
+
+      <div class="ob-skip" id="obSkipLink" onclick="obSkipToApp()">Пропустить</div>
+    </div>
+
+    <!-- Step: group created — show code + QR -->
+    <div class="ob-step" id="obGroupCreated">
+      <div class="auth-tagline" style="margin-bottom:6px;font-size:15px;color:#fff;" id="obCreatedTitle">Группа создана!</div>
+      <div class="auth-tagline" id="obCreatedSub">Отправь этот код участникам группы</div>
+      <div id="groupCodeDisplay">
+        <div class="code" id="newGroupCodeTxt">VETER-2024</div>
+        <div id="newGroupQrWrap" style="display:flex;justify-content:center;margin-top:8px;"></div>
+      </div>
+      <button class="auth-btn-primary" id="obCreatedDoneBtn" onclick="obFinishOnboarding()">Готово, в приложение</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-hdr">
+  <div class="page-hdr-top">
+    <div class="page-title-txt" id="pageTitleTxt">Сетлист</div>
+    <div class="page-hdr-right">
+      <div id="syncDot" style="width:7px;height:7px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s;" title="Офлайн"></div>
+      <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="openProfileScreen()">И</button>
     </div>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab on" id="navSetlist" onclick="switchView('setlist')">Сетлист</button>
-    <button class="nav-tab" id="navRep" onclick="switchView('rep')">Репертуар</button>
+  <div class="hero-row">
+    <button class="hero-btn-live" id="liveModeBtn" onclick="toggleLiveMode()">
+      <span class="ld"></span><span class="lbl" id="heroLiveLbl">Live</span>
+    </button>
+    <button class="hero-btn-add" id="mainAddBtn" onclick="mainAdd()">
+      <span class="add-icon-wrap">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </span>
+      <span class="lbl" id="heroAddLbl">Добавить</span>
+      <span class="add-icon-wrap" aria-hidden="true"></span>
+    </button>
   </div>
 </div>
 
@@ -530,14 +777,14 @@ textarea.fi.tall{min-height:120px;}
     <div class="phdr-print" id="phdrp"></div>
     <div id="list"></div>
     <div id="staticAddSec" style="display:none;">
-      <button class="add-sec-btn" onclick="openAddSec()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="flex-shrink:0"><line x1="5.5" y1="1" x2="5.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5.5" x2="10" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>&nbsp;<span id="addSecBtnTxt">Добавить отделение</span></button>
+      <button class="add-sec-btn" onclick="openAddSec()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span id="addSecBtnTxt">Добавить отделение</span></button>
     </div>
     <div id="secDialog" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0d;z-index:200;padding:30px 20px;box-sizing:border-box;">
       <div style="font-family:'Golos Text',sans-serif;font-size:22px;color:#fff;margin-bottom:20px;" id="secDialogTitle">Новое отделение</div>
       <div style="font-size:10px;letter-spacing:2px;color:#b0aaa4;margin-bottom:8px;text-transform:uppercase;">Название</div>
-      <input id="secDialogInp" style="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:12px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;" placeholder="1 отделение">
-      <button id="secDialogOkBtn" style="width:100%;margin-top:16px;padding:14px;background:#D4793F;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">ДОБАВИТЬ</button>
-      <button id="secDialogCancelBtn" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid #32323e;border-radius:12px;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">ОТМЕНА</button>
+      <input id="secDialogInp" style="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:8px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;" placeholder="1 отделение">
+      <button id="secDialogOkBtn" style="width:100%;margin-top:16px;padding:14px;background:#D4793F;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">ДОБАВИТЬ</button>
+      <button id="secDialogCancelBtn" style="width:100%;margin-top:10px;padding:12px;background:none;border:1px solid #32323e;border-radius:8px;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">ОТМЕНА</button>
     </div>
   </div>
 </div>
@@ -549,8 +796,8 @@ textarea.fi.tall{min-height:120px;}
   <div class="search-wrap">
     <div class="search-inner">
       <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <circle cx="6.5" cy="6.5" r="5" stroke="#555" stroke-width="1.5"/>
-        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="6.5" cy="6.5" r="5" stroke="#b0b0b8" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#b0b0b8" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       <input class="search-inp" id="srchRep" placeholder="Поиск в репертуаре..." oninput="rRep()">
     </div>
@@ -558,11 +805,55 @@ textarea.fi.tall{min-height:120px;}
   <div class="lw" id="repList"></div>
 </div>
 
+<div class="bottom-nav" id="bottomNav">
+  <button class="bnav-item on" id="navSetlist" onclick="switchView('setlist')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6h12M4 12h16M4 18h9" stroke-width="2" stroke-linecap="round"/></svg>
+    <span id="navSetlistTxt">Сетлист</span>
+  </button>
+  <button class="bnav-item" id="navRep" onclick="switchView('rep')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 18V5l12-2v13" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" stroke-width="1.8"/><circle cx="18" cy="16" r="3" stroke-width="1.8"/></svg>
+    <span id="navRepTxt">Песни</span>
+  </button>
+</div>
+
+<div class="profile-screen" id="profileScreen">
+  <div class="profile-screen-hdr">
+    <button onclick="closeProfileScreen()">
+      <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="profile-screen-title" id="profileScreenTitle">Профиль</div>
+  </div>
+  <div class="profile-screen-body">
+    <div class="psec-lbl" id="psecLangLbl">Язык</div>
+    <div class="psec-box">
+      <div class="psec-row" style="cursor:default;">
+        <span class="lbl3" id="psecLangRowLbl">Язык интерфейса</span>
+        <div class="lang-switch">
+          <button id="langBtnRu" onclick="setAppLang('ru')">RU</button>
+          <button id="langBtnEn" onclick="setAppLang('en')">EN</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="psec-lbl" id="psecGroupLbl">Группа</div>
+    <div class="psec-box">
+      <div class="psec-row disabled">
+        <span class="lbl3" id="psecGroupRowLbl">Управление группой и участниками</span>
+        <span class="soon-tag" id="psecSoonTag">Скоро</span>
+      </div>
+      <div class="psec-row disabled">
+        <span class="lbl3" id="psecAuthRowLbl">Вход / регистрация</span>
+        <span class="soon-tag" id="psecSoonTag2">Скоро</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="panel" id="panel" style="display:none">
 <div class="lp-header" id="lpHeader" style="padding:0 12px 6px;gap:8px;border-bottom:1px solid #2a2a34;">
   <button class="lp-play" id="lpPlayBtn" onclick="togglePlay()">▶</button>
-  <div class="lp-prog" id="lpProg" style="flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;">
-    <div class="lp-prog-fill" id="lpFill" style="width:0%;height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;pointer-events:none;"></div>
+  <div class="lp-prog" id="lpProg" style="flex:1;height:4px;background:#2a2a34;border-radius:8px;cursor:pointer;position:relative;">
+    <div class="lp-prog-fill" id="lpFill" style="width:0%;height:100%;background:#D4793F;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;"></div>
   </div>
   <span class="lp-time" id="lpTime" style="font-family:Inter,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>
 </div>
@@ -583,7 +874,7 @@ textarea.fi.tall{min-height:120px;}
 var LANG = "ru";
 var TR = {
   ru: {
-    setlist:"Сетлист", repertoire:"Репертуар",
+    setlist:"Сетлист", repertoire:"Песни",
     search:"Поиск...", searchRep:"Поиск в репертуаре...",
     newConcert:"Новый концерт", downloadPDF:"Скачать PDF",
     addSection:"+ Добавить отделение", newSection:"Новое отделение",
@@ -616,7 +907,7 @@ var TR = {
     solo:"Соло", outro:"Аутро", pre:"Пре-хорус"
   },
   en: {
-    setlist:"Setlist", repertoire:"Song List",
+    setlist:"Setlist", repertoire:"Songs",
     search:"Search...", searchRep:"Search songs...",
     newConcert:"New concert", downloadPDF:"Download PDF",
     addSection:"+ Add section", newSection:"New section",
@@ -654,17 +945,23 @@ function t(key){ return TR[LANG][key] || TR.ru[key] || key; }
 
 function toggleAppLang(){
   LANG = LANG === "ru" ? "en" : "ru";
-  var btn = document.getElementById("langToggleBtn");
-  if(btn) btn.textContent = LANG === "ru" ? "EN" : "RU";
   applyLang();
 }
 
 function applyLang(){
-  // nav tabs
-  var ns = document.getElementById("navSetlist");
-  var nr = document.getElementById("navRep");
-  if(ns) ns.textContent = t("setlist");
-  if(nr) nr.textContent = t("repertoire");
+  // bottom nav tabs (text lives inside <span>, button also holds an SVG icon)
+  var nsTxt = document.getElementById("navSetlistTxt");
+  var nrTxt = document.getElementById("navRepTxt");
+  if(nsTxt) nsTxt.textContent = t("setlist");
+  if(nrTxt) nrTxt.textContent = t("repertoire");
+  // hero buttons
+  var heroLive=document.getElementById("heroLiveLbl");
+  var heroAdd=document.getElementById("heroAddLbl");
+  if(heroLive) heroLive.textContent = "Live";
+  if(heroAdd) heroAdd.textContent = LANG==="en"?"Add":"Добавить";
+  // page title follows current view
+  var pageTitle=document.getElementById("pageTitleTxt");
+  if(pageTitle) pageTitle.textContent = currentView==="rep"?t("repertoire"):t("setlist");
   // search placeholders
   var sr = document.getElementById("srch");
   var srr = document.getElementById("srchRep");
@@ -787,40 +1084,426 @@ var repStatusFilter="all";
 var pickedForSection=null;
 var _remoteIgnore=false;
 
+/* ============ AUTH / GROUPS ============ */
+var currentUser=null;       // firebase auth user object (or null)
+var currentGroupId=null;    // active group id (e.g. "VETER-2024")
+var currentRole=null;       // "leader" | "member" | "guest"
+var isGuestMode=false;      // viewing without login
+var _authReady=false;
+
+function authT(ru,en){return LANG==="en"?en:ru;}
+
+function showAuthScreen(which){
+  var scr=document.getElementById("authScreen");
+  if(scr)scr.style.display="flex";
+  document.getElementById("authLogin").classList.toggle("on",which!=="register");
+  document.getElementById("authRegister").classList.toggle("on",which==="register");
+  hideAuthError();
+}
+function hideAuthScreen(){
+  var scr=document.getElementById("authScreen");
+  if(scr)scr.style.display="none";
+}
+function hideAuthError(){
+  ["authLoginError","authRegError"].forEach(function(id){
+    var e=document.getElementById(id);if(e){e.classList.remove("show");e.textContent="";}
+  });
+}
+function showAuthError(id,msg){
+  var e=document.getElementById(id);if(!e)return;
+  e.textContent=msg;e.classList.add("show");
+}
+function friendlyAuthError(err){
+  var code=err&&err.code||"";
+  var map={
+    "auth/invalid-email":authT("Неверный формат email","Invalid email format"),
+    "auth/user-not-found":authT("Пользователь не найден","User not found"),
+    "auth/wrong-password":authT("Неверный пароль","Wrong password"),
+    "auth/invalid-credential":authT("Неверный email или пароль","Invalid email or password"),
+    "auth/email-already-in-use":authT("Этот email уже зарегистрирован","Email already in use"),
+    "auth/weak-password":authT("Пароль слишком короткий (мин. 6 символов)","Password too weak (min 6 chars)"),
+    "auth/popup-closed-by-user":authT("Окно входа закрыто","Sign-in window closed"),
+    "auth/network-request-failed":authT("Проблема с сетью","Network error")
+  };
+  return map[code]||(authT("Ошибка: ","Error: ")+(err&&err.message||""));
+}
+
+function doEmailLogin(){
+  if(!auth)return;
+  var email=document.getElementById("authEmailInp").value.trim();
+  var pass=document.getElementById("authPassInp").value;
+  hideAuthError();
+  if(!email||!pass){showAuthError("authLoginError",authT("Заполните все поля","Fill in all fields"));return;}
+  var btn=document.getElementById("authLoginBtn");btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';
+  auth.signInWithEmailAndPassword(email,pass).catch(function(err){
+    showAuthError("authLoginError",friendlyAuthError(err));
+  }).finally(function(){btn.disabled=false;btn.textContent=authT("Войти","Sign in");});
+}
+function doEmailRegister(){
+  if(!auth)return;
+  var name=document.getElementById("authNameInp").value.trim();
+  var email=document.getElementById("authRegEmailInp").value.trim();
+  var pass=document.getElementById("authRegPassInp").value;
+  hideAuthError();
+  if(!name||!email||!pass){showAuthError("authRegError",authT("Заполните все поля","Fill in all fields"));return;}
+  var btn=document.getElementById("authRegBtn");btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';
+  auth.createUserWithEmailAndPassword(email,pass).then(function(cred){
+    return cred.user.updateProfile({displayName:name});
+  }).catch(function(err){
+    showAuthError("authRegError",friendlyAuthError(err));
+  }).finally(function(){btn.disabled=false;btn.textContent=authT("Зарегистрироваться","Sign up");});
+}
+function doGoogleLogin(){
+  if(!auth)return;
+  var provider=new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(function(err){
+    var id=document.getElementById("authRegister").classList.contains("on")?"authRegError":"authLoginError";
+    if(err.code!=="auth/popup-closed-by-user")showAuthError(id,friendlyAuthError(err));
+  });
+}
+function continueAsGuest(){
+  isGuestMode=true;
+  hideAuthScreen();
+  // Guest needs a group code to view anything meaningful
+  openOnboarding("joinOnly");
+}
+function doLogout(){
+  isGuestMode=false;currentGroupId=null;currentRole=null;
+  try{localStorage.removeItem("bandlist_groupId");}catch(e){}
+  if(auth)auth.signOut();
+}
+
+/* ---- group code generation ---- */
+var BAND_WORDS=["VETER","ROCK","STAGE","DRIVE","ECHO","SOUND","WAVE","BEAT","TONE","RIFF","AMP","JAM"];
+function genGroupCode(){
+  var w=BAND_WORDS[Math.floor(Math.random()*BAND_WORDS.length)];
+  var n=Math.floor(1000+Math.random()*9000);
+  return w+"-"+n;
+}
+function genGroupCodeUnique(cb){
+  var code=genGroupCode();
+  db.ref("groups/"+code).once("value").then(function(snap){
+    if(snap.exists())genGroupCodeUnique(cb);else cb(code);
+  }).catch(function(){cb(code);});
+}
+
+/* ---- migration of legacy single-tenant data into a fresh group ---- */
+function migrateLegacyDataInto(groupId,cb){
+  db.ref("bandlist").once("value").then(function(snap){
+    var legacy=snap.val();
+    if(legacy&&legacy.concerts&&legacy.repertoire){
+      var toSave=JSON.parse(JSON.stringify(legacy));
+      toSave.repertoire.forEach(function(s){delete s.trackData;});
+      db.ref("groups/"+groupId+"/data").set(toSave).then(function(){cb&&cb();}).catch(function(){cb&&cb();});
+    }else{
+      db.ref("groups/"+groupId+"/data").set(JSON.parse(JSON.stringify(DEF))).then(function(){cb&&cb();}).catch(function(){cb&&cb();});
+    }
+  }).catch(function(){cb&&cb();});
+}
+
+function createGroup(name,cb){
+  if(!db||!currentUser){cb&&cb(null);return;}
+  genGroupCodeUnique(function(code){
+    var memberData={
+      uid:currentUser.uid,
+      name:currentUser.displayName||currentUser.email||"Без имени",
+      role:"leader",
+      instrument:pendingInstrument||"",
+      joinedAt:Date.now()
+    };
+    var groupMeta={name:name,createdBy:currentUser.uid,createdAt:Date.now()};
+    var updates={};
+    updates["groups/"+code+"/meta"]=groupMeta;
+    updates["groups/"+code+"/members/"+currentUser.uid]=memberData;
+    updates["users/"+currentUser.uid+"/groups/"+code]=true;
+    updates["users/"+currentUser.uid+"/activeGroup"]=code;
+    db.ref().update(updates).then(function(){
+      migrateLegacyDataInto(code,function(){cb&&cb(code);});
+    }).catch(function(){cb&&cb(null);});
+  });
+}
+
+function joinGroup(code,cb){
+  if(!db){cb&&cb(false,"nodb");return;}
+  code=code.trim().toUpperCase();
+  db.ref("groups/"+code+"/meta").once("value").then(function(snap){
+    if(!snap.exists()){cb&&cb(false,"notfound");return;}
+    if(!currentUser){cb&&cb(false,"noauth");return;}
+    var memberData={
+      uid:currentUser.uid,
+      name:currentUser.displayName||currentUser.email||"Без имени",
+      role:"member",
+      instrument:pendingInstrument||"",
+      joinedAt:Date.now()
+    };
+    var updates={};
+    updates["groups/"+code+"/members/"+currentUser.uid]=memberData;
+    updates["users/"+currentUser.uid+"/groups/"+code]=true;
+    updates["users/"+currentUser.uid+"/activeGroup"]=code;
+    db.ref().update(updates).then(function(){cb&&cb(true,code);}).catch(function(){cb&&cb(false,"writeerr");});
+  }).catch(function(){cb&&cb(false,"readerr");});
+}
+
+function setActiveGroup(code){
+  currentGroupId=code;
+  try{localStorage.setItem("bandlist_groupId",code);}catch(e){}
+  hideOnboarding();
+  attachGroupListeners();
+}
+
 function save(){
+  // Временно вырезаем trackData перед сериализацией — избегаем дорогого
+  // JSON.stringify больших base64-строк аудио (несколько МБ на трек),
+  // которые всё равно не должны сохраняться в localStorage/Firebase
+  var savedTracks=[];
+  D.repertoire.forEach(function(s){
+    if(s.trackData){
+      savedTracks.push({s:s,data:s.trackData,name:s.trackName});
+      s.trackData=undefined;
+    }
+  });
   var toSave=JSON.parse(JSON.stringify(D));
-  toSave.repertoire.forEach(function(s){delete s.trackData;});
+  // Восстанавливаем trackData в оригинальном объекте D (в памяти, не в toSave)
+  savedTracks.forEach(function(t){t.s.trackData=t.data;});
   try{localStorage.setItem("bandlist_v3",JSON.stringify(toSave));}catch(e){}
-  if(db){
+  if(db&&currentGroupId&&!isGuestMode){
     try{
       _remoteIgnore=true;
-      db.ref("bandlist").set(toSave,function(){
+      db.ref("groups/"+currentGroupId+"/data").set(toSave,function(){
         setTimeout(function(){_remoteIgnore=false;},3000);
       });
     }catch(e){_remoteIgnore=false;}
   }
 }
 
-// Firebase listeners — only if db available
-function initFirebase(){
-  if(!db)return;
+var _groupListenersAttached=false;
+function attachGroupListeners(){
+  if(!db||!currentGroupId||_groupListenersAttached)return;
+  _groupListenersAttached=true;
   db.ref(".info/connected").on("value",function(snap){
     var dot=document.getElementById("syncDot");if(!dot)return;
     dot.style.background=snap.val()?"#D4793F":"#555";
-    dot.title=snap.val()?"Онлайн · синхронизировано":"Офлайн";
+    dot.title=snap.val()?authT("Онлайн · синхронизировано","Online · synced"):authT("Офлайн","Offline");
   });
-  db.ref("bandlist").on("value",function(snap){
+  db.ref("groups/"+currentGroupId+"/data").on("value",function(snap){
     var remote=snap.val();if(!remote||_remoteIgnore)return;
     var localTracks={};
     D.repertoire.forEach(function(s){if(s.trackData)localTracks[s.id]={data:s.trackData,name:s.trackName};});
     D=remote;
     if(!D.repertoire)D.repertoire=[];
+    if(!D.concerts)D.concerts=DEF.concerts;
+    if(!D.sections)D.sections=DEF.sections;
+    if(!D.active)D.active=D.concerts[0]&&D.concerts[0].id;
     D.repertoire.forEach(function(s){if(localTracks[s.id]){s.trackData=localTracks[s.id].data;s.trackName=localTracks[s.id].name;}});
     try{localStorage.setItem("bandlist_v3",JSON.stringify(D));}catch(e){}
     rConcerts();rList();rRep();
     if(panel.id){var ps=findR(panel.id);if(ps)rPanel();else closePanel();}
   });
+  db.ref("groups/"+currentGroupId+"/members/"+(currentUser?currentUser.uid:"")).once("value").then(function(snap){
+    var m=snap.val();currentRole=m?m.role:(isGuestMode?"guest":null);
+    updateUIForRole();
+  });
 }
+
+function updateUIForRole(){
+  var readOnly=isGuestMode||currentRole==="guest";
+  document.body.classList.toggle("guest-readonly",!!readOnly);
+}
+
+// Legacy initFirebase kept as no-op alias for backwards compatibility
+function initFirebase(){}
+
+/* ============ ONBOARDING FLOW ============ */
+var pendingInstrument=null;
+var pendingOnboardMode=null; // "joinOnly" for guests
+
+function openOnboarding(mode){
+  pendingOnboardMode=mode||null;
+  var scr=document.getElementById("onboardingScreen");
+  if(!scr)return;
+  scr.style.display="block";
+  document.getElementById("obInstrument").classList.toggle("on",mode!=="joinOnly");
+  document.getElementById("obGroupChoice").classList.toggle("on",mode==="joinOnly");
+  document.getElementById("obGroupCreated").classList.remove("on");
+  if(mode==="joinOnly"){
+    // Guests only join, never create
+    document.getElementById("obTabJoin").click();
+    document.getElementById("obTabCreate").style.display="none";
+    document.getElementById("obSkipLink").style.display="none";
+    renderExistingGroups();
+  }else{
+    document.getElementById("obTabCreate").style.display="";
+    document.getElementById("obSkipLink").style.display="";
+  }
+}
+function hideOnboarding(){
+  var scr=document.getElementById("onboardingScreen");
+  if(scr)scr.style.display="none";
+}
+
+function pickInstrument(el){
+  document.querySelectorAll(".ob-instrument").forEach(function(x){x.classList.remove("sel");});
+  el.classList.add("sel");
+  pendingInstrument=el.dataset.instr;
+  document.getElementById("obInstrNextBtn").disabled=false;
+}
+function obGoToGroupStep(){
+  document.getElementById("obInstrument").classList.remove("on");
+  document.getElementById("obGroupChoice").classList.add("on");
+  renderExistingGroups();
+}
+function obSwitchTab(which){
+  document.getElementById("obTabCreate").classList.toggle("on",which==="create");
+  document.getElementById("obTabJoin").classList.toggle("on",which==="join");
+  document.getElementById("obPaneCreate").classList.toggle("on",which==="create");
+  document.getElementById("obPaneJoin").classList.toggle("on",which==="join");
+}
+function renderExistingGroups(){
+  var wrap=document.getElementById("obExistingGroups");
+  if(!wrap||!db||!currentUser){if(wrap)wrap.innerHTML="";return;}
+  db.ref("users/"+currentUser.uid+"/groups").once("value").then(function(snap){
+    var groups=snap.val();
+    if(!groups){wrap.innerHTML="";return;}
+    var codes=Object.keys(groups);
+    var html="";
+    codes.forEach(function(code){
+      html+='<div class="group-card" onclick="selectExistingGroup(\''+code+'\')">'+
+        '<div class="group-card-icon">'+code.charAt(0)+'</div>'+
+        '<div class="group-card-info"><h4>'+code+'</h4><span>'+authT("Продолжить","Continue")+'</span></div></div>';
+    });
+    wrap.innerHTML=html;
+  }).catch(function(){wrap.innerHTML="";});
+}
+function selectExistingGroup(code){
+  setActiveGroup(code);
+}
+
+function obCreateGroupClick(){
+  var name=document.getElementById("obGroupNameInp").value.trim();
+  var errEl=document.getElementById("obCreateError");
+  errEl.classList.remove("show");
+  if(!name){errEl.textContent=authT("Введите название группы","Enter a group name");errEl.classList.add("show");return;}
+  var btn=document.getElementById("obCreateBtn");btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';
+  createGroup(name,function(code){
+    btn.disabled=false;btn.textContent=authT("Создать группу","Create group");
+    if(!code){errEl.textContent=authT("Не удалось создать группу","Failed to create group");errEl.classList.add("show");return;}
+    showCreatedGroup(code);
+  });
+}
+function showCreatedGroup(code){
+  document.getElementById("obGroupChoice").classList.remove("on");
+  document.getElementById("obGroupCreated").classList.add("on");
+  document.getElementById("newGroupCodeTxt").textContent=code;
+  var qrWrap=document.getElementById("newGroupQrWrap");
+  qrWrap.innerHTML="";
+  if(window.QRCode){
+    try{ new QRCode(qrWrap,{text:code,width:170,height:170,colorDark:"#0a0a0d",colorLight:"#ffffff"}); }catch(e){}
+  }
+  currentGroupId=code;
+}
+function obFinishOnboarding(){
+  setActiveGroup(currentGroupId);
+}
+
+function obJoinGroupClick(){
+  var code=document.getElementById("obJoinCodeInp").value.trim();
+  var errEl=document.getElementById("obJoinError");
+  errEl.classList.remove("show");
+  if(!code){errEl.textContent=authT("Введите код группы","Enter group code");errEl.classList.add("show");return;}
+  var btn=document.getElementById("obJoinBtn");btn.disabled=true;btn.innerHTML='<span class="auth-spinner"></span>';
+  if(isGuestMode){
+    // guest viewing: just verify the group exists, no membership write
+    db.ref("groups/"+code.toUpperCase()+"/meta").once("value").then(function(snap){
+      btn.disabled=false;btn.textContent=authT("Войти в группу","Join group");
+      if(!snap.exists()){errEl.textContent=authT("Группа не найдена","Group not found");errEl.classList.add("show");return;}
+      setActiveGroup(code.toUpperCase());
+    }).catch(function(){
+      btn.disabled=false;btn.textContent=authT("Войти в группу","Join group");
+      errEl.textContent=authT("Ошибка соединения","Connection error");errEl.classList.add("show");
+    });
+    return;
+  }
+  joinGroup(code,function(ok,result){
+    btn.disabled=false;btn.textContent=authT("Войти в группу","Join group");
+    if(!ok){
+      var msgs={notfound:authT("Группа не найдена","Group not found"),noauth:authT("Нужно войти в аккаунт","Sign in required"),writeerr:authT("Ошибка записи","Write error"),readerr:authT("Ошибка соединения","Connection error")};
+      errEl.textContent=msgs[result]||authT("Ошибка","Error");errEl.classList.add("show");
+      return;
+    }
+    setActiveGroup(result);
+  });
+}
+
+var _qrScannerInstance=null;
+function obStartQrScan(){
+  var wrap=document.getElementById("qrReaderWrap");
+  if(!window.Html5Qrcode){wrap.style.display="none";return;}
+  wrap.style.display="block";
+  document.getElementById("obScanQrBtn").style.display="none";
+  _qrScannerInstance=new Html5Qrcode("qrReaderEl");
+  _qrScannerInstance.start(
+    {facingMode:"environment"},
+    {fps:10,qrbox:220},
+    function(decodedText){
+      document.getElementById("obJoinCodeInp").value=decodedText.trim().toUpperCase();
+      obStopQrScan();
+      obJoinGroupClick();
+    },
+    function(){}
+  ).catch(function(){
+    wrap.style.display="none";
+    document.getElementById("obScanQrBtn").style.display="flex";
+  });
+}
+function obStopQrScan(){
+  if(_qrScannerInstance){
+    _qrScannerInstance.stop().catch(function(){});
+    _qrScannerInstance=null;
+  }
+  document.getElementById("qrReaderWrap").style.display="none";
+  document.getElementById("obScanQrBtn").style.display="flex";
+}
+function obSkipToApp(){
+  // create a default solo group silently so the user has somewhere to save data
+  if(!currentUser){hideOnboarding();return;}
+  var btn=document.getElementById("obSkipLink");
+  createGroup(authT("Моя группа","My band"),function(code){
+    if(code)setActiveGroup(code);else hideOnboarding();
+  });
+}
+
+/* ============ APP BOOTSTRAP ============ */
+function bootstrapApp(){
+  if(!auth){
+    // No firebase auth available — fall back to fully offline legacy mode
+    hideAuthScreen();hideOnboarding();
+    return;
+  }
+  auth.onAuthStateChanged(function(user){
+    currentUser=user;
+    if(user){
+      isGuestMode=false;
+      hideAuthScreen();
+      // does this user already have an active group?
+      db.ref("users/"+user.uid+"/activeGroup").once("value").then(function(snap){
+        var code=snap.val();
+        if(code){
+          setActiveGroup(code);
+        }else{
+          openOnboarding();
+        }
+      }).catch(function(){openOnboarding();});
+    }else{
+      isGuestMode=false;
+      var savedGroup=null;
+      try{savedGroup=localStorage.getItem("bandlist_groupId");}catch(e){}
+      hideOnboarding();
+      showAuthScreen("login");
+    }
+  });
+}
+
+
 
 // helpers
 function secs(){return D.sections[D.active]||[];}
@@ -831,12 +1514,16 @@ function statusDotClass(st){var s=getStatuses().find(function(x){return x.id===s
 
 /* VIEW SWITCHING */
 function switchView(v){
+  closeCtx();
   currentView=v;
   document.getElementById("viewSetlist").style.display=v==="setlist"?"flex":"none";
   document.getElementById("viewRep").style.display=v==="rep"?"flex":"none";
   document.getElementById("navSetlist").classList.toggle("on",v==="setlist");
   document.getElementById("navRep").classList.toggle("on",v==="rep");
-  var addBtn=document.getElementById("mainAddBtn");
+  var pageTitle=document.getElementById("pageTitleTxt");
+  if(pageTitle) pageTitle.textContent = v==="rep"?t("repertoire"):t("setlist");
+  var heroAdd=document.getElementById("heroAddLbl");
+  if(heroAdd) heroAdd.textContent = v==="rep"?(LANG==="en"?"New song":"Новая песня"):(LANG==="en"?"Add":"Добавить");
   if(v==="rep"){rRep();rStatusFilter();}
 }
 function mainAdd(){
@@ -844,6 +1531,45 @@ function mainAdd(){
   if(repTab&&repTab.classList.contains("on")) openAddSong();
   else openAddFrom();
 }
+function openProfileScreen(){
+  updateProfileScreenTexts();
+  document.getElementById("profileScreen").classList.add("open");
+  history.pushState({profileScreen:true},"","");
+}
+function closeProfileScreen(){
+  document.getElementById("profileScreen").classList.remove("open");
+}
+function setAppLang(lang){
+  if(LANG===lang)return;
+  LANG=lang;
+  try{localStorage.setItem("bandlist_lang",LANG);}catch(e){}
+  applyLang();
+  updateProfileScreenTexts();
+}
+function updateProfileScreenTexts(){
+  var rb=document.getElementById("langBtnRu"), eb=document.getElementById("langBtnEn");
+  if(rb) rb.classList.toggle("on",LANG==="ru");
+  if(eb) eb.classList.toggle("on",LANG==="en");
+  var map={
+    profileScreenTitle:LANG==="en"?"Profile":"Профиль",
+    psecLangLbl:LANG==="en"?"Language":"Язык",
+    psecLangRowLbl:LANG==="en"?"Interface language":"Язык интерфейса",
+    psecGroupLbl:LANG==="en"?"Group":"Группа",
+    psecGroupRowLbl:LANG==="en"?"Manage group & members":"Управление группой и участниками",
+    psecAuthRowLbl:LANG==="en"?"Sign in / Sign up":"Вход / регистрация",
+    psecSoonTag:LANG==="en"?"Soon":"Скоро",
+    psecSoonTag2:LANG==="en"?"Soon":"Скоро"
+  };
+  Object.keys(map).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.textContent=map[id];
+  });
+}
+window.addEventListener('popstate',function(){
+  closeCtx();
+  var ps=document.getElementById('profileScreen');
+  if(ps&&ps.classList.contains('open')){closeProfileScreen();}
+});
 
 /* TRANSPOSE */
 function txKey(key,st){
@@ -894,7 +1620,7 @@ function startMetronome(){
   var btn=document.getElementById('metrBtn');
   var lbl=document.getElementById('metrLabel');
   var icon=document.getElementById('metrIcon');
-  if(btn)btn.style.cssText='flex:1;width:100%;background:rgba(212,121,63,0.2);border:1px solid #D4793F;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:42px;';
+  if(btn)btn.style.cssText='flex:1;width:100%;background:rgba(212,121,63,0.2);border:1px solid #D4793F;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:42px;';
   if(lbl)lbl.textContent=LANG==='en'?'Stop':'Стоп';
   if(icon){icon.setAttribute('stroke','#D4793F');}
   var beat=0;
@@ -909,7 +1635,7 @@ function stopMetronome(){
   var btn=document.getElementById('metrBtn');
   var lbl=document.getElementById('metrLabel');
   var icon=document.getElementById('metrIcon');
-  if(btn)btn.style.cssText='flex:1;width:100%;background:var(--s2);border:none;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:42px;';
+  if(btn)btn.style.cssText='flex:1;width:100%;background:var(--s2);border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:42px;';
   if(lbl)lbl.textContent=LANG==='en'?'Click':'Клик';
   if(icon){icon.style.display='none';}
 }
@@ -972,7 +1698,14 @@ function rConcerts(){
       b.appendChild(inp);b.onclick=function(e){e.stopPropagation();};
       w.appendChild(b);requestAnimationFrame(function(){inp.focus();inp.select();});
     } else {
-      b.textContent=c.name;b.onclick=function(){D.active=c.id;save();rConcerts();rList();};
+      b.textContent=c.name;b.onclick=function(){
+        D.active=c.id;
+        save();
+        rConcerts();
+        rList();
+        unloadInactiveTracks();
+        loadAllTracksFromIDB();
+      };
       var pt;
       b.addEventListener("touchstart",function(e){pt=setTimeout(function(){showCtx(c.id,e.touches[0].clientX,e.touches[0].clientY);},480);},{passive:true});
       b.addEventListener("touchend",function(){clearTimeout(pt);});b.addEventListener("touchmove",function(){clearTimeout(pt);});
@@ -1018,13 +1751,13 @@ function openConcert(){
   var ttl=document.createElement("div");ttl.style.cssText="font-family:'Golos Text',sans-serif;font-size:22px;color:#fff;margin-bottom:20px;";ttl.textContent=LANG==="en"?"New setlist":"Новый сетлист";
   var lbl=document.createElement("div");lbl.style.cssText="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b0aaa4;margin-bottom:8px;";lbl.textContent=LANG==="en"?"Name":"Название";
   var inp=document.createElement("input");
-  inp.style.cssText="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:12px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;";
+  inp.style.cssText="width:100%;background:#2a2a34;border:2px solid #D4793F;border-radius:8px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;";
   inp.placeholder=LANG==="en"?"Setlist 1":"Сетлист 1";
   var okBtn=document.createElement("button");
-  okBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:16px;height:44px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:14px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  okBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:16px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   okBtn.textContent=LANG==="en"?"CREATE":"СОЗДАТЬ";
   var cancelBtn=document.createElement("button");
-  cancelBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:14px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.textContent=LANG==="en"?"CANCEL":"ОТМЕНА";
   okBtn.addEventListener("click",function(){
     var name=inp.value.trim();if(!name)return;
@@ -1067,7 +1800,7 @@ function buildSecModal(title,btnText,defaultName,editId){
   var lbl=document.createElement("div");lbl.style.cssText="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b0aaa4;margin-bottom:7px;";lbl.textContent="Название";ov.appendChild(lbl);
   // input
   var inp=document.createElement("input");
-  inp.style.cssText="width:100%;background:#2a2a34;border:1px solid #D4793F;border-radius:12px;color:#f0ece4;padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;box-sizing:border-box;";
+  inp.style.cssText="width:100%;background:#2a2a34;border:1px solid #D4793F;border-radius:8px;color:#f0ece4;padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;box-sizing:border-box;";
   inp.value=defaultName;inp.placeholder="2 отделение";
   nSection._inp=inp;
   inp.addEventListener("input",function(){nSection.name=inp.value;});
@@ -1075,7 +1808,7 @@ function buildSecModal(title,btnText,defaultName,editId){
   ov.appendChild(inp);
   // button
   var btn=document.createElement("button");
-  btn.style.cssText="width:100%;padding:13px;border:none;border-radius:12px;background:#D4793F;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;";
+  btn.style.cssText="width:100%;padding:13px;border:none;border-radius:8px;background:#D4793F;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;";
   btn.textContent=btnText;
   btn.addEventListener("click",function(){doSubmitSec(ov);});
   ov.appendChild(btn);
@@ -1201,12 +1934,12 @@ function rAddFromModal(searchVal){
     var ddWrap=document.createElement("div");ddWrap.style.cssText="position:relative;margin-bottom:14px;";
     var ddBtn=document.createElement("div");
     ddBtn.id="secPickerBtn";
-    ddBtn.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s1);border:1.5px solid var(--or);border-radius:12px;cursor:pointer;font-family:'Golos Text',sans-serif;font-size:15px;color:var(--tx);user-select:none;";
-    ddBtn.innerHTML='<span id="secPickerLabel">'+(selectedSec?selectedSec.name:'')+'</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;transition:transform .2s;color:var(--or);"><polyline points="6,9 12,15 18,9"/></svg>';
+    ddBtn.style.cssText="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s1);border:1.5px solid var(--br);border-radius:8px;cursor:pointer;font-family:'Golos Text',sans-serif;font-size:15px;color:var(--tx);user-select:none;";
+    ddBtn.innerHTML='<span id="secPickerLabel">'+(selectedSec?selectedSec.name:'')+'</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;transition:transform .2s;color:var(--mu);"><polyline points="6,9 12,15 18,9"/></svg>';
 
     var ddList=document.createElement("div");
     ddList.id="secPickerList";
-    ddList.style.cssText="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s2);border:1px solid var(--br);border-radius:12px;z-index:999;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);";
+    ddList.style.cssText="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--s2);border:1px solid var(--br);border-radius:8px;z-index:999;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5);";
 
     ss2.forEach(function(sec){
       var item=document.createElement("div");
@@ -1301,7 +2034,7 @@ function rAddFromModal(searchVal){
       row.appendChild(dot);row.appendChild(info);
       if(already){
         var badge=document.createElement("span");
-        badge.style.cssText="font-size:10px;color:var(--or);letter-spacing:1px;flex-shrink:0;";
+        badge.style.cssText="font-size:10px;color:var(--mu);letter-spacing:1px;flex-shrink:0;";
         badge.textContent=LANG==="en"?"In setlist":"В сетлисте";
         row.appendChild(badge);
       } else {
@@ -1404,7 +2137,7 @@ function rList(){
       var ph=document.createElement("div");
       ph.className="drop-placeholder";
       ph.dataset.secId=sec.id;
-      ph.textContent="+ перетяни сюда";
+      ph.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>'+(LANG==='en'?'drag here':'перетяни сюда')+'</span>';
       // drag over events
       ph.addEventListener("dragover",function(e){e.preventDefault();ph.classList.add("drag-over");});
       ph.addEventListener("dragleave",function(){ph.classList.remove("drag-over");});
@@ -1423,7 +2156,7 @@ function rList(){
       gn++;
       var row=document.createElement("div");row.className="row";row.dataset.secId=sec.id;row.dataset.songId=s.id;row.style.position="relative";
       var noteSq=document.createElement("div");noteSq.className="note-sq";
-      noteSq.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg>';
+      noteSq.innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg>';
       noteSq.title="Сменить статус";
       if(sec.locked) noteSq.style.cssText+="opacity:0.2;pointer-events:none;cursor:default;";
       var si=document.createElement("div");si.className="si";
@@ -1454,7 +2187,7 @@ function rList(){
     (function(secId){
       var addBtn=document.createElement('button');
       addBtn.className='sec-add-song';
-      addBtn.innerHTML='<svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="flex-shrink:0"><line x1="5.5" y1="1" x2="5.5" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5.5" x2="10" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>&nbsp;'+(LANG==='en'?'Add song':'Добавить песню');
+      addBtn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>'+(LANG==='en'?'Add song':'Добавить песню')+'</span>';
       addBtn.addEventListener('click',function(){
         D._addToSecId=secId;
         openAddFrom();
@@ -1504,8 +2237,7 @@ function rStatusFilter(){
       var btn=document.createElement("button");
       var isOn=repStatusFilter===sf.id;
       btn.className="sf-btn"+(isOn?" on":"");
-      if(isOn){btn.style.cssText="display:inline-flex;align-items:center;justify-content:center;height:24px;border-radius:12px;border-color:#CC6E28;color:#fff;background:#CC6E28;font-weight:500;padding:3px 10px;";}
-      
+
       if(sf.id!=="all"){
         var dot=document.createElement("span");
         dot.style.cssText="display:inline-block;width:6px;height:6px;border-radius:50%;background:"+statusColor(sf.id)+";flex-shrink:0;";
@@ -1538,7 +2270,7 @@ function rRep(){
     row.className="rep-row";
     row.dataset.songId=String(sid);
     row.innerHTML=
-      '<div class="note-sq"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg></div>'
+      '<div class="note-sq"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg></div>'
       +'<div class="rep-info" onclick="openSong('+sid+')">'
         +'<div class="rep-title">'+esc(s.title)+'</div>'
         +'<div class="rep-sub">'+esc(s.artist)+' · ♩'+s.tempo+'</div>'
@@ -1603,13 +2335,13 @@ function showSecPickerFor(sid){
   ov.appendChild(title);
   D.sections[D.active].forEach(function(sec){
     var btn=document.createElement("button");
-    btn.style.cssText="width:100%;padding:14px;margin-bottom:10px;border:1px solid var(--br);border-radius:12px;background:var(--s1);color:var(--tx);font-family:'Golos Text',sans-serif;font-size:18px;cursor:pointer;text-align:left;padding-left:20px;";
+    btn.style.cssText="width:100%;padding:14px;margin-bottom:10px;border:1px solid var(--br);border-radius:8px;background:var(--s1);color:var(--tx);font-family:'Golos Text',sans-serif;font-size:18px;cursor:pointer;text-align:left;padding-left:20px;";
     btn.textContent=sec.name;
     btn.addEventListener("click",function(){ov.remove();doAddSong(sec.id,sid);});
     ov.appendChild(btn);
   });
   var cancel=document.createElement("button");
-  cancel.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:12px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:6px;";
+  cancel.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:8px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:6px;";
   cancel.textContent=LANG==="en"?"Cancel":"Отмена";
   cancel.addEventListener("click",function(){ov.remove();});
   ov.appendChild(cancel);
@@ -1631,7 +2363,7 @@ function cycleStatus(id,dotEl){
   ov.style.cssText="position:fixed;inset:0;z-index:98;background:transparent;";
 
   var menu=document.createElement("div");menu.id="statusMenu";
-  menu.style.cssText="position:fixed;z-index:99;background:#2a2a34;border:1px solid #32323e;border-radius:14px;overflow:hidden;min-width:150px;box-shadow:0 8px 32px rgba(0,0,0,.7);";
+  menu.style.cssText="position:fixed;z-index:99;background:#2a2a34;border:1px solid #32323e;border-radius:8px;overflow:hidden;min-width:150px;box-shadow:0 8px 32px rgba(0,0,0,.7);";
 
   getStatuses().forEach(function(st,i){
     var item=document.createElement("button");
@@ -1643,7 +2375,7 @@ function cycleStatus(id,dotEl){
     item.appendChild(document.createTextNode(st.label));
     (function(stId){item.addEventListener("click",function(e){
       e.stopPropagation();
-      s.status=stId;save();rRep();rList();
+      s.status=stId;save();rRep();rList();rStatusFilter();
       menu.remove();ov.remove();
     });})(st.id);
     menu.appendChild(item);
@@ -1829,11 +2561,13 @@ function setupRepDrag(row,songId){
     end();
     if(!wasMoved){cycleStatus(songId,handle);}
   });
+  handle.addEventListener("touchcancel",function(e){end();});
   handle.addEventListener("mousedown",function(e){start(e.clientY);var mm=function(ev){move(ev.clientY);};var mu=function(){var wasMoved=moved;end();document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);if(!wasMoved){cycleStatus(songId,handle);}};document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);e.preventDefault();});
 }
 
 /* PANEL */
 function openSong(id){
+  closeCtx();
   panel.id=id;panel.tab="form";taps=[];
   var p=document.getElementById("panel");
   p.style.cssText="display:flex !important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0d;z-index:20;transform:none !important;overflow:hidden;";
@@ -1841,6 +2575,7 @@ function openSong(id){
   rPanel();
 }
 function closePanel(){
+  closeCtx();
   if(audioObj){audioObj.pause();audioObj=null;audioTrackSongId=null;}
   stopMetronome();
   if(perfMetrOn){clearInterval(perfMetrInterval);perfMetrInterval=null;perfMetrOn=false;}
@@ -1891,10 +2626,10 @@ document.getElementById("ctrls").innerHTML=
     +'<button class="cbtn" onclick="shiftTempo(-2)">−</button><div class="cv">'+s.tempo+'</div><button class="cbtn" onclick="shiftTempo(+2)">+</button>'
     +'</div></div>'
     +'<div style="display:flex;flex-direction:column;gap:8px;flex:0 0 72px;">'
-    +'<button onclick="tapTempo()" style="flex:1;width:100%;background:var(--s2);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:42px;">'
+    +'<button onclick="tapTempo()" style="flex:1;width:100%;background:var(--s2);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:42px;">'
     +'<span style=\'font-size:9px;color:#d0ccc4;letter-spacing:1.5px;text-transform:uppercase;text-align:center;\'>TAP</span>'
     +'</button>'
-    +'<button id="metrBtn" onclick="toggleMetronome()" style="flex:1;width:100%;background:var(--s2);border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:42px;">'
+    +'<button id="metrBtn" onclick="toggleMetronome()" style="flex:1;width:100%;background:var(--s2);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:42px;">'
     +'<span id="metrLabel" style=\'font-size:9px;color:#d0ccc4;letter-spacing:1.5px;text-transform:uppercase;text-align:center;\'>'+(LANG==='en'?'Click':'Клик')+'</span>'
     +'</button>'
     +'</div>'
@@ -1936,7 +2671,7 @@ function showFormSectionPicker(sid){
   types.forEach(function(type){
     var btn=document.createElement("button");
     btn.textContent=type;
-    btn.style.cssText="padding:10px 18px;border-radius:10px;border:1px solid #32323e;background:#22222a;color:#d0ccc4;font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;";
+    btn.style.cssText="padding:10px 18px;border-radius:8px;border:1px solid #32323e;background:#22222a;color:#d0ccc4;font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;";
     btn.addEventListener("click",function(){
       var s=findR(sid);if(!s)return;
       if(!s.form)s.form=[];
@@ -1953,10 +2688,10 @@ function showFormSectionPicker(sid){
   customRow.style.cssText="display:flex;gap:8px;margin-bottom:16px;";
   var inp=document.createElement("input");
   inp.placeholder=t("customName");
-  inp.style.cssText="flex:1;background:#22222a;border:1px solid #32323e;border-radius:10px;color:#f0ece4;padding:11px 13px;font-size:14px;font-family:'Montserrat',sans-serif;outline:none;";
+  inp.style.cssText="flex:1;background:#22222a;border:1px solid #32323e;border-radius:8px;color:#f0ece4;padding:11px 13px;font-size:14px;font-family:'Montserrat',sans-serif;outline:none;";
   var okBtn=document.createElement("button");
   okBtn.textContent=LANG==="en"?"Add":"Добавить";
-  okBtn.style.cssText="background:#D4793F;border:none;border-radius:10px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:11px 16px;cursor:pointer;white-space:nowrap;";
+  okBtn.style.cssText="background:#D4793F;border:none;border-radius:8px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:11px 16px;cursor:pointer;white-space:nowrap;";
   okBtn.addEventListener("click",function(){
     var val=inp.value.trim();if(!val)return;
     var s=findR(sid);if(!s)return;
@@ -1970,7 +2705,7 @@ function showFormSectionPicker(sid){
 
   var cancelBtn=document.createElement("button");
   cancelBtn.textContent=LANG==="en"?"Cancel":"Отмена";
-  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid #32323e;border-radius:12px;background:none;color:#b0aaa4;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid #32323e;border-radius:8px;background:none;color:#b0aaa4;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.addEventListener("click",function(){ov.remove();});
   ov.appendChild(cancelBtn);
 
@@ -2005,26 +2740,26 @@ function rLyricsTab(s){
         return '<button onclick="insertLyricsSection(\''+sec+'\')" style="padding:6px 10px;background:transparent;border:1px solid rgba(212,121,63,0.5);border-radius:8px;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;">+ '+sec+'</button>';
       }).join('')
       +'</div>'
-      +'<textarea class="ta notes" id="taL" style="min-height:300px" oninput="saveLyrics()" placeholder="[Интро]&#10;&#10;[Куплет]&#10;Текст первого куплета...&#10;&#10;[Припев]&#10;Текст припева...">'+esc(s.lyrics||'')+'</textarea>'
-      +'<button onclick="doneLyricsEdit()" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--or);border-radius:10px;background:transparent;color:var(--or);font-family:Inter,sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Done':'Готово')+'</button>';
+      +'<textarea class="ta notes" id="taL" style="min-height:300px" oninput="saveLyrics()" placeholder="'+(LANG==='en'?'[Intro]&#10;&#10;[Verse]&#10;First verse text...&#10;&#10;[Chorus]&#10;Chorus text...':'[Интро]&#10;&#10;[Куплет]&#10;Текст первого куплета...&#10;&#10;[Припев]&#10;Текст припева...')+'">'+esc(s.lyrics||'')+'</textarea>'
+      +'<button onclick="doneLyricsEdit()" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--or);border-radius:8px;background:transparent;color:var(--or);font-family:Inter,sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Done':'Готово')+'</button>';
     return;
   }
   var tapBar='';
   if(lyricsTapMode && s.trackData){
-    tapBar='<div style="background:#1a1a22;border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">'
+    tapBar='<div style="background:#1a1a22;border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">'
       +'<button onclick="lyricsTapTogglePlay()" id="lyricsTapBtn" style="width:32px;height:32px;background:none;border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><polygon points="3,2 16,9 3,16" fill="#D4793F"/></svg></button>'
-      +'<div style="flex:1;"><div style="width:100%;height:3px;background:#252530;border-radius:2px;"><div id="lyricsTapFill" style="width:0%;height:100%;background:#D4793F;border-radius:2px;"></div></div></div>'
+      +'<div style="flex:1;"><div style="width:100%;height:3px;background:#252530;border-radius:8px;"><div id="lyricsTapFill" style="width:0%;height:100%;background:#D4793F;border-radius:8px;"></div></div></div>'
       +'<span id="lyricsTapTime" style="font-size:11px;color:#D4793F;font-family:Inter,sans-serif;min-width:32px;">0:00</span>'
       +'<button onclick="exitLyricsTap()" style="background:none;border:none;color:#555;font-size:14px;cursor:pointer;">✕</button>'
       +'</div>'
       +'<div style="font-size:10px;color:#888;font-family:Inter,sans-serif;margin-bottom:10px;">'+(LANG==='en'?'Play track and tap section headers':'Запусти трек и тапай по заголовкам секций')+'</div>';
   }
   var h='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">'
-    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Import from text':'Импорт из текста')+'</button>'
+    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:1px solid var(--br);border-radius:8px;background:transparent;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Import from text':'Импорт из текста')+'</button>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button onclick="switchLyricsEdit()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>'+t('editLyrics')+'</button>'
-    +(s.trackData?'<button onclick="enterLyricsTapMode()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:'+(lyricsTapMode?'rgba(212,121,63,0.15)':'transparent')+';color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="#D4793F" stroke="none"/></svg>'+(LANG==='en'?'Tap':'Разметить')+'</button>':'')+'</div>'
-    +'<button onclick="enterPerfMode()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>'+(LANG==='en'?'Stage':'Сцена')+'</button>'
+    +'<button onclick="switchLyricsEdit()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid var(--br);border-radius:8px;background:transparent;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>'+t('editLyrics')+'</button>'
+    +(s.trackData?'<button onclick="enterLyricsTapMode()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border:1px solid '+(lyricsTapMode?'#fff':'var(--br)')+';border-radius:8px;background:transparent;color:'+(lyricsTapMode?'#fff':'var(--mu)')+';font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>'+(LANG==='en'?'Tap':'Разметить')+'</button>':'')+'</div>'
+    +'<button onclick="enterPerfMode()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid var(--br);border-radius:8px;background:transparent;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>'+(LANG==='en'?'Stage':'Сцена')+'</button>'
     +'</div>';
   h+=tapBar;
   h+='<div class="lyr">';
@@ -2104,22 +2839,22 @@ function enterLyricsTapMode(){
   var h='<div style="padding:14px 16px;border-bottom:1px solid #1e1e26;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">'
     +'<div><div style="font-size:16px;font-weight:600;color:#f0ece4;">'+esc(s.title||'')+'</div>'
     +'<div style="font-size:10px;color:#D4793F;letter-spacing:2px;font-family:Inter,sans-serif;margin-top:2px;">РЕЖИМ РАЗМЕТКИ</div></div>'
-    +'<button onclick="exitLyricsTap()" style="background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#c0392b;padding:8px 14px;font-size:11px;font-family:Inter,sans-serif;cursor:pointer;">✕ Выйти</button>'
+    +'<button onclick="exitLyricsTap()" style="background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:8px;color:#c0392b;padding:8px 14px;font-size:11px;font-family:Inter,sans-serif;cursor:pointer;">✕ Выйти</button>'
     +'</div>'
     +'<div style="padding:12px 16px;background:#1a1a22;border-bottom:1px solid #1e1e26;flex-shrink:0;">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">'
     +'<button onclick="lyricsTapTogglePlay()" id="lyricsTapBtn" style="width:36px;height:36px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">'
     +'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="3,2 16,9 3,16" fill="#D4793F"/></svg></button>'
     +'<div id="lyricsTapBar" style="flex:1;height:28px;display:flex;align-items:center;cursor:pointer;">'
-    +'<div style="width:100%;height:4px;background:#252530;border-radius:2px;position:relative;">'
-    +'<div id="lyricsTapFill" style="width:0%;height:100%;background:#D4793F;border-radius:2px;"></div>'
+    +'<div style="width:100%;height:4px;background:#252530;border-radius:8px;position:relative;">'
+    +'<div id="lyricsTapFill" style="width:0%;height:100%;background:#D4793F;border-radius:8px;"></div>'
     +'<div id="lyricsTapDot" style="position:absolute;top:50%;transform:translateY(-50%);left:0%;width:12px;height:12px;border-radius:50%;background:#D4793F;margin-left:-6px;"></div>'
     +'</div></div>'
     +'<span id="lyricsTapTime" style="font-size:13px;color:#D4793F;font-family:Inter,sans-serif;min-width:36px;">0:00</span>'
     +'</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;">'
     +'<div id="lyricsTapHint" style="font-size:11px;color:#555;font-family:Inter,sans-serif;">Нажми ▶ затем тапай на секцию</div>'
-    +'<button onclick="lyricsTapReset()" style="background:none;border:1px solid #3a3a46;border-radius:6px;color:#888;font-family:Inter,sans-serif;font-size:10px;padding:4px 10px;cursor:pointer;">Сбросить</button>'
+    +'<button onclick="lyricsTapReset()" style="background:none;border:1px solid #3a3a46;border-radius:8px;color:#888;font-family:Inter,sans-serif;font-size:10px;padding:4px 10px;cursor:pointer;">Сбросить</button>'
     +'</div></div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px;"><div style="display:flex;flex-direction:column;gap:10px;">';
   secs.forEach(function(sec){
@@ -2128,7 +2863,7 @@ function enterLyricsTapMode(){
     h+='<button id="lhd_'+sec.idx+'" data-idx="'+sec.idx+'" data-name="'+esc(sec.name)+'" class="tap-sec-btn" style="'
       +'width:100%;padding:18px 20px;display:flex;align-items:center;gap:12px;'
       +'background:rgba(255,255,255,0.02);border:1.5px dashed '+(hasTap?'rgba(212,121,63,0.4)':'#3a3a46')+';'
-      +'border-radius:14px;cursor:pointer;text-align:left;">'
+      +'border-radius:8px;cursor:pointer;text-align:left;">'
       +'<div id="dot_'+sec.idx+'" style="width:8px;height:8px;border-radius:50%;background:'+(hasTap?'#D4793F':'#3a3a46')+';flex-shrink:0;"></div>'
       +'<span id="name_'+sec.idx+'" style="font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:'+(hasTap?'#D4793F':'#888')+';font-family:Inter,sans-serif;">'+esc(sec.name)+'</span>'
       +'<span id="time_'+sec.idx+'" style="margin-left:auto;font-size:12px;color:#888;font-family:Inter,sans-serif;">'+(hasTap?tStr:'тап →')+'</span>'
@@ -2379,7 +3114,7 @@ function showSectionPicker(s){
 
   SECTION_TYPES.forEach(function(type){
     var btn=document.createElement("button");
-    btn.style.cssText="padding:10px 18px;border-radius:10px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;";
+    btn.style.cssText="padding:10px 18px;border-radius:8px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;";
     btn.textContent=type;
     btn.addEventListener("click",function(){
       if(!s.chordBlocks)s.chordBlocks=[];
@@ -2405,7 +3140,7 @@ function showSectionPicker(s){
   customRow.appendChild(inp);customRow.appendChild(okBtn);
 
   var cancelBtn=document.createElement("button");
-  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:12px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:8px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.textContent=LANG==="en"?"Cancel":"Отмена";
   cancelBtn.addEventListener("click",function(){ov.remove();});
 
@@ -2463,7 +3198,7 @@ function rEditTab(s){
     +'<div class="fl">'+t('lyricsLabel')+'</div>'
     +'<textarea class="fi tall" oninput="editSong.lyrics=this.value">'+esc(s.lyrics||"")+'</textarea>'
     +'<button class="subbtn" onclick="saveEdit()">'+t('save').toUpperCase()+'</button>'
-    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;">'+(LANG==="en"?"Import from text":"Импорт из текста")+'</button>'
+    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:1px solid var(--br);border-radius:8px;background:transparent;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;">'+(LANG==="en"?"Import from text":"Импорт из текста")+'</button>'
     +'<button class="delbtn" onclick="delFromPanelRep()">'+t('deleteFromRep').toUpperCase()+'</button>';
 }
 function editStatus(st){
@@ -2513,7 +3248,7 @@ function rSongModal(){
     +'<textarea class="fi" oninput="nSong.form=this.value" placeholder="'+t('phForm').replace(/\\n/g,'&#10;')+'">'+esc(n.form)+'</textarea>'
     +'<div class="fl">'+t('lyricsLabel')+'</div>'
     +'<textarea class="fi tall" oninput="nSong.lyrics=this.value" placeholder="'+t('phLyrics').replace(/\\n/g,'&#10;')+'">'+esc(n.lyrics)+'</textarea>'
-    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;">'+(LANG==="en"?"Import from text":"Импорт из текста")+'</button>'
+    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:1px solid var(--br);border-radius:8px;background:transparent;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;">'+(LANG==="en"?"Import from text":"Импорт из текста")+'</button>'
     +'<button class="subbtn" onclick="submitSong()">'+t('addToRep').toUpperCase()+'</button>';
 }
 function submitSong(){
@@ -2544,13 +3279,13 @@ function rLandscapePlayer(s){
   if(!s||!s.trackName||!s.trackData){
     lph.innerHTML=loadBtn
       +'<button style="width:24px;height:24px;border-radius:50%;background:#2a2a34;border:none;cursor:default;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;opacity:0.5;">'+playSvgDisabled+'</button>'
-      +'<div id="lpInlineProg" style="flex:1;height:4px;background:#2a2a34;border-radius:2px;position:relative;opacity:0.3;">'
-      +'<div id="lpInlineFill" style="width:0%;height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;pointer-events:none;"></div></div>';
+      +'<div id="lpInlineProg" style="flex:1;height:4px;background:#2a2a34;border-radius:8px;position:relative;opacity:0.3;">'
+      +'<div id="lpInlineFill" style="width:0%;height:100%;background:#D4793F;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;"></div></div>';
   } else {
     lph.innerHTML=loadBtn
       +'<button id="lpInlinePlay" onclick="togglePlay()" style="width:24px;height:24px;border-radius:50%;background:#D4793F;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;">'+playSvg+'</button>'
-      +'<div id="lpInlineProg" style="flex:1;height:4px;background:#2a2a34;border-radius:2px;cursor:pointer;position:relative;">'
-      +'<div id="lpInlineFill" style="width:0%;height:100%;background:#D4793F;border-radius:2px;position:absolute;left:0;top:0;pointer-events:none;"></div></div>'
+      +'<div id="lpInlineProg" style="flex:1;height:4px;background:#2a2a34;border-radius:8px;cursor:pointer;position:relative;">'
+      +'<div id="lpInlineFill" style="width:0%;height:100%;background:#D4793F;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;"></div></div>'
       +'<span id="lpInlineTime" style="font-family:Inter,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>';
   }
   setTimeout(function(){
@@ -2595,7 +3330,7 @@ function rPlayer(s){
   slot.innerHTML="";
   if(!s.trackName||!s.trackData){
     var btn=document.createElement("button");
-    btn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+    btn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:8px;background:transparent;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
     btn.textContent='';
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>&nbsp;&nbsp;'+t("loadTrack").replace('♫  ','');
     btn.addEventListener("click",function(e){e.preventDefault();_trackTargetSongId=s.id;document.getElementById("trackFileInput").value="";document.getElementById("trackFileInput").click();});
@@ -2657,6 +3392,16 @@ function initAudio(s){
   if(audioTrackSongId===s.id&&audioObj){
     // just re-hook the UI elements without stopping playback
     hookAudioEvents();
+    return;
+  }
+  if(!s.trackData){
+    // Трек не в памяти — подгружаем из IDB по требованию вместо предзагрузки всего репертуара
+    loadTrackIDB(s.id,function(rec){
+      if(rec){
+        s.trackData=rec.data;s.trackName=rec.name;
+        initAudio(s); // повторный вызов теперь с готовым trackData
+      }
+    });
     return;
   }
   if(audioObj){audioObj.pause();audioObj=null;}
@@ -2771,17 +3516,17 @@ function showConfirm(msg,onOk){
   var ov=document.createElement("div");ov.id="confirmOv";
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;";
   var box=document.createElement("div");
-  box.style.cssText="background:#22222a;border-radius:16px;padding:24px 20px;width:100%;max-width:320px;";
+  box.style.cssText="background:#22222a;border-radius:8px;padding:24px 20px;width:100%;max-width:320px;";
   var txt=document.createElement("div");
   txt.style.cssText="font-family:'Golos Text',sans-serif;font-size:18px;color:#f0ece4;margin-bottom:20px;text-align:center;line-height:1.4;";
   txt.textContent=msg;
   var btns=document.createElement("div");btns.style.cssText="display:flex;gap:10px;";
   var cancelBtn=document.createElement("button");
-  cancelBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:14px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(212,121,63,0.6);border-radius:8px;color:#D4793F;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.textContent=LANG==="en"?"Cancel":"Отмена";
   cancelBtn.addEventListener("click",function(){ov.remove();});
   var okBtn=document.createElement("button");
-  okBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(224,82,82,0.6);border-radius:14px;color:#e05252;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  okBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(224,82,82,0.6);border-radius:8px;color:#e05252;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   okBtn.textContent=LANG==="en"?"Delete":"Удалить";
   okBtn.addEventListener("click",function(){ov.remove();onOk();});
   btns.appendChild(cancelBtn);btns.appendChild(okBtn);
@@ -2802,7 +3547,6 @@ document.addEventListener("DOMContentLoaded",function(){
   });
 });
 try{ var _sl=localStorage.getItem("bandlist_lang"); if(_sl) LANG=_sl; }catch(e){}
-var _lb=document.getElementById("langToggleBtn"); if(_lb) _lb.textContent=LANG==="ru"?"EN":"RU";
 
 var perfFontSz = 22;
 var perfScrollOn = false;
@@ -2868,7 +3612,7 @@ function enterPerfMode(){
       var label=nameCounts[n]>1?n+' '+nameIdx[n]:n;
       var btn=document.createElement('button');
       btn.textContent=label;btn.dataset.secIdx=i;
-      btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
+      btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:8px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
       btn.addEventListener('click',function(){
         var idx=parseInt(btn.dataset.secIdx);
         var target=perfSecs[idx];
@@ -3088,7 +3832,7 @@ function renderMapCanvas(s, canvas){
     var empty=document.createElement('div');
     empty.style.cssText='display:flex;flex-direction:column;width:100%;';
     var emptyBtn=document.createElement('button');
-    emptyBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:14px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
+    emptyBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(212,121,63,0.6);border-radius:8px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
     emptyBtn.textContent=LANG==='en'?'+ Add first section':'+ Добавить секцию';
     (function(id){emptyBtn.addEventListener('click',function(){openMapSheet(id);});})(sid);
     empty.appendChild(emptyBtn);
@@ -3109,7 +3853,7 @@ function renderMapCanvas(s, canvas){
     var secRow=document.createElement('div');
     secRow.style.cssText='display:flex;align-items:center;gap:6px;';
     var menuBtn=document.createElement('button');
-    menuBtn.style.cssText='width:22px;height:22px;border-radius:6px;border:none;background:#2a2a34;color:#666;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;';
+    menuBtn.style.cssText='width:22px;height:22px;border-radius:8px;border:none;background:#2a2a34;color:#666;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;';
     menuBtn.textContent='⋮';
     (function(gIdx){
       menuBtn.addEventListener('click',function(e){e.stopPropagation();openMapCtx(sid,gIdx,e);});
@@ -3242,7 +3986,7 @@ function renameMapSection(sid,gi){
   var ov=document.createElement('div');ov.id='mapRenameOv';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
   var box=document.createElement('div');
-  box.style.cssText='background:#22222a;border-radius:14px;padding:20px;width:100%;max-width:320px;';
+  box.style.cssText='background:#22222a;border-radius:8px;padding:20px;width:100%;max-width:320px;';
   var lbl=document.createElement('div');
   lbl.style.cssText='font-size:11px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:Inter,sans-serif;';
   lbl.textContent=LANG==='en'?'Rename section':'Переименовать секцию';
@@ -3294,6 +4038,8 @@ function deleteMapSection(sid,gi){
 
 function openMapSheet(sid,insertAtIdx,insertPos){
   mapPickerSongId=sid;
+  mapPickerInsertIdx=(insertAtIdx!==undefined&&insertAtIdx!==null)?insertAtIdx:null;
+  mapPickerInsertPos=insertPos||null;
   mapPickerSel='intro';mapPickerBars=4;
   document.getElementById('mapBarsVal').textContent=4;
   document.getElementById('mapSheetTitle').textContent=LANG==='en'?'Section type':'Тип секции';
@@ -3370,12 +4116,35 @@ window.addEventListener('resize',function(){
 
 // IndexedDB for backing tracks
 var trackDB=null;
+var _trackDBOpening=false;
+var _trackDBCallbacks=[];
 function openTrackDB(cb){
   if(trackDB){cb(trackDB);return;}
-  var req=indexedDB.open('bandlist_tracks',1);
-  req.onupgradeneeded=function(e){e.target.result.createObjectStore('tracks');};
-  req.onsuccess=function(e){trackDB=e.target.result;cb(trackDB);};
-  req.onerror=function(){cb(null);};
+  _trackDBCallbacks.push(cb);
+  if(_trackDBOpening)return; // уже открывается — просто ждём в очереди
+  _trackDBOpening=true;
+  try{
+    if(typeof indexedDB==='undefined'||!indexedDB){throw new Error('no indexedDB');}
+    var req=indexedDB.open('bandlist_tracks',1);
+    req.onupgradeneeded=function(e){e.target.result.createObjectStore('tracks');};
+    req.onsuccess=function(e){
+      trackDB=e.target.result;
+      _trackDBOpening=false;
+      var cbs=_trackDBCallbacks;_trackDBCallbacks=[];
+      cbs.forEach(function(c){c(trackDB);});
+    };
+    req.onerror=function(){
+      _trackDBOpening=false;
+      var cbs=_trackDBCallbacks;_trackDBCallbacks=[];
+      cbs.forEach(function(c){c(null);});
+    };
+  }catch(e){
+    // IndexedDB недоступен в этом контексте (content://, file://, приватный режим и т.п.) —
+    // не даём ошибке оборвать выполнение остального скрипта.
+    _trackDBOpening=false;
+    var cbs2=_trackDBCallbacks;_trackDBCallbacks=[];
+    cbs2.forEach(function(c){c(null);});
+  }
 }
 function saveTrackIDB(songId,data,name){
   openTrackDB(function(db){
@@ -3401,9 +4170,26 @@ function deleteTrackIDB(songId){
   });
 }
 // Load tracks from IDB on init
-function loadAllTracksFromIDB(){
+function unloadInactiveTracks(){
+  // Выгружаем из памяти треки песен, не входящих в текущий активный сетлист,
+  // чтобы при переключении между сетлистами память не накапливалась бесконтрольно
+  var secs=D.sections[D.active]||D.sections[String(D.active)]||D.sections[+D.active]||[];
+  var activeIds={};
+  secs.forEach(function(sec){(sec.songs||[]).forEach(function(sid){activeIds[sid]=true;});});
   D.repertoire.forEach(function(s){
-    if(!s.trackData){
+    if(s.trackData && !activeIds[s.id] && s.id!==audioTrackSongId){
+      s.trackData=undefined;
+    }
+  });
+}
+function loadAllTracksFromIDB(){
+  // Загружаем в память только треки ТЕКУЩЕГО активного сетлиста,
+  // а не весь репертуар целиком — экономит память при росте репертуара
+  var secs=D.sections[D.active]||D.sections[String(D.active)]||D.sections[+D.active]||[];
+  var songIds={};
+  secs.forEach(function(sec){(sec.songs||[]).forEach(function(sid){songIds[sid]=true;});});
+  D.repertoire.forEach(function(s){
+    if(!s.trackData && songIds[s.id]){
       loadTrackIDB(s.id,function(rec){
         if(rec){s.trackData=rec.data;s.trackName=rec.name;}
       });
@@ -3705,12 +4491,12 @@ function openImportModal(){
   ov.appendChild(hint);
 
   var ta=document.createElement('textarea');
-  ta.style.cssText='width:100%;background:#22222a;border:1px solid #3a3a46;border-radius:10px;color:#d0ccc4;padding:12px;font-size:12px;font-family:Courier New,monospace;outline:none;resize:none;min-height:200px;line-height:1.8;';
+  ta.style.cssText='width:100%;background:#22222a;border:1px solid #3a3a46;border-radius:8px;color:#d0ccc4;padding:12px;font-size:12px;font-family:Courier New,monospace;outline:none;resize:none;min-height:200px;line-height:1.8;';
   ta.placeholder=LANG==='en'?'[Verse]:\n[Am]Song text [F]here\n\n[Chorus]:\n[C]Chorus [G]text':'[Куплет]:\n[Am]Текст песни [F]здесь\n\n[Припев]:\n[C]Текст [G]припева';
   ov.appendChild(ta);
 
   var okBtn=document.createElement('button');
-  okBtn.style.cssText='width:100%;margin-top:12px;padding:12px;border:1px solid #D4793F;border-radius:10px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
+  okBtn.style.cssText='width:100%;margin-top:12px;padding:12px;border:1px solid #D4793F;border-radius:8px;background:transparent;color:#D4793F;font-family:Inter,sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
   okBtn.textContent=LANG==='en'?'PARSE & IMPORT':'РАСПОЗНАТЬ И ИМПОРТИРОВАТЬ';
   okBtn.onclick=function(){
     var raw=ta.value.trim();
@@ -3804,14 +4590,19 @@ function triggerTrackUpload(songId){
   inp.value='';
   inp.click();
 }
-initFirebase();
+bootstrapApp();
 rConcerts();rList();rStatusFilter();
-loadAllTracksFromIDB();
+try{loadAllTracksFromIDB();}catch(e){}
 applyLang();
+updateProfileScreenTexts();
 document.addEventListener("click",function(e){
   if(!e.target.closest(".row-menu-btn")&&!e.target.closest(".row-menu-popup")){
     document.querySelectorAll(".row-menu-popup.open").forEach(function(p){p.classList.remove("open");});
   }
+  if(!e.target.closest(".cxm")&&!e.target.closest(".cxov")){
+    closeCtx();
+  }
+  document.querySelectorAll(".dover").forEach(function(r){r.classList.remove("dover");});
 });
 
 // Handle Android back button
@@ -3919,26 +4710,80 @@ if('serviceWorker' in navigator){
     <button onclick="toggleLiveMode()" id="liveExitBtn" style="background:transparent;border:none;color:var(--mu);font-size:14px;font-weight:400;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;line-height:1;">✕</button>
   </div>
   <div id="liveCards" style="flex:1;overflow-y:auto;padding:10px 12px 40px;"></div>
+
+  <!-- Закреплённый плеер снизу -->
+  <div id="livePlayerBar" style="flex-shrink:0;background:var(--bg);padding:14px 18px calc(20px + env(safe-area-inset-bottom, 0px));display:none;">
+    <div id="livePlayerProg" class="lp-prog-bar" onclick="seekLivePlayer(event)">
+      <div id="livePlayerProgFill" class="lp-prog-bar-fill"><div class="lp-prog-bar-dot"></div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-size:11px;color:var(--tx2);margin-bottom:14px;">
+      <span id="livePlayerTimeElapsed">0:00</span>
+      <span id="livePlayerTimeLeft">-0:00</span>
+    </div>
+    <div id="liveDebugLine" style="font-family:'Inter',sans-serif;font-size:10px;color:#c0392b;margin-bottom:10px;word-break:break-all;"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+      <button class="lp-tab-btn active" id="lpTabBtn_lyrics" onclick="setLivePlayerTab('lyrics')">Текст</button>
+      <button class="lp-tab-btn" id="lpTabBtn_form" onclick="setLivePlayerTab('form')">Форма</button>
+      <button class="lp-tab-btn" id="lpTabBtn_chords" onclick="setLivePlayerTab('chords')">Аккорды</button>
+      <button class="lp-tab-btn" id="lpTabBtn_notes" onclick="setLivePlayerTab('notes')">Заметки</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <button id="liveMyMixBtn" onclick="openLiveMyMixSheet()" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tx2);cursor:pointer;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        <span style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;">My Mix</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:22px;">
+        <button onclick="livePrevSong()" style="background:none;border:none;color:#fff;cursor:pointer;display:flex;"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M11 19V5l-8.5 7zM20 19V5l-8.5 7z"/></svg></button>
+        <button id="livePlayerPlayBtn" onclick="toggleLivePlayerPlay()" style="width:54px;height:54px;border-radius:50%;background:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0a0a0d"><polygon points="6,4 20,12 6,20"/></svg></button>
+        <button onclick="liveNextSong()" style="background:none;border:none;color:#fff;cursor:pointer;display:flex;"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" style="transform:scaleX(-1);"><path d="M11 19V5l-8.5 7zM20 19V5l-8.5 7z"/></svg></button>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tx2);min-width:36px;">
+        <span id="livePlayerKey" style="font-size:14px;color:#fff;font-weight:700;font-family:'Golos Text',sans-serif;">—</span>
+        <span id="livePlayerBpm" style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:1px;">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- My Mix bottom sheet -->
+<div id="liveMyMixSheetOverlay" onclick="closeLiveMyMixSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:220;"></div>
+<div id="liveMyMixSheet" style="display:none;position:fixed;left:0;right:0;bottom:0;background:#1c1c22;border-radius:20px 20px 0 0;padding:10px 22px 28px;z-index:221;box-shadow:0 -10px 40px rgba(0,0,0,.5);">
+  <div style="width:36px;height:4px;background:#4a4a52;border-radius:3px;margin:0 auto 18px;"></div>
+  <div style="font-size:19px;font-weight:700;color:#fff;text-align:center;margin-bottom:24px;font-family:'Golos Text',sans-serif;">My Mix</div>
+  <div style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:14px;color:var(--tx2);font-family:'Golos Text',sans-serif;">Трек</div>
+      <div id="liveMixTrackVal" style="font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);">80%</div>
+    </div>
+    <input type="range" id="liveMixTrackSlider" min="0" max="100" value="80" class="lp-mix-slider" oninput="updateLiveMixTrack(this.value)">
+  </div>
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tx2);font-family:'Golos Text',sans-serif;"><span id="liveMixClickDot" style="width:7px;height:7px;border-radius:50%;background:#e74c3c;display:inline-block;"></span>Клик</div>
+      <div id="liveMixClickVal" style="font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);">90%</div>
+    </div>
+    <input type="range" id="liveMixClickSlider" min="0" max="100" value="90" class="lp-mix-slider" oninput="updateLiveMixClick(this.value)">
+  </div>
 </div>
 
 <!-- ═══ LIVE FULLSCREEN TAB ═══ -->
 <div id="liveFullTab" style="position:fixed;inset:0;background:#0a0a0d;z-index:210;flex-direction:column;overflow:hidden;">
-  <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e26;flex-shrink:0;">
-    <button onclick="closeLiveFullTab()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;">
+  <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e26;flex-shrink:0;gap:10px;">
+    <button onclick="closeLiveFullTab()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span style="font-size:12px;color:#b0aaa4;font-family:'Inter',sans-serif;letter-spacing:1px;" id="lftBackBtn">НАЗАД</span>
     </button>
-    <div style="text-align:center;">
-      <div id="lftTitle" style="font-size:12px;color:#f0ece4;font-family:'Golos Text',sans-serif;font-weight:500;"></div>
-      <div id="lftTabLabel" style="font-size:10px;color:#D4793F;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;"></div>
+    <div style="text-align:center;flex:1;min-width:0;overflow:hidden;">
+      <div id="lftTitle" style="font-size:12px;color:#f0ece4;font-family:'Golos Text',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="lftTabLabel" style="font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;margin-top:3px;"></div>
     </div>
-    <div style="display:flex;gap:6px;">
-      <div style="background:#1e1e26;border-radius:6px;padding:4px 8px;text-align:center;">
-        <div style="font-size:8px;color:#D4793F;font-family:'Inter',sans-serif;font-weight:600;">KEY</div>
+    <div style="display:flex;gap:6px;flex-shrink:0;">
+      <div style="background:transparent;padding:4px 8px;text-align:center;">
+        <div style="font-size:8px;color:#888;font-family:'Inter',sans-serif;font-weight:600;">KEY</div>
         <div id="lftKey" style="font-size:13px;font-weight:700;color:#fff;"></div>
       </div>
-      <div style="background:#1e1e26;border-radius:6px;padding:4px 8px;text-align:center;">
-        <div style="font-size:8px;color:#D4793F;font-family:'Inter',sans-serif;font-weight:600;">BPM</div>
+      <div style="background:transparent;padding:4px 8px;text-align:center;">
+        <div style="font-size:8px;color:#888;font-family:'Inter',sans-serif;font-weight:600;">BPM</div>
         <div id="lftBpm" style="font-size:13px;font-weight:700;color:#fff;"></div>
       </div>
     </div>
@@ -3946,13 +4791,13 @@ if('serviceWorker' in navigator){
   <div id="lftSecNav" style="overflow-x:auto;white-space:nowrap;padding:6px 16px;border-bottom:1px solid #1a1a1f;scrollbar-width:none;flex-shrink:0;display:none;"></div>
   <div id="lftContent" style="flex:1;overflow-y:auto;padding:16px 24px 40px;scrollbar-width:none;font-size:22px;line-height:1.65;color:#f0ece4;font-weight:500;letter-spacing:0.2px;"></div>
   <div class="perf-footer">
-    <span class="perf-font-lbl">A</span>
-    <button class="perf-fbtn" onclick="lftFontChange(-2)">−</button>
-    <button class="perf-fbtn" onclick="lftFontChange(+2)">+</button>
+    <span class="perf-font-lbl" id="lftFontLbl">A</span>
+    <button class="perf-fbtn" id="lftFontMinusBtn" onclick="lftFontChange(-2)">−</button>
+    <button class="perf-fbtn" id="lftFontPlusBtn" onclick="lftFontChange(+2)">+</button>
     <button class="perf-scroll" id="lftScrollBtn" onclick="toggleLftScroll()">AUTO<br>SCROLL</button>
-    <button class="perf-fbtn" onclick="lftScrollSpeedChange(-1)">−</button>
-    <button class="perf-fbtn" onclick="lftScrollSpeedChange(+1)">+</button>
-    <span class="perf-font-lbl">S</span>
+    <button class="perf-fbtn" id="lftSpeedMinusBtn" onclick="lftScrollSpeedChange(-1)">−</button>
+    <button class="perf-fbtn" id="lftSpeedPlusBtn" onclick="lftScrollSpeedChange(+1)">+</button>
+    <span class="perf-font-lbl" id="lftSpeedLbl">S</span>
   </div>
 </div>
 
@@ -3961,33 +4806,45 @@ if('serviceWorker' in navigator){
 #liveOverlay.open{display:flex!important;}
 #liveFullTab{display:none;}
 #liveFullTab.open{display:flex!important;}
-.lc{background:#1a1a22;border-radius:14px;padding:14px 16px;margin-bottom:8px;border:1px solid #252530;}
+.lc{background:var(--bg);border-radius:8px;padding:8px 12px;margin-bottom:2px;border-left:2px solid transparent;}
+.lc.active{border-left:2px solid #fff;background:rgba(255,255,255,0.04);}
 .lc-row{display:flex;align-items:center;gap:10px;}
-.lc-num{width:24px;height:24px;border-radius:50%;background:transparent;border:1.5px solid #D4793F;display:flex;align-items:center;justify-content:center;font-size:11px;color:#D4793F;font-family:'Inter',sans-serif;font-weight:600;flex-shrink:0;}
+.lc-num{width:48px;height:48px;border-radius:8px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.lc-num-badge{position:absolute;top:-4px;left:-4px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:'Inter',sans-serif;}
 .lc-info{flex:1;min-width:0;}
 .lc-title{font-size:17px;font-weight:600;color:#f0ece4;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lc-artist{font-size:10px;color:#D4793F;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;margin-top:2px;}
+.lc-artist{font-size:10px;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;margin-top:2px;}
 .lc-meta{display:flex;gap:6px;flex-shrink:0;}
-.lc-box{background:#252530;border-radius:8px;padding:5px 10px;text-align:center;}
-.lc-box-lbl{font-size:9px;color:#D4793F;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;}
+.lc-key-simple{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:700;color:var(--tx2);}
+.lc-box{background:transparent;padding:5px 10px;text-align:center;}
+.lc-box-lbl{font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;}
 .lc-box-val{font-size:16px;font-weight:700;color:#fff;line-height:1.1;}
-.lc-divider{height:1px;background:#252530;margin:10px 0 8px;}
-.lc-mix{background:#252530;border-radius:10px;overflow:hidden;margin-top:10px;}
-.lc-mix-hdr{width:100%;padding:8px 12px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
-.lc-mix-body{padding:0 12px 12px;}
+.lc-divider{height:0;margin:10px 0 0;}
+.lc-mix{background:transparent;margin-top:10px;}
+.lc-mix-hdr{width:100%;padding:8px 0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+.lc-mix-body{padding:0 0 12px;}
 .lc-mix-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
 .lc-mix-lbl{font-size:12px;font-family:'Golos Text',sans-serif;width:40px;flex-shrink:0;}
 .lc-mix-slider{flex:1;accent-color:#D4793F;height:3px;cursor:pointer;}
 .lc-mix-val{font-size:11px;color:#b0aaa4;font-family:'Golos Text',sans-serif;width:36px;text-align:right;}
-.lc-beat{width:18px;height:18px;border-radius:4px;background:#1a1a22;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#444;transition:background .05s;}
+.lc-beat{width:18px;height:18px;border-radius:8px;background:#1a1a22;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#444;transition:background .05s;}
 .lc-beat.active1{background:#c0392b;color:#fff;}
 .lc-beat.active{background:#D4793F;color:#fff;}
 .lc-tabs{display:flex;gap:5px;}
-.lc-tab{flex:1;padding:7px 2px;background:transparent;border:1.5px solid #D4793F;border-radius:8px;color:#D4793F;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;}
-.lc-player{display:flex;align-items:center;gap:10px;padding-top:10px;}
+.lc-tab{flex:1;padding:7px 2px;background:transparent;border:1.5px solid var(--br);border-radius:8px;color:var(--mu);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;}
+.lc-player{display:none;}
+.lc-mix{display:none;}
+.lp-prog-bar{position:relative;height:2px;background:#5a5a62;border-radius:8px;margin-bottom:10px;cursor:pointer;}
+.lp-prog-bar-fill{position:absolute;left:0;top:0;height:100%;background:transparent;border-radius:8px;}
+.lp-prog-bar-dot{position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:13px;height:13px;border-radius:50%;background:#fff;}
+.lp-tab-btn{flex:1;padding:9px 0;background:transparent;border:none;color:var(--mu2);font-size:10px;letter-spacing:1px;text-transform:uppercase;text-align:center;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;}
+.lp-tab-btn.active{color:#fff;}
+.lp-mix-slider{width:100%;height:2px;-webkit-appearance:none;background:#3a3a40;border-radius:8px;outline:none;}
+.lp-mix-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;cursor:pointer;}
+.lc-tabs{display:none;}
 .lc-play{width:32px;height:32px;background:none;border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0;}
-.lc-prog{flex:1;height:3px;background:#2a2a36;border-radius:2px;cursor:pointer;position:relative;}
-.lc-prog-fill{position:absolute;left:0;top:0;height:100%;background:#D4793F;border-radius:2px;}
+.lc-prog{flex:1;height:3px;background:var(--br);border-radius:8px;cursor:pointer;position:relative;}
+.lc-prog-fill{position:absolute;left:0;top:0;height:100%;background:#D4793F;border-radius:8px;}
 .lc-prog-dot{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#D4793F;}
 .lc-time{font-size:10px;color:#555;font-family:'Inter',sans-serif;flex-shrink:0;min-width:32px;text-align:right;}
 .lc-notrack{font-size:10px;color:#555;font-family:'Inter',sans-serif;letter-spacing:1px;padding:6px 0;}
@@ -4001,18 +4858,172 @@ var liveCardStates={}; // глобальный реестр cardState всех �
 var liveActiveSongIdx=-1;
 
 function setLiveSong(idx){
-  liveActiveSongIdx=idx;
   var cards=document.querySelectorAll('.lc');
+  var prevCard=cards[liveActiveSongIdx];
+  if(prevCard&&liveActiveSongIdx!==idx){
+    var prevKey=prevCard.dataset.songId;
+    var prevCs=liveCardStates[prevKey];
+    if(prevCs&&prevCs.stop)prevCs.stop();
+  }
+  liveActiveSongIdx=idx;
   cards.forEach(function(c,i){
     if(i===idx){
-      c.style.border='1.5px solid #D4793F';
-      c.style.boxShadow='0 0 0 1px rgba(212,121,63,0.2)';
+      c.classList.add('active');
       c.scrollIntoView({behavior:'smooth',block:'nearest'});
     } else {
-      c.style.border='1px solid #252530';
-      c.style.boxShadow='none';
+      c.classList.remove('active');
     }
   });
+  [idx-1,idx,idx+1].forEach(function(i){
+    var c=cards[i];
+    if(!c)return;
+    var cs=liveCardStates[c.dataset.songId];
+    if(cs&&cs.cardState&&cs.cardState.ensureLoaded)cs.cardState.ensureLoaded();
+  });
+  showLivePlayerBarForCurrentSong();
+}
+
+function showLivePlayerBarForCurrentSong(){
+  var bar=document.getElementById('livePlayerBar');
+  var cards=document.querySelectorAll('.lc');
+  var card=cards[liveActiveSongIdx];
+  if(!bar||!card)return;
+  bar.style.display='block';
+  var uniqueKey=card.dataset.songId;
+  var songId=uniqueKey?uniqueKey.split('_')[0]:null;
+  var s=songId?findR(songId):null;
+  document.getElementById('livePlayerKey').textContent=(s&&s.key)||'—';
+  document.getElementById('livePlayerBpm').textContent=(s&&s.tempo)||'—';
+}
+
+function openLiveMyMixSheet(){
+  document.getElementById('liveMyMixSheetOverlay').style.display='block';
+  document.getElementById('liveMyMixSheet').style.display='block';
+}
+function closeLiveMyMixSheet(){
+  document.getElementById('liveMyMixSheetOverlay').style.display='none';
+  document.getElementById('liveMyMixSheet').style.display='none';
+}
+function updateLiveMixTrack(val){
+  document.getElementById('liveMixTrackVal').textContent=val+'%';
+}
+function updateLiveMixClick(val){
+  document.getElementById('liveMixClickVal').textContent=val+'%';
+}
+
+function toggleLivePlayerPlay(){
+  var cards=document.querySelectorAll('.lc');
+  var card=cards[liveActiveSongIdx];
+  if(!card)return;
+  var uniqueKey=card.dataset.songId;
+  var cs=liveCardStates[uniqueKey];
+  if(!cs||!cs.cardState||!cs.cardState.togglePlay)return;
+  var ok=cs.cardState.togglePlay();
+  if(!ok){
+    // Трек ещё не декодирован — покажем индикацию и попробуем снова через короткую паузу
+    var attempts=0;
+    var retry=setInterval(function(){
+      attempts++;
+      if(cs.cardState.togglePlay()){clearInterval(retry);}
+      else if(attempts>=20){clearInterval(retry);}
+    },150);
+  }
+}
+
+function seekLivePlayer(e){
+  var cards=document.querySelectorAll('.lc');
+  var card=cards[liveActiveSongIdx];
+  if(!card)return;
+  var uniqueKey=card.dataset.songId;
+  var cs=liveCardStates[uniqueKey];
+  if(!cs||!cs.cardState||!cs.cardState.seekTo)return;
+  var visibleBar=document.getElementById('livePlayerProg');
+  var vRect=visibleBar.getBoundingClientRect();
+  var pct=Math.max(0,Math.min(1,(e.clientX-vRect.left)/vRect.width));
+  var ok=cs.cardState.seekTo(pct);
+  if(!ok){
+    var attempts=0;
+    var retry=setInterval(function(){
+      attempts++;
+      if(cs.cardState.seekTo(pct)){clearInterval(retry);}
+      else if(attempts>=20){clearInterval(retry);}
+    },150);
+  }
+}
+
+var _livePlayerSyncInterval=null;
+function startLivePlayerSync(){
+  if(_livePlayerSyncInterval) return;
+  _livePlayerSyncInterval=setInterval(function(){
+    var cards=document.querySelectorAll('.lc');
+    var card=cards[liveActiveSongIdx];
+    if(!card){
+      var bar=document.getElementById('livePlayerBar');
+      if(bar) bar.style.display='none';
+      return;
+    }
+    var uniqueKey=card.dataset.songId;
+    var cs=liveCardStates[uniqueKey];
+    var hiddenFill=card.querySelector('.lc-prog-fill');
+    var hiddenTime=card.querySelector('.lc-time');
+    var playBtn=document.getElementById('livePlayerPlayBtn');
+    var progFill=document.getElementById('livePlayerProgFill');
+    var timeElapsed=document.getElementById('livePlayerTimeElapsed');
+    var timeLeft=document.getElementById('livePlayerTimeLeft');
+    var isPlaying=cs&&cs.cardState&&cs.cardState.tPlaying;
+    if(playBtn){
+      playBtn.innerHTML=isPlaying
+        ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="#0a0a0d"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>'
+        :'<svg width="20" height="20" viewBox="0 0 24 24" fill="#0a0a0d"><polygon points="6,4 20,12 6,20"/></svg>';
+    }
+    if(hiddenFill&&progFill){
+      progFill.style.width=hiddenFill.style.width||'0%';
+    }
+    if(hiddenTime&&timeElapsed){
+      timeElapsed.textContent=hiddenTime.textContent||'0:00';
+    }
+    // Оставшееся время, если знаем длительность трека
+    if(cs&&cs.cardState&&typeof cs.cardState.liveElapsed==='number'){
+      var dur=cs.cardState.trackDuration;
+      if(dur&&timeLeft){
+        var left=Math.max(0,dur-cs.cardState.liveElapsed);
+        var lv=Math.floor(left);
+        timeLeft.textContent='-'+Math.floor(lv/60)+':'+(lv%60<10?'0':'')+lv%60;
+      }
+    }
+    var dbgEl=document.getElementById('liveDebugLine');
+    if(dbgEl){
+      if(window._jsErr){
+        dbgEl.textContent='JS: '+window._jsErr;
+        dbgEl.style.display='block';
+      } else if(cs&&cs.cardState){
+        var d=cs.cardState.dbg||{};
+        var hasProblem=d.createErr||d.audioErr||d.playErr||(d.hasTrackData===false);
+        if(hasProblem){
+          var ctxState=cs.cardState.actx?cs.cardState.actx.state:'no-ctx';
+          dbgEl.textContent='data:'+(d.hasTrackData?'yes('+d.trackDataLen+')':'NO')
+            +' audio:'+(d.created?'ok':(d.createErr?'ERR:'+d.createErr:'—'))
+            +' dur:'+(d.duration?d.duration.toFixed(1):'—')
+            +' aErr:'+(d.audioErr||'-')
+            +' playErr:'+(d.playErr||'-')
+            +' ctx:'+ctxState;
+          dbgEl.style.display='block';
+        } else {
+          dbgEl.style.display='none';
+        }
+      } else {
+        dbgEl.style.display='none';
+      }
+    }
+  },200);
+}
+
+function setLivePlayerTab(tabId){
+  ['lyrics','form','chords','notes'].forEach(function(t){
+    var btn=document.getElementById('lpTabBtn_'+t);
+    if(btn) btn.classList.toggle('active',t===tabId);
+  });
+  // Полноценное переключение содержимого появится на Этапе 4
 }
 
 function liveNextSong(){
@@ -4033,9 +5044,7 @@ function toggleLiveMode(){
   var ov=document.getElementById('liveOverlay');
   if(liveActive){
     if(btn){
-      btn.style.background='#c0392b';
-      btn.style.borderColor='#c0392b';
-      btn.querySelectorAll('span').forEach(function(s){s.style.color='#fff';});
+      btn.classList.add('active-live');
     }
     // Останавливаем обычный плеер карточки
     if(audioObj&&!audioObj.paused){
@@ -4046,14 +5055,14 @@ function toggleLiveMode(){
     ov.classList.add('open');
     rLiveCards();
     history.pushState({live:true},'','');
+    startLivePlayerSync();
   } else {
     if(btn){
-      btn.style.background='transparent';
-      btn.style.borderColor='rgba(255,255,255,0.8)';
-      btn.querySelectorAll('span').forEach(function(s){s.style.color='rgba(255,255,255,0.9)';});
+      btn.classList.remove('active-live');
     }
     ov.classList.remove('open');
     document.getElementById('liveFullTab').classList.remove('open');
+    if(_livePlayerSyncInterval){clearInterval(_livePlayerSyncInterval);_livePlayerSyncInterval=null;}
     // Останавливаем все треки и закрываем AudioContext
     Object.values(liveCardStates).forEach(function(cs){
       if(cs&&cs.stop) cs.stop();
@@ -4072,32 +5081,33 @@ function toggleLiveMode(){
 
 function rLiveCards(){
   if(typeof D==='undefined')return;
-  var con=D.concerts.find(function(c){return c.id===D.active;})||D.concerts[0];
+  var con=D.concerts.find(function(c){return c.id===D.active||String(c.id)===String(D.active);})||D.concerts[0];
   var titleEl=document.getElementById('liveConTitle');
   if(titleEl&&con)titleEl.textContent=con.name||'';
   var container=document.getElementById('liveCards');
   if(!container)return;
   container.innerHTML='';
-  var secs=D.sections[D.active]||[];
+  var secs=D.sections[D.active]||D.sections[String(D.active)]||D.sections[+D.active]||[];
   var songs=[];
   secs.forEach(function(sec){
     (sec.songs||[]).forEach(function(sid){var s=findR(sid);if(s)songs.push(s);});
   });
-  // Загружаем треки из IDB для всех песен перед рендером
+  // Рендерим список сразу, не дожидаясь загрузки треков из IDB —
+  // иначе экран чернеет на десятки секунд при большом сетлисте.
+  _renderLiveCards(songs);
+  setTimeout(function(){setLiveSong(0);},50);
   var pending=songs.filter(function(s){return !s.trackData;});
+  if(pending.length===0)return;
   var loaded=0;
-  if(pending.length===0){
-    _renderLiveCards(songs);
-    setTimeout(function(){setLiveSong(0);},50);
-    return;
-  }
   pending.forEach(function(s){
     loadTrackIDB(s.id,function(rec){
       if(rec){s.trackData=rec.data;s.trackName=rec.name;}
       loaded++;
-      if(loaded===pending.length){
+      if(loaded===pending.length && liveActive){
+        // Догрузили остальные треки — перерисовываем, чтобы у них появился плеер
+        var curIdx=liveActiveSongIdx;
         _renderLiveCards(songs);
-        setTimeout(function(){setLiveSong(0);},50);
+        setTimeout(function(){setLiveSong(Math.max(0,curIdx));},50);
       }
     });
   });
@@ -4107,10 +5117,19 @@ function _renderLiveCards(songs){
   var container=document.getElementById('liveCards');
   if(!container)return;
   container.innerHTML='';
+  if(!songs||songs.length===0){
+    container.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--mu);font-family:\'Golos Text\',sans-serif;font-size:14px;">'+(LANG==='en'?'No songs in this setlist yet':'В этом сетлисте пока нет песен')+'</div>';
+    return;
+  }
   var svgPlay='<svg width="16" height="16" viewBox="0 0 18 18" fill="none"><polygon points="3,2 16,9 3,16" fill="#D4793F"/></svg>';
   var svgStop='<svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" fill="#D4793F"/></svg>';
   songs.forEach(function(s,i){
-    var card=document.createElement('div');card.className='lc';
+    var uniqueKey=s.id+'_'+i;
+    var card=document.createElement('div');card.className='lc';card.dataset.songId=uniqueKey;
+    if(i===0){
+      liveActiveSongIdx=0;
+      card.classList.add('active');
+    }
     (function(idx){
       card.addEventListener('click',function(e){
         if(e.target.closest('button')||e.target.closest('.lc-prog'))return;
@@ -4118,12 +5137,12 @@ function _renderLiveCards(songs){
       });
     })(i);
     var row=document.createElement('div');row.className='lc-row';
-    var num=document.createElement('div');num.className='lc-num';num.textContent=i+1;
+    var num=document.createElement('div');num.className='lc-num';
+    num.innerHTML='<div class="lc-num-badge">'+(i+1)+'</div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/></svg>';
     var info=document.createElement('div');info.className='lc-info';
     info.innerHTML='<div class="lc-title">'+esc(s.title||'')+'</div><div class="lc-artist">'+esc(s.artist||'')+'</div>';
     var meta=document.createElement('div');meta.className='lc-meta';
-    meta.innerHTML='<div class="lc-box"><div class="lc-box-lbl">key</div><div class="lc-box-val">'+esc(s.key||'—')+'</div></div>'
-      +'<div class="lc-box"><div class="lc-box-lbl">bpm</div><div class="lc-box-val">'+(s.tempo||'—')+'</div></div>';
+    meta.innerHTML='<div class="lc-key-simple">'+esc(s.key||'—')+'</div>';
     row.appendChild(num);row.appendChild(info);row.appendChild(meta);
     card.appendChild(row);
     if(s.trackName&&s.trackData){
@@ -4136,33 +5155,63 @@ function _renderLiveCards(songs){
       var tm=document.createElement('div');tm.className='lc-time';tm.textContent='0:00';
       var cardState={tPlaying:false,actx:null,trackGain:null,gainNode:null,clickTimer:null};
       (function(sid,playBtn,progBar,fill,timeEl,songObj){
-        var trackBuf=null;
-        var srcNode=null;
-        var tOffset=0;
-        var tStartCtx=0;
+        var audioEl=null;
         var rafId=null;
+        var loadStarted=false;
 
         function getCtx(){
-          if(!cardState.actx) cardState.actx=new(window.AudioContext||window.webkitAudioContext)();
+          if(!cardState.actx||cardState.actx.state==='closed') cardState.actx=new(window.AudioContext||window.webkitAudioContext)();
+          if(cardState.actx.state==='suspended') cardState.actx.resume();
           return cardState.actx;
         }
 
-        // Загрузка трека
-        (function(){
-          try{
-            var b64=s.trackData.split(',')[1];
-            var bin=atob(b64);
-            var ab=new ArrayBuffer(bin.length);
-            var ua=new Uint8Array(ab);
-            for(var i=0;i<bin.length;i++) ua[i]=bin.charCodeAt(i);
-            getCtx().decodeAudioData(ab).then(function(buf){trackBuf=buf;});
-          }catch(e){}
-        })();
+        // Воспроизведение бэк-трека через <audio> вместо decodeAudioData в буфер:
+        // данные трека уже лежат в памяти (data:-URL), поэтому play()/currentTime
+        // работают мгновенно — без многосекундного декодирования всего файла в PCM,
+        // которое и было причиной задержки Play и "зависшей" перемотки.
+        function getAudioEl(){
+          cardState.dbg=cardState.dbg||{};
+          cardState.dbg.hasTrackData=!!s.trackData;
+          cardState.dbg.trackDataLen=s.trackData?s.trackData.length:0;
+          if(!audioEl){
+            try{
+              audioEl=new Audio();
+              audioEl.preload='auto';
+              audioEl.src=s.trackData;
+              audioEl.addEventListener('loadedmetadata',function(){cardState.trackDuration=audioEl.duration;cardState.dbg.duration=audioEl.duration;cardState.dbg.canplay=true;});
+              audioEl.addEventListener('error',function(){
+                var err=audioEl.error;
+                cardState.dbg.audioErr=err?('code'+err.code):'unknown';
+              });
+              audioEl.addEventListener('ended',function(){
+                if(cardState.tPlaying){stopAll();fill.style.width='0%';timeEl.textContent='0:00';}
+              });
+              audioEl.volume=(typeof trackVol==='number'&&isFinite(trackVol))?trackVol:0.8;
+              cardState.dbg.created=true;
+            }catch(e){
+              cardState.dbg.createErr=String(e&&e.message||e);
+            }
+          }
+          return audioEl;
+        }
+        function loadTrack(){
+          if(loadStarted)return;
+          loadStarted=true;
+          getAudioEl();
+        }
+        cardState.ensureLoaded=loadTrack;
+        cardState._setVol=function(v){if(audioEl&&typeof v==='number'&&isFinite(v))audioEl.volume=v;};
+
+        function durationKnown(){
+          return audioEl&&!isNaN(audioEl.duration)&&audioEl.duration>0;
+        }
 
         function updateUI(){
-          if(!cardState.tPlaying||!trackBuf)return;
-          var el=getCtx().currentTime-tStartCtx+tOffset;
-          fill.style.width=Math.min(100,(el/trackBuf.duration*100))+'%';
+          if(!cardState.tPlaying||!audioEl)return;
+          var el=audioEl.currentTime;
+          cardState.liveElapsed=el;
+          var dur=cardState.trackDuration||audioEl.duration;
+          if(dur) fill.style.width=Math.min(100,(el/dur*100))+'%';
           var v=Math.floor(el);
           timeEl.textContent=Math.floor(v/60)+':'+(v%60<10?'0':'')+v%60;
           rafId=requestAnimationFrame(updateUI);
@@ -4189,111 +5238,144 @@ function _renderLiveCards(songs){
         }
 
         function stopAll(){
-          if(srcNode){try{srcNode.stop();}catch(e){}srcNode=null;}
+          if(audioEl){try{audioEl.pause();}catch(e){}}
           clearInterval(cardState.clickTimer);cardState.clickTimer=null;
           cancelAnimationFrame(rafId);
           cardState.tPlaying=false;
           playBtn.innerHTML=svgPlay;
           beatDots.forEach(function(d){d.className='lc-beat';});
         }
-        liveCardStates[sid]={cardState:cardState,stop:stopAll,resetBuf:function(){trackBuf=null;tOffset=0;}};
+        liveCardStates[sid]={cardState:cardState,stop:stopAll,resetBuf:function(){
+          if(audioEl){try{audioEl.pause();}catch(e){}}
+          audioEl=null;loadStarted=false;
+        }};
+
+        // Метроном-клик во время воспроизведения, синхронизированный по audioEl.currentTime
+        function startClickLoop(bInt){
+          var cnt=Math.floor(audioEl.currentTime/bInt);
+          cardState.clickTimer=setInterval(function(){
+            if(!audioEl||audioEl.paused)return;
+            var beatPhase=audioEl.currentTime/bInt;
+            var nextCnt=Math.floor(beatPhase)+1;
+            if(nextCnt>cnt){
+              cnt=nextCnt;
+              var ctx2=getCtx();
+              beep(ctx2,ctx2.currentTime,cnt%4===1,clickVolLocal);
+              showBeat(((cnt-1)%4)+1,0);
+            }
+          },20);
+        }
 
         function startEverything(offset){
-          if(!trackBuf)return;
-          var ctx=getCtx();
-          var now=ctx.currentTime;
+          var audio=getAudioEl();
+          if(!durationKnown()&&offset>0){
+            // Длительность ещё не известна — подождём метаданные и попробуем снова
+            audio.addEventListener('loadedmetadata',function once(){
+              audio.removeEventListener('loadedmetadata',once);
+              startEverything(offset);
+            });
+            return;
+          }
+          audio.currentTime=offset||0;
           var bpm=songObj.tempo||120;
           var bInt=60/bpm;
 
-          // Время старта трека
-          var trackStart;
+          function beginPlayback(){
+            var p=audio.play();
+            if(p&&p.catch)p.catch(function(err){cardState.dbg.playErr=String(err&&err.message||err);});
+            cardState.tPlaying=true;
+            playBtn.innerHTML=svgStop;
+            rafId=requestAnimationFrame(updateUI);
+            if(clickOn) startClickLoop(bInt);
+          }
+
           if(clickOn && offset===0){
-            // 4 удара предтакта, потом трек
-            trackStart=now+0.1+4*bInt;
-            // Генерируем 4 удара предтакта
+            // 4 удара предтакта на синтетическом клике, затем старт трека
+            var ctx=getCtx();
+            var now=ctx.currentTime;
             for(var i=0;i<4;i++){
-              var bt=now+0.1+i*bInt;
+              var bt=now+0.05+i*bInt;
               beep(ctx, bt, i===0, clickVolLocal);
               showBeat(i+1, (bt-now)*1000);
             }
+            setTimeout(beginPlayback, (0.05+4*bInt)*1000);
           } else {
-            trackStart=now+0.1;
-          }
-
-          // Стартуем трек
-          srcNode=ctx.createBufferSource();
-          srcNode.buffer=trackBuf;
-          var gn=ctx.createGain();gn.gain.value=trackVol;
-          srcNode.connect(gn);gn.connect(ctx.destination);
-          cardState.trackGain=gn;
-          srcNode.start(trackStart, offset);
-          tStartCtx=trackStart-offset;
-          tOffset=offset;
-          cardState.tPlaying=true;
-          cardState.tStartCtx=tStartCtx;
-          cardState.tOffset=tOffset;
-          playBtn.innerHTML=svgStop;
-          srcNode.onended=function(){
-            if(cardState.tPlaying){stopAll();fill.style.width='0%';timeEl.textContent='0:00';tOffset=0;}
-          };
-          rafId=requestAnimationFrame(updateUI);
-
-          // Стартуем клик вместе с треком через тот же ctx
-          if(clickOn){
-            var bElapsed=offset/bInt;
-            var firstBeat=trackStart+(Math.ceil(bElapsed)-bElapsed)*bInt;
-            var cnt=Math.ceil(bElapsed);
-            cardState.clickTimer=setInterval(function(){
-              var n=ctx.currentTime;
-              while(firstBeat<n+0.1){
-                beep(ctx, firstBeat, cnt%4===0, clickVolLocal);
-                var bn=(cnt%4)+1;
-                (function(b,t){showBeat(b,Math.max(0,(t-n)*1000));})(bn,firstBeat);
-                cnt++;firstBeat+=bInt;
-              }
-            },25);
+            beginPlayback();
           }
         }
 
         playBtn.addEventListener('click',function(e){
           if(e)e.stopPropagation();
-          if(!trackBuf)return;
+          loadTrack();
           if(cardState.tPlaying){
-            tOffset=getCtx().currentTime-tStartCtx+tOffset;
             stopAll();
           } else {
-            startEverything(tOffset);
+            startEverything(audioEl.currentTime||0);
           }
         });
+        cardState.togglePlay=function(){
+          loadTrack();
+          if(cardState.tPlaying){
+            stopAll();
+          } else {
+            startEverything(audioEl.currentTime||0);
+          }
+          return true;
+        };
 
-        progBar.addEventListener('click',function(e){
-          e.stopPropagation();
-          if(!trackBuf)return;
-          var r=progBar.getBoundingClientRect();
-          var newOffset=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*trackBuf.duration;
+        function doSeek(clientX,rect){
+          loadTrack();
+          var audio=getAudioEl();
+          var pct=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
+          var dur=cardState.trackDuration||audio.duration;
+          if(!dur){
+            audio.addEventListener('loadedmetadata',function once(){
+              audio.removeEventListener('loadedmetadata',once);
+              doSeek(clientX,rect);
+            });
+            return;
+          }
+          var newOffset=pct*dur;
           var wasPlaying=cardState.tPlaying;
           stopAll();
-          tOffset=newOffset;
-          fill.style.width=(newOffset/trackBuf.duration*100)+'%';
+          audio.currentTime=newOffset;
+          fill.style.width=(newOffset/dur*100)+'%';
           var vv=Math.floor(newOffset);
           timeEl.textContent=Math.floor(vv/60)+':'+(vv%60<10?'0':'')+vv%60;
           if(wasPlaying) startEverything(newOffset);
+        }
+
+        cardState.seekTo=function(pct){
+          loadTrack();
+          var audio=getAudioEl();
+          var dur=cardState.trackDuration||audio.duration;
+          if(!dur)return false; // метаданные ещё не пришли — крайне короткое окно, retry в вызывающем коде это покроет
+          var newOffset=Math.max(0,Math.min(1,pct))*dur;
+          var wasPlaying=cardState.tPlaying;
+          stopAll();
+          audio.currentTime=newOffset;
+          fill.style.width=(newOffset/dur*100)+'%';
+          var vv=Math.floor(newOffset);
+          timeEl.textContent=Math.floor(vv/60)+':'+(vv%60<10?'0':'')+vv%60;
+          if(wasPlaying) startEverything(newOffset);
+          return true;
+        };
+        cardState._startClickNow=function(){
+          if(cardState.tPlaying&&audioEl){
+            var bpm=songObj.tempo||120;
+            startClickLoop(60/bpm);
+          }
+        };
+        progBar.addEventListener('click',function(e){
+          e.stopPropagation();
+          doSeek(e.clientX, progBar.getBoundingClientRect());
         });
         progBar.addEventListener('touchend',function(e){
           e.preventDefault();e.stopPropagation();
-          if(!trackBuf)return;
-          var r=progBar.getBoundingClientRect();
-          var newOffset=Math.max(0,Math.min(1,(e.changedTouches[0].clientX-r.left)/r.width))*trackBuf.duration;
-          var wasPlaying=cardState.tPlaying;
-          stopAll();
-          tOffset=newOffset;
-          fill.style.width=(newOffset/trackBuf.duration*100)+'%';
-          var vv=Math.floor(newOffset);
-          timeEl.textContent=Math.floor(vv/60)+':'+(vv%60<10?'0':'')+vv%60;
-          if(wasPlaying) startEverything(newOffset);
+          doSeek(e.changedTouches[0].clientX, progBar.getBoundingClientRect());
         },{passive:false});
 
-      })(s.id,pb,pg,pf,tm,s);
+      })(uniqueKey,pb,pg,pf,tm,s);
       pw.appendChild(pb);pw.appendChild(pg);pw.appendChild(tm);
       card.appendChild(pw);
     } else {
@@ -4325,7 +5407,7 @@ function _renderLiveCards(songs){
       +'<span style="font-size:10px;color:#D4793F;font-family:\'Inter\',sans-serif;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">'+(LANG==='en'?'My Mix':'Мой микс')+'</span>'
       +'<span id="mixDot_'+s.id+'" style="display:none;width:6px;height:6px;border-radius:50%;background:#c0392b;box-shadow:0 0 6px #c0392b;"></span>'
       +'</div>'
-      +'<svg id="mixArrow_'+s.id+'" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg>';
+      +'<svg id="mixArrow_'+s.id+'" width="16" height="16" viewBox="0 0 12 12" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" style="transition:transform .2s;"><polyline points="2,4 6,8 10,4"/></svg>';
 
     var mixBody=document.createElement('div');mixBody.className='lc-mix-body';mixBody.style.display='none';
 
@@ -4348,7 +5430,7 @@ function _renderLiveCards(songs){
 
     // Тогл
     var tog=document.createElement('button');
-    tog.style.cssText='width:36px;height:20px;border-radius:10px;background:#1a1a22;border:1px solid #3a3a46;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;';
+    tog.style.cssText='width:36px;height:20px;border-radius:8px;background:#1a1a22;border:1px solid #3a3a46;cursor:pointer;position:relative;transition:all .2s;flex-shrink:0;';
     tog.innerHTML='<div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:1px;left:1px;transition:left .2s;"></div>';
 
     (function(songObj, togBtn, bDots){
@@ -4370,28 +5452,7 @@ function _renderLiveCards(songs){
           // Восстанавливаем громкость клика
           if(cardState.clickMasterGain) cardState.clickMasterGain.gain.setTargetAtTime(clickVolLocal, cardState.actx.currentTime, 0.01);
           if(cardState.tPlaying && !cardState.clickTimer){
-            var ctx2=cardState.actx;
-            if(ctx2){
-              var elapsed2=ctx2.currentTime-cardState.tStartCtx+cardState.tOffset;
-              var bpm2=songObj.tempo||120;var bInt2=60/bpm2;
-              var bElapsed2=elapsed2/bInt2;
-              var firstBeat2=ctx2.currentTime+0.05+(Math.ceil(bElapsed2)-bElapsed2)*bInt2;
-              var cnt2=Math.ceil(bElapsed2);
-              cardState.clickTimer=setInterval(function(){
-                var n=ctx2.currentTime;
-                while(firstBeat2<n+0.1){
-                  var osc=ctx2.createOscillator();var g=ctx2.createGain();
-                  osc.connect(g);g.connect(ctx2.destination);
-                  osc.frequency.value=cnt2%4===0?1200:900;
-                  g.gain.setValueAtTime(clickVolLocal*0.4,firstBeat2);
-                  g.gain.exponentialRampToValueAtTime(0.001,firstBeat2+0.06);
-                  osc.start(firstBeat2);osc.stop(firstBeat2+0.08);
-                  var bn2=(cnt2%4)+1;
-                  (function(b,t){setTimeout(function(){bDots.forEach(function(d,i){d.className='lc-beat'+(i+1===b?(b===1?' active1':' active'):'');});},Math.max(0,(t-n)*1000));})(bn2,firstBeat2);
-                  cnt2++;firstBeat2+=bInt2;
-                }
-              },25);
-            }
+            if(cardState._startClickNow) cardState._startClickNow();
           }
         } else {
           togBtn.style.background='#1a1a22';togBtn.style.borderColor='#3a3a46';
@@ -4422,7 +5483,7 @@ function _renderLiveCards(songs){
       trackMuted=trackVol===0;
       var ic=document.getElementById('trackMuteIcon_'+s.id);if(ic)ic.innerHTML=volIconSvg(trackMuted);
       tRow.querySelector('.lc-mix-val').textContent=Math.round(trackVol*100)+'%';
-      if(cardState.trackGain) cardState.trackGain.gain.value=trackVol;
+      if(cardState._setVol) cardState._setVol(trackVol);
     });
     tRow.querySelector('.lc-mix-icon').addEventListener('click',function(){
       var slider=tRow.querySelector('input');
@@ -4437,7 +5498,7 @@ function _renderLiveCards(songs){
       slider.value=trackVol;
       tRow.querySelector('.lc-mix-val').textContent=Math.round(trackVol*100)+'%';
       this.innerHTML=volIconSvg(trackMuted);
-      if(cardState.trackGain) cardState.trackGain.gain.value=trackVol;
+      if(cardState._setVol) cardState._setVol(trackVol);
     });
     mixBody.appendChild(tRow);
 
@@ -4477,8 +5538,8 @@ function _renderLiveCards(songs){
       mixBody.style.display=mixOpen?'block':'none';
       var arrow=document.getElementById('mixArrow_'+s.id);
       if(arrow) arrow.innerHTML=mixOpen
-        ?'<polyline points="2,8 6,4 10,8" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>'
-        :'<polyline points="2,4 6,8 10,4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>';
+        ?'<polyline points="2,8 6,4 10,8" stroke="#aaa" stroke-width="2" stroke-linecap="round"/>'
+        :'<polyline points="2,4 6,8 10,4" stroke="#aaa" stroke-width="2" stroke-linecap="round"/>';
     });
 
     mix.appendChild(mixHdr);mix.appendChild(mixBody);
@@ -4489,20 +5550,40 @@ function _renderLiveCards(songs){
     [{id:'form',label:LANG==='en'?'FORM':'ФОРМА'},{id:'lyrics',label:LANG==='en'?'LYRICS':'ТЕКСТ'},{id:'chords',label:LANG==='en'?'CHORDS':'АККОРДЫ'},{id:'notes',label:LANG==='en'?'NOTES':'ЗАМЕТКИ'}]
     .forEach(function(t){
       var btn=document.createElement('button');btn.className='lc-tab';btn.textContent=t.label;
-      (function(song,tabId){btn.addEventListener('click',function(){openLiveFullTab(song,tabId);});})(s,t.id);
+      (function(song,tabId,uk){btn.addEventListener('click',function(){openLiveFullTab(song,tabId,uk);});})(s,t.id,uniqueKey);
       tabs.appendChild(btn);
     });
     card.appendChild(tabs);
     container.appendChild(card);
+    if(i===0){
+      var lcs0=liveCardStates[uniqueKey];
+      if(lcs0&&lcs0.cardState.ensureLoaded)lcs0.cardState.ensureLoaded();
+    }
   });
 } // end _renderLiveCards
 
-function openLiveFullTab(s,tabId){
+function openLiveFullTab(s,tabId,uniqueKey){
+  lftCurrentSongId=uniqueKey!==undefined&&uniqueKey!==null?uniqueKey:s.id;
   var labels={form:LANG==='en'?'FORM':'ФОРМА',lyrics:LANG==='en'?'LYRICS':'ТЕКСТ',chords:LANG==='en'?'CHORDS':'АККОРДЫ',notes:LANG==='en'?'NOTES':'ЗАМЕТКИ'};
   document.getElementById('lftTitle').textContent=s.title||'';
   document.getElementById('lftTabLabel').textContent=labels[tabId]||tabId;
   document.getElementById('lftKey').textContent=s.key||'—';
   document.getElementById('lftBpm').textContent=s.tempo||'—';
+  var scrollBtnEl=document.getElementById('lftScrollBtn');
+  var speedMinusEl=document.getElementById('lftSpeedMinusBtn');
+  var speedPlusEl=document.getElementById('lftSpeedPlusBtn');
+  var speedLblEl=document.getElementById('lftSpeedLbl');
+  var fontLblEl=document.getElementById('lftFontLbl');
+  var fontMinusEl=document.getElementById('lftFontMinusBtn');
+  var fontPlusEl=document.getElementById('lftFontPlusBtn');
+  var showScrollControls=(tabId==='lyrics')?'':'none';
+  if(scrollBtnEl) scrollBtnEl.style.display=showScrollControls;
+  if(speedMinusEl) speedMinusEl.style.display=showScrollControls;
+  if(speedPlusEl) speedPlusEl.style.display=showScrollControls;
+  if(speedLblEl) speedLblEl.style.display=showScrollControls;
+  if(fontLblEl) fontLblEl.style.display=showScrollControls;
+  if(fontMinusEl) fontMinusEl.style.display=showScrollControls;
+  if(fontPlusEl) fontPlusEl.style.display=showScrollControls;
   // Сбрасываем nav и скролл перед построением
   var lftNavReset=document.getElementById('lftSecNav');
   if(lftNavReset){lftNavReset.style.display='none';lftNavReset.innerHTML='';}
@@ -4517,7 +5598,7 @@ function openLiveFullTab(s,tabId){
     } else {
       form.forEach(function(f){
         var d=document.createElement('div');
-        d.style.cssText='padding:12px 16px;background:#1e1e26;border-radius:10px;margin-bottom:8px;font-size:16px;color:#f0ece4;font-weight:500;border-left:3px solid #D4793F;display:flex;align-items:center;justify-content:space-between;';
+        d.style.cssText='padding:12px 16px;background:#1e1e26;border-radius:8px;margin-bottom:8px;font-size:16px;color:#f0ece4;font-weight:500;border-left:3px solid #D4793F;display:flex;align-items:center;justify-content:space-between;';
         var nameSpan=document.createElement('span');nameSpan.textContent=f.n||f.name||'';
         var barsSpan=document.createElement('span');barsSpan.style.cssText='font-size:11px;color:#555;font-family:Inter,sans-serif;';
         barsSpan.textContent=(f.b||f.bars||4)+' '+(LANG==='en'?'bars':'тактов');
@@ -4575,7 +5656,7 @@ function openLiveFullTab(s,tabId){
           var label=lftNameCounts[n]>1?n+' '+lftNameIdx[n]:n;
           var btn=document.createElement('button');
           btn.textContent=label;btn.dataset.secIdx=i;
-          btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:12px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
+          btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:8px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
           btn.addEventListener('click',function(){
             var idx=parseInt(btn.dataset.secIdx);
             var target=lftSecs[idx];
@@ -4594,7 +5675,7 @@ function openLiveFullTab(s,tabId){
       } else if(lftNav){ lftNav.style.display='none'; }
     }
   } else if(tabId==='chords'){
-    var blocks=s.chordBlocks||[];
+    var blocks=(s.chordBlocks||[]).filter(function(b){return b.chords&&b.chords.trim();});
     if(!blocks.length){
       content.innerHTML='<div class="empty-state">'+(LANG==='en'?'No chords':'Нет аккордов')+'</div>';
     } else {
@@ -4618,12 +5699,22 @@ function openLiveFullTab(s,tabId){
   content.scrollTop=0;
   requestGlobalWakeLock();
   // Автозапуск AUTO SCROLL если трек играет и есть таймкоды — как в режиме Сцена
-  setTimeout(function(){
+  // Повторяем проверку несколько раз, т.к. cardState может быть готов не сразу
+  if(_lftAutoScrollCheck) clearInterval(_lftAutoScrollCheck);
+  var autoScrollAttempts=0;
+  _lftAutoScrollCheck=setInterval(function(){
+    autoScrollAttempts++;
     var hasSections=content.querySelectorAll('.perf-section[data-time]').length>0;
-    var trackPlaying=Object.values(liveCardStates).some(function(cs){
-      return cs&&cs.cardState&&cs.cardState.tPlaying;
-    });
-    if(hasSections && trackPlaying && !lftScrollOn) toggleLftScroll();
+    var cs=liveCardStates[lftCurrentSongId];
+    var trackPlaying=cs&&cs.cardState&&cs.cardState.tPlaying&&typeof cs.cardState.liveElapsed==='number';
+    if(hasSections && trackPlaying && !lftScrollOn){
+      toggleLftScroll(lftCurrentSongId);
+      clearInterval(_lftAutoScrollCheck);
+      _lftAutoScrollCheck=null;
+    } else if(autoScrollAttempts>=10){
+      clearInterval(_lftAutoScrollCheck);
+      _lftAutoScrollCheck=null;
+    }
   },300);
   if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
   var backBtn=document.getElementById('lftBackBtn');
@@ -4635,6 +5726,8 @@ var lftFontSz=22;
 var lftScrollInterval=null;
 var lftScrollOn=false;
 var lftScrollSpeed=0.5;
+var lftCurrentSongId=null;
+var _lftAutoScrollCheck=null;
 
 function lftFontChange(d){
   lftFontSz=Math.max(14,Math.min(36,lftFontSz+d));
@@ -4652,7 +5745,7 @@ function lftScrollSpeedChange(d){
   }
 }
 
-function toggleLftScroll(){
+function toggleLftScroll(forcedSongId){
   lftScrollOn=!lftScrollOn;
   var btn=document.getElementById('lftScrollBtn');
   if(btn){btn.classList.toggle('on',lftScrollOn);btn.innerHTML=lftScrollOn?'■ STOP':'AUTO<br>SCROLL';}
@@ -4663,14 +5756,13 @@ function toggleLftScroll(){
     if(c) c.querySelectorAll('.perf-section[data-time]').forEach(function(el){
       sections.push({el:el,time:parseFloat(el.dataset.time)});
     });
-    // Источник аудио — liveCardStates
+    // Источник аудио — конкретная песня, если передан songId явно, иначе активная карточка списка
     var getAudioTime=function(){
-      var states=Object.values(liveCardStates);
-      for(var i=0;i<states.length;i++){
-        var cs=states[i];
-        if(cs&&cs.cardState&&cs.cardState.tPlaying&&cs.cardState.actx){
-          return cs.cardState.actx.currentTime-cs.cardState.tStartCtx+cs.cardState.tOffset;
-        }
+      var sid=forcedSongId!==undefined&&forcedSongId!==null?forcedSongId:lftCurrentSongId;
+      if(sid===undefined||sid===null) return null;
+      var cs=liveCardStates[sid];
+      if(cs&&cs.cardState&&typeof cs.cardState.liveElapsed==='number'&&cs.cardState.tPlaying){
+        return cs.cardState.liveElapsed;
       }
       return null;
     };
@@ -4718,6 +5810,7 @@ function toggleLftScroll(){
 function closeLiveFullTab(){
   document.getElementById('liveFullTab').classList.remove('open');
   clearInterval(lftScrollInterval);lftScrollOn=false;
+  if(_lftAutoScrollCheck){clearInterval(_lftAutoScrollCheck);_lftAutoScrollCheck=null;}
   var sb=document.getElementById('lftScrollBtn');if(sb)sb.classList.remove('on');
 }
 
