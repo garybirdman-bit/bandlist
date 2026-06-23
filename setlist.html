@@ -597,27 +597,8 @@ textarea.fi.tall{min-height:120px;}
 </style>
 </head>
 <body>
-<button id="pwaExitBtn" onclick="tryExitApp()" style="display:none;position:fixed;top:env(safe-area-inset-top,8px);right:10px;z-index:99998;width:34px;height:34px;border-radius:50%;background:rgba(20,20,24,0.85);border:1px solid #333;color:#aaa;font-size:16px;line-height:1;cursor:pointer;">✕</button>
-<script>
-// Кнопка выхода нужна только когда сайт открыт как установленное PWA-приложение
-// (там нет адресной строки браузера и обычного способа закрыть/выйти)
-if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true){
-  document.getElementById('pwaExitBtn').style.display='flex';
-  document.getElementById('pwaExitBtn').style.alignItems='center';
-  document.getElementById('pwaExitBtn').style.justifyContent='center';
-}
-function tryExitApp(){
-  // window.close() работает только если это единственная запись в истории —
-  // именно так обычно запускается PWA с домашнего экрана
-  window.close();
-  // Если close() не сработал (вкладка не была открыта скриптом) — подсказываем,
-  // как выйти штатным способом Android
-  setTimeout(function(){
-    alert('Чтобы закрыть приложение: смахни его из списка последних приложений (кнопка "Квадрат"/"Последние" внизу экрана).');
-  },300);
-}
-</script>
 <input type="file" id="trackFileInput" accept="audio/*" style="position:fixed;left:0;top:0;width:100%;height:100%;opacity:0;z-index:-1;pointer-events:none;">
+
 
 
 <!-- AUTH SCREEN -->
