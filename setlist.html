@@ -4751,7 +4751,7 @@ if('serviceWorker' in navigator){
   <div id="liveCards" style="flex:1;overflow-y:auto;padding:10px 12px 40px;"></div>
 
   <!-- Закреплённый плеер снизу -->
-  <div id="livePlayerBar" style="flex-shrink:0;background:var(--bg);padding:14px 18px calc(20px + env(safe-area-inset-bottom, 0px));display:none;">
+  <div id="livePlayerBar" style="flex-shrink:0;background:var(--bg);padding:26px 18px calc(20px + env(safe-area-inset-bottom, 0px));display:none;">
     <div id="livePlayerProg" class="lp-prog-bar" onclick="seekLivePlayer(event)">
       <div id="livePlayerProgFill" class="lp-prog-bar-fill"><div class="lp-prog-bar-dot"></div></div>
     </div>
@@ -5651,10 +5651,11 @@ function _renderLiveCards(songs){
     });
     card.appendChild(tabs);
     container.appendChild(card);
-    if(i===0){
-      var lcs0=liveCardStates[uniqueKey];
-      if(lcs0&&lcs0.cardState.ensureLoaded)lcs0.cardState.ensureLoaded();
-    }
+    // Декодируем трек сразу для КАЖДОЙ песни, как только её карточка создана —
+    // не дожидаясь, что песня станет активной. Так декодирование успевает
+    // закончиться в фоне заранее, и нажатие Play не ждёт ни секунды.
+    var lcsAll=liveCardStates[uniqueKey];
+    if(lcsAll&&lcsAll.cardState.ensureLoaded) lcsAll.cardState.ensureLoaded();
   });
 } // end _renderLiveCards
 
