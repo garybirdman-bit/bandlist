@@ -5026,7 +5026,6 @@ function _hideLiveMyMixSheet(){
   document.getElementById('liveMyMixSheet').style.display='none';
 }
 function closeLiveMyMixSheet(){
-  _hideLiveMyMixSheet();
   history.back();
 }
 
@@ -5284,9 +5283,14 @@ function _renderLiveCards(songs){
       var tm=document.createElement('div');tm.className='lc-time';tm.textContent='0:00';
       var cardState={tPlaying:false,actx:null,trackGain:null,gainNode:null,clickTimer:null};
       (function(sid,playBtn,progBar,fill,timeEl,songObj){
-        var audioEl=null;
+        var trackBuf=null;
+        var srcNode=null;
+        var curGain=null;
+        var tOffset=0;
+        var tStartCtx=0;
         var rafId=null;
         var loadStarted=false;
+        var loadCallbacks=[];
 
         function getCtx(){
           if(!cardState.actx||cardState.actx.state==='closed') cardState.actx=new(window.AudioContext||window.webkitAudioContext)();
@@ -5294,54 +5298,45 @@ function _renderLiveCards(songs){
           return cardState.actx;
         }
 
-        // Воспроизведение бэк-трека через <audio> вместо decodeAudioData в буфер:
-        // данные трека уже лежат в памяти (data:-URL), поэтому play()/currentTime
-        // работают мгновенно — без многосекундного декодирования всего файла в PCM,
-        // которое и было причиной задержки Play и "зависшей" перемотки.
-        function getAudioEl(){
+        // Декодируем трек в Web Audio буфер — это даёт сэмпл-точное планирование старта
+        // (synced с щелчками метронома на одном таймере). Лениво: только когда песня
+        // становится активной/соседней — декодирование всего сетлиста сразу грузит CPU.
+        function loadTrack(cb){
           cardState.dbg=cardState.dbg||{};
           cardState.dbg.hasTrackData=!!s.trackData;
           cardState.dbg.trackDataLen=s.trackData?s.trackData.length:0;
-          if(!audioEl){
-            try{
-              audioEl=new Audio();
-              audioEl.preload='auto';
-              audioEl.src=s.trackData;
-              audioEl.addEventListener('loadedmetadata',function(){cardState.trackDuration=audioEl.duration;cardState.dbg.duration=audioEl.duration;cardState.dbg.canplay=true;});
-              audioEl.addEventListener('error',function(){
-                var err=audioEl.error;
-                cardState.dbg.audioErr=err?('code'+err.code):'unknown';
-              });
-              audioEl.addEventListener('ended',function(){
-                if(cardState.tPlaying){stopAll();fill.style.width='0%';timeEl.textContent='0:00';}
-              });
-              audioEl.volume=(typeof trackVol==='number'&&isFinite(trackVol))?trackVol:0.8;
-              cardState.dbg.created=true;
-            }catch(e){
-              cardState.dbg.createErr=String(e&&e.message||e);
-            }
-          }
-          return audioEl;
-        }
-        function loadTrack(){
+          if(trackBuf){if(cb)cb();return;}
+          if(cb)loadCallbacks.push(cb);
           if(loadStarted)return;
           loadStarted=true;
-          getAudioEl();
+          try{
+            fetch(s.trackData).then(function(r){return r.arrayBuffer();}).then(function(ab){
+              return getCtx().decodeAudioData(ab);
+            }).then(function(buf){
+              trackBuf=buf;
+              cardState.trackDuration=buf.duration;
+              cardState.dbg.created=true;
+              var cbs=loadCallbacks;loadCallbacks=[];
+              cbs.forEach(function(c){c();});
+            }).catch(function(e){
+              cardState.dbg.createErr=String(e&&e.message||e);
+              loadStarted=false;
+            });
+          }catch(e){
+            cardState.dbg.createErr=String(e&&e.message||e);
+            loadStarted=false;
+          }
         }
-        cardState.ensureLoaded=loadTrack;
-        cardState._setVol=function(v){if(typeof v==='number'&&isFinite(v)){trackVol=v;if(audioEl)audioEl.volume=v;}};
-
-        function durationKnown(){
-          return audioEl&&!isNaN(audioEl.duration)&&audioEl.duration>0;
-        }
+        cardState.ensureLoaded=function(){loadTrack();};
+        cardState._setVol=function(v){if(typeof v==='number'&&isFinite(v)){trackVol=v;if(curGain)curGain.gain.value=v;}};
 
         function updateUI(){
-          if(!cardState.tPlaying||!audioEl)return;
-          var el=audioEl.currentTime;
+          if(!cardState.tPlaying)return;
+          var el=getCtx().currentTime-tStartCtx;
           cardState.liveElapsed=el;
-          var dur=cardState.trackDuration||audioEl.duration;
+          var dur=cardState.trackDuration||(trackBuf&&trackBuf.duration);
           if(dur) fill.style.width=Math.min(100,(el/dur*100))+'%';
-          var v=Math.floor(el);
+          var v=Math.floor(Math.max(0,el));
           timeEl.textContent=Math.floor(v/60)+':'+(v%60<10?'0':'')+v%60;
           rafId=requestAnimationFrame(updateUI);
         }
@@ -5367,7 +5362,11 @@ function _renderLiveCards(songs){
         }
 
         function stopAll(){
-          if(audioEl){try{audioEl.pause();}catch(e){}}
+          if(srcNode){
+            tOffset=Math.max(0,getCtx().currentTime-tStartCtx);
+            try{srcNode.onended=null;srcNode.stop();}catch(e){}
+            srcNode=null;
+          }
           clearInterval(cardState.clickTimer);cardState.clickTimer=null;
           cancelAnimationFrame(rafId);
           cardState.tPlaying=false;
@@ -5375,131 +5374,109 @@ function _renderLiveCards(songs){
           beatDots.forEach(function(d){d.className='lc-beat';});
         }
         liveCardStates[sid]={cardState:cardState,stop:stopAll,resetBuf:function(){
-          if(audioEl){try{audioEl.pause();}catch(e){}}
-          audioEl=null;loadStarted=false;
+          trackBuf=null;loadStarted=false;tOffset=0;
         }};
 
-        // Метроном-клик во время воспроизведения, синхронизированный по audioEl.currentTime
-        function startClickLoop(bInt){
-          var cnt=Math.floor(audioEl.currentTime/bInt);
+        // Метроном-клик во время воспроизведения — планируется ЗАРАНЕЕ (lookahead),
+        // а не реактивно по факту наступления доли. Это и была причина рассинхрона:
+        // реактивный клик всегда звучит чуть позже самой доли и накопительно "плывёт".
+        function startClickLoop(bInt, refStart, refOffset){
+          var bElapsed=refOffset/bInt;
+          var nextBeat=refStart+(Math.ceil(bElapsed)-bElapsed)*bInt;
+          var cnt=Math.ceil(bElapsed);
           cardState.clickTimer=setInterval(function(){
-            if(!audioEl||audioEl.paused)return;
-            var beatPhase=audioEl.currentTime/bInt;
-            var nextCnt=Math.floor(beatPhase)+1;
-            if(nextCnt>cnt){
-              cnt=nextCnt;
-              var ctx2=getCtx();
-              beep(ctx2,ctx2.currentTime,cnt%4===1,clickVolLocal);
-              showBeat(((cnt-1)%4)+1,0);
+            var ctx2=getCtx();
+            var n=ctx2.currentTime;
+            while(nextBeat<n+0.1){
+              beep(ctx2, nextBeat, cnt%4===0, clickVolLocal);
+              var bn=(cnt%4)+1;
+              (function(b,t){showBeat(b,Math.max(0,(t-n)*1000));})(bn,nextBeat);
+              cnt++;nextBeat+=bInt;
             }
-          },20);
+          },25);
         }
 
         function startEverything(offset){
-          var audio=getAudioEl();
-          if(!durationKnown()&&offset>0){
-            // Длительность ещё не известна — подождём метаданные и попробуем снова
-            audio.addEventListener('loadedmetadata',function once(){
-              audio.removeEventListener('loadedmetadata',once);
-              startEverything(offset);
-            });
+          if(!trackBuf){loadTrack(function(){startEverything(offset);});return;}
+          var ctx=getCtx();
+          // ВАЖНО: resume() асинхронный — если не дождаться его завершения,
+          // ctx.currentTime в момент расчёта может ещё не "ожить" по-настоящему,
+          // и вся сетка тайминга предтакта+трека смещается на доли секунды.
+          if(ctx.state==='suspended'){
+            ctx.resume().then(function(){startEverything(offset);});
             return;
           }
-          audio.currentTime=offset||0;
+          var now=ctx.currentTime;
           var bpm=songObj.tempo||120;
           var bInt=60/bpm;
-
-          function beginPlayback(){
-            var p=audio.play();
-            if(p&&p.catch)p.catch(function(err){cardState.dbg.playErr=String(err&&err.message||err);});
-            cardState.tPlaying=true;
-            playBtn.innerHTML=svgStop;
-            rafId=requestAnimationFrame(updateUI);
-            if(clickOn) startClickLoop(bInt);
-          }
+          var trackStart;
 
           if(clickOn && offset===0){
-            // 4 удара предтакта на синтетическом клике, затем старт трека
-            var ctx=getCtx();
-            var now=ctx.currentTime;
+            // 4 удара предтакта — затем трек, на ОДНОМ И ТОМ ЖЕ точном таймере
             for(var i=0;i<4;i++){
               var bt=now+0.05+i*bInt;
               beep(ctx, bt, i===0, clickVolLocal);
               showBeat(i+1, (bt-now)*1000);
             }
-            // Старт фонограммы — не через setTimeout (он "плывёт" на десятки мс),
-            // а точным опросом того же аудио-таймера, что и у щелчков метронома
-            var targetTime=now+0.05+4*bInt;
-            function waitAndStart(){
-              if(ctx.currentTime>=targetTime){beginPlayback();return;}
-              requestAnimationFrame(waitAndStart);
-            }
-            requestAnimationFrame(waitAndStart);
+            trackStart=now+0.05+4*bInt;
           } else {
-            beginPlayback();
+            trackStart=now+0.05;
           }
+
+          srcNode=ctx.createBufferSource();
+          srcNode.buffer=trackBuf;
+          var gn=ctx.createGain();gn.gain.value=trackVol;
+          srcNode.connect(gn);gn.connect(ctx.destination);
+          curGain=gn;
+          srcNode.start(trackStart, offset);
+          tStartCtx=trackStart-offset;
+          cardState.tPlaying=true;
+          playBtn.innerHTML=svgStop;
+          srcNode.onended=function(){
+            if(cardState.tPlaying){stopAll();fill.style.width='0%';timeEl.textContent='0:00';tOffset=0;}
+          };
+          rafId=requestAnimationFrame(updateUI);
+
+          // Клик во время игры планируется СРАЗУ через тот же lookahead-таймер,
+          // начиная ровно с trackStart — без задвоения уже сыгранных ударов предтакта
+          if(clickOn) startClickLoop(bInt, trackStart, offset);
         }
 
         playBtn.addEventListener('click',function(e){
           if(e)e.stopPropagation();
-          loadTrack();
-          if(cardState.tPlaying){
-            stopAll();
-          } else {
-            startEverything(audioEl.currentTime||0);
-          }
+          if(cardState.tPlaying){stopAll();return;}
+          loadTrack(function(){startEverything(tOffset);});
         });
         cardState.togglePlay=function(){
-          loadTrack();
-          if(cardState.tPlaying){
-            stopAll();
-          } else {
-            startEverything(audioEl.currentTime||0);
-          }
+          if(cardState.tPlaying){stopAll();return true;}
+          loadTrack(function(){startEverything(tOffset);});
           return true;
         };
-
-        function doSeek(clientX,rect){
-          loadTrack();
-          var audio=getAudioEl();
-          var pct=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width));
-          var dur=cardState.trackDuration||audio.duration;
-          if(!dur){
-            audio.addEventListener('loadedmetadata',function once(){
-              audio.removeEventListener('loadedmetadata',once);
-              doSeek(clientX,rect);
-            });
-            return;
-          }
-          var newOffset=pct*dur;
-          var wasPlaying=cardState.tPlaying;
-          stopAll();
-          audio.currentTime=newOffset;
-          fill.style.width=(newOffset/dur*100)+'%';
-          var vv=Math.floor(newOffset);
-          timeEl.textContent=Math.floor(vv/60)+':'+(vv%60<10?'0':'')+vv%60;
-          if(wasPlaying) startEverything(newOffset);
-        }
 
         cardState.seekTo=function(pct){
-          loadTrack();
-          var audio=getAudioEl();
-          var dur=cardState.trackDuration||audio.duration;
-          if(!dur)return false; // метаданные ещё не пришли — крайне короткое окно, retry в вызывающем коде это покроет
-          var newOffset=Math.max(0,Math.min(1,pct))*dur;
-          var wasPlaying=cardState.tPlaying;
-          stopAll();
-          audio.currentTime=newOffset;
-          fill.style.width=(newOffset/dur*100)+'%';
-          var vv=Math.floor(newOffset);
-          timeEl.textContent=Math.floor(vv/60)+':'+(vv%60<10?'0':'')+vv%60;
-          if(wasPlaying) startEverything(newOffset);
+          doSeek(null,null,pct);
           return true;
         };
+        // doSeek поддерживает либо координаты клика, либо прямой pct (для seekTo)
+        function doSeek(clientXOrNull,rectOrNull,pctDirect){
+          var pct=(pctDirect!==undefined)?Math.max(0,Math.min(1,pctDirect)):Math.max(0,Math.min(1,(clientXOrNull-rectOrNull.left)/rectOrNull.width));
+          loadTrack(function(){
+            var dur=trackBuf.duration;
+            var newOffset=pct*dur;
+            var wasPlaying=cardState.tPlaying;
+            if(wasPlaying) stopAll();
+            tOffset=newOffset;
+            fill.style.width=(newOffset/dur*100)+'%';
+            var vv=Math.floor(newOffset);
+            timeEl.textContent=Math.floor(vv/60)+':'+(vv%60<10?'0':'')+vv%60;
+            if(wasPlaying) startEverything(newOffset);
+          });
+        }
         cardState._startClickNow=function(){
-          if(cardState.tPlaying&&audioEl){
+          if(cardState.tPlaying){
             var bpm=songObj.tempo||120;
-            startClickLoop(60/bpm);
+            var curOffset=Math.max(0,getCtx().currentTime-tStartCtx);
+            startClickLoop(60/bpm, tStartCtx, curOffset);
           }
         };
         progBar.addEventListener('click',function(e){
