@@ -412,15 +412,16 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .cpro-wrap{padding:4px 0 12px;font-family:'Golos Text',sans-serif;}
 .cpro-directive{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#666;margin:14px 0 6px;font-family:'Inter',sans-serif;font-weight:600;}
 .cpro-directive:first-child{margin-top:0;}
-.cpro-line{display:flex;flex-wrap:wrap;align-items:flex-end;margin-bottom:2px;line-height:1;}
-.cpro-line-empty{height:10px;}
-.cpro-chunk{display:inline-flex;flex-direction:column;align-items:flex-start;}
-.cpro-chord{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--or);min-height:20px;line-height:1;padding-bottom:3px;padding-right:4px;white-space:nowrap;}
+.cpro-line{display:flex;flex-wrap:nowrap;align-items:flex-end;margin-bottom:4px;line-height:1;overflow:hidden;}
+.cpro-line-empty{height:12px;}
+.cpro-chunk{display:inline-flex;flex-direction:column;align-items:flex-start;flex-shrink:0;}
+.cpro-chord{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--or);min-height:20px;line-height:1;padding-bottom:3px;padding-right:2px;white-space:nowrap;}
 .cpro-word{font-size:15px;color:var(--tx2);white-space:pre;line-height:1.5;}
-.cpro-chord-only{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--or);padding:2px 6px 2px 0;white-space:nowrap;}
-/* В Live fullscreen чуть крупнее */
+.cpro-chord-only{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--or);padding:2px 8px 2px 0;white-space:nowrap;}
+/* В Live fullscreen — крупнее и без overflow */
+.lft-chords-view .cpro-line{overflow:visible;}
 .lft-chords-view .cpro-chord{font-size:14px;}
-.lft-chords-view .cpro-word{font-size:17px;}
+.lft-chords-view .cpro-word{font-size:18px;}
 /* Кнопки режима редактор/просмотр */
 .cpro-mode-btns{display:flex;gap:6px;margin-bottom:12px;}
 .cpro-mode-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--br);background:none;color:var(--mu2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;}
@@ -5068,7 +5069,8 @@ function enterPerfMode(){
       if(!currentSection){ currentSection = document.createElement('div'); currentSection.className='perf-section'; body.appendChild(currentSection); }
       var ln = document.createElement('div');
       ln.className = 'perf-line';
-      ln.textContent = line;
+      // Убираем ChordPro аккорды [Am] из текста для Stage режима
+      ln.textContent = line.replace(/\[[A-G][b#]?[^\]|]*\]/g,'');
       currentSection.appendChild(ln);
     }
   });
@@ -7644,13 +7646,13 @@ function openLiveFullTab(s,tabId,uniqueKey){
     }
   } else if(tabId==='lyrics'){
     content.style.whiteSpace='';
-    // Если есть ChordPro — показываем аккорды над словами
-    if(s.chordPro!==undefined&&s.chordPro!==null&&s.chordPro.trim()){
+    var lyricsText=s.lyrics||'';
+    var hasChordProInLyrics=/\[[A-G][b#]?[^\]|]*\]/.test(lyricsText);
+    // Если в тексте есть аккорды [Am] — показываем ChordPro над словами
+    if(hasChordProInLyrics){
       content.style.fontSize='16px';
       content.style.lineHeight='1.6';
-      var cproContainer=document.createElement('div');
-      cproContainer.className='lft-chords-view';
-      // Транспонирование
+      // Кнопки транспонирования
       var trRow2=document.createElement('div');
       trRow2.style.cssText='display:flex;align-items:center;gap:8px;padding:0 0 14px;';
       var trLbl2=document.createElement('span');trLbl2.style.cssText='font-size:10px;color:#555;font-family:Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;';
@@ -7661,13 +7663,16 @@ function openLiveFullTab(s,tabId,uniqueKey){
       trN2.textContent=(s.chordProTranspose>0?"+":"")+(s.chordProTranspose||0);
       var trU2=document.createElement('button');trU2.textContent='+';
       trU2.style.cssText=trD2.style.cssText;
-      trD2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)-1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(s.chordPro,s.chordProTranspose);});
-      trU2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)+1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(s.chordPro,s.chordProTranspose);});
+      var cproContainer=document.createElement('div');
+      cproContainer.className='lft-chords-view';
+      cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose||0);
+      trD2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)-1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose);autofitCproFont(cproContainer,content);});
+      trU2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)+1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose);autofitCproFont(cproContainer,content);});
       trRow2.appendChild(trLbl2);trRow2.appendChild(trD2);trRow2.appendChild(trN2);trRow2.appendChild(trU2);
       content.appendChild(trRow2);
-      cproContainer.innerHTML=renderChordPro(s.chordPro,s.chordProTranspose||0);
       content.appendChild(cproContainer);
-    } else if(!s.lyrics){
+      setTimeout(function(){autofitCproFont(cproContainer,content);},80);
+    } else if(!lyricsText){
       content.innerHTML='<div class="empty-state">'+(LANG==='en'?'No lyrics':'Нет текста')+'</div>';
     } else {
       content.innerHTML='';
@@ -7699,7 +7704,7 @@ function openLiveFullTab(s,tabId,uniqueKey){
           if(!currentSection){currentSection=document.createElement('div');currentSection.className='perf-section';content.appendChild(currentSection);}
           var ln=document.createElement('div');
           ln.className='perf-line';
-          ln.textContent=line;
+          ln.textContent=line.replace(/\[[A-G][b#]?[^\]|]*\]/g,'');
           currentSection.appendChild(ln);
         }
       });
@@ -7774,10 +7779,53 @@ var lftScrollSpeed=0.5;
 var lftCurrentSongId=null;
 var _lftAutoScrollCheck=null;
 
+function autofitCproFont(container,parentEl){
+  if(!container||!parentEl)return;
+  var maxW=(parentEl.clientWidth||320)-40;
+  var fontSize=lftFontSz;
+  var chordRatio=0.72;
+  function applySize(sz){
+    container.querySelectorAll('.cpro-word').forEach(function(el){el.style.fontSize=sz+'px';});
+    container.querySelectorAll('.cpro-chord,.cpro-chord-only').forEach(function(el){el.style.fontSize=Math.round(sz*chordRatio)+'px';});
+  }
+  applySize(fontSize);
+  var iters=0;
+  while(iters++<30){
+    var overflow=false;
+    container.querySelectorAll('.cpro-line').forEach(function(l){
+      if(l.scrollWidth>maxW+2)overflow=true;
+    });
+    if(!overflow)break;
+    fontSize=Math.max(10,fontSize-1);
+    applySize(fontSize);
+  }
+  lftFontSz=fontSize;
+}
+
 function lftFontChange(d){
-  lftFontSz=Math.max(14,Math.min(36,lftFontSz+d));
+  lftFontSz=Math.max(10,Math.min(40,lftFontSz+d));
   var c=document.getElementById('lftContent');
-  if(c)c.style.fontSize=lftFontSz+'px';
+  if(!c)return;
+  var cpro=c.querySelector('.lft-chords-view');
+  if(cpro){
+    // ChordPro — применяем напрямую к элементам
+    c.querySelectorAll('.cpro-word').forEach(function(el){el.style.fontSize=lftFontSz+'px';});
+    c.querySelectorAll('.cpro-chord,.cpro-chord-only').forEach(function(el){el.style.fontSize=Math.round(lftFontSz*0.72)+'px';});
+    // Проверяем overflow и подстраиваем
+    var maxW=(c.clientWidth||320)-40;
+    var overflow=false;
+    c.querySelectorAll('.cpro-line').forEach(function(l){if(l.scrollWidth>maxW+2)overflow=true;});
+    if(overflow&&d>0){
+      // Если увеличили и не влезает — откатываем
+      lftFontSz=Math.max(10,lftFontSz-1);
+      c.querySelectorAll('.cpro-word').forEach(function(el){el.style.fontSize=lftFontSz+'px';});
+      c.querySelectorAll('.cpro-chord,.cpro-chord-only').forEach(function(el){el.style.fontSize=Math.round(lftFontSz*0.72)+'px';});
+    }
+  } else {
+    // Обычный текст
+    c.style.fontSize=lftFontSz+'px';
+    c.querySelectorAll('.perf-line').forEach(function(el){el.style.fontSize=lftFontSz+'px';});
+  }
 }
 
 function lftScrollSpeedChange(d){
