@@ -412,7 +412,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .cpro-wrap{padding:4px 0 12px;font-family:'Golos Text',sans-serif;}
 .cpro-directive{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#666;margin:14px 0 6px;font-family:'Inter',sans-serif;font-weight:600;}
 .cpro-directive:first-child{margin-top:0;}
-.cpro-line{display:flex;flex-wrap:nowrap;align-items:flex-end;margin-bottom:4px;line-height:1;overflow:hidden;}
+.cpro-line{display:flex;flex-wrap:nowrap;align-items:flex-end;margin-bottom:4px;line-height:1;}
 .cpro-line-empty{height:12px;}
 .cpro-chunk{display:inline-flex;flex-direction:column;align-items:flex-start;flex-shrink:0;}
 .cpro-chord{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--or);min-height:20px;line-height:1;padding-bottom:3px;padding-right:2px;white-space:nowrap;}
@@ -7626,7 +7626,7 @@ function openLiveFullTab(s,tabId,uniqueKey){
   if(lftScrollOn){clearInterval(lftScrollInterval);lftScrollOn=false;var sb=document.getElementById('lftScrollBtn');if(sb){sb.classList.remove('on');sb.innerHTML='AUTO<br>SCROLL';}}  var content=document.getElementById('lftContent');
   content.scrollTop=0;
   content.innerHTML='';
-  content.style.cssText='flex:1;overflow-y:auto;padding:24px 20px 40px;font-size:22px;line-height:1.8;color:#f0ece4;font-family:Golos Text,sans-serif;';
+  content.style.cssText='flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 20px 40px;font-size:22px;line-height:1.8;color:#f0ece4;font-family:Golos Text,sans-serif;';
   if(tabId==='form'){
     var form=s.form||[];
     if(!form.length){
@@ -7671,7 +7671,12 @@ function openLiveFullTab(s,tabId,uniqueKey){
       trRow2.appendChild(trLbl2);trRow2.appendChild(trD2);trRow2.appendChild(trN2);trRow2.appendChild(trU2);
       content.appendChild(trRow2);
       content.appendChild(cproContainer);
-      setTimeout(function(){autofitCproFont(cproContainer,content);},80);
+      // Запускаем подбор шрифта после полной отрисовки
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          autofitCproFont(cproContainer,content);
+        });
+      });
     } else if(!lyricsText){
       content.innerHTML='<div class="empty-state">'+(LANG==='en'?'No lyrics':'Нет текста')+'</div>';
     } else {
