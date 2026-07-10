@@ -6303,7 +6303,7 @@ if('serviceWorker' in navigator){
       <span id="livePlayerTimeLeft">-0:00</span>
     </div>
     <div id="liveDebugLine" style="font-family:'Inter',sans-serif;font-size:10px;color:#c0392b;margin-bottom:10px;word-break:break-all;"></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+    <div style="display:flex;justify-content:stretch;margin-bottom:14px;">
       <button class="lp-tab-btn active" id="lpTabBtn_lyrics" onclick="setLivePlayerTab('lyrics')">Текст</button>
       <button class="lp-tab-btn" id="lpTabBtn_form" onclick="setLivePlayerTab('form')">Форма</button>
       <button class="lp-tab-btn" id="lpTabBtn_notes" onclick="setLivePlayerTab('notes')">Заметки</button>
@@ -6436,7 +6436,7 @@ if('serviceWorker' in navigator){
 .lp-prog-bar{position:relative;height:3px;background:#4a4a52;border-radius:8px;margin-bottom:10px;cursor:pointer;}
 .lp-prog-bar-fill{position:absolute;left:0;top:50%;transform:translateY(-50%);height:6px;background:#fff;border-radius:3px;}
 .lp-prog-bar-dot{position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:13px;height:13px;border-radius:50%;background:#fff;}
-.lp-tab-btn{padding:9px 4px;background:transparent;border:none;color:#fff;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-align:center;font-family:'Inter',sans-serif;font-weight:400;cursor:pointer;}
+.lp-tab-btn{flex:1;padding:9px 4px;background:transparent;border:none;color:#fff;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-align:center;font-family:'Inter',sans-serif;font-weight:400;cursor:pointer;}
 .lp-tab-btn.active{color:#fff;}
 .lp-mix-slider{width:100%;height:2px;-webkit-appearance:none;background:#3a3a40;border-radius:8px;outline:none;}
 .lp-mix-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;cursor:pointer;}
@@ -7507,69 +7507,6 @@ function _renderLiveCards(songs){
     var mixBody=document.createElement('div');mixBody.className='lc-mix-body';mixBody.id='lcMixBody_'+uniqueKey;mixBody.style.display='none';
 
     // Клик тогл строка
-    var clickRow=document.createElement('div');clickRow.className='lc-mix-row';clickRow.style.justifyContent='space-between';clickRow.style.marginBottom='22px';clickRow.style.paddingBottom='18px';clickRow.style.borderBottom='1px solid #2a2a32';
-
-    var clickLeft=document.createElement('div');clickLeft.style.cssText='display:flex;align-items:center;gap:8px;';
-    clickLeft.innerHTML='<span style="font-size:14px;color:#a8a4a0;font-family:\'Golos Text\',sans-serif;" id="clickLbl_'+s.id+'">'+(LANG==='en'?'Click':'Клик')+'</span>';
-
-    var clickRight=document.createElement('div');clickRight.style.cssText='display:flex;align-items:center;gap:6px;';
-
-    // Доли
-    var beatsDiv=document.createElement('div');beatsDiv.style.cssText='display:flex;gap:3px;';
-    beatDots=[];
-    for(var bi=1;bi<=4;bi++){
-      var bd=document.createElement('div');bd.className='lc-beat';bd.textContent=bi;
-      beatsDiv.appendChild(bd);beatDots.push(bd);
-    }
-    clickRight.appendChild(beatsDiv);
-
-    // Тогл
-    var tog=document.createElement('button');tog.id='lcClickTog_'+uniqueKey;tog.dataset.on='0';
-    tog.style.cssText='width:46px;height:26px;border-radius:13px;background:#2e2e38;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;';
-    tog.innerHTML='<div style="width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);"></div>';
-
-    (function(songObj, togBtn, bDots){
-      function updateBeats(beatNum){
-        bDots.forEach(function(d,i){
-          d.className='lc-beat';
-          if(i+1===beatNum) d.className='lc-beat '+(i===0?'active1':'active');
-        });
-      }
-      togBtn.addEventListener('click',function(){
-        // На пульт-устройстве локальный клик заблокирован — управляется мастером
-        if(liveDeviceRole==='ctrl'&&currentGroupId)return;
-        clickOn=!clickOn;
-        var dot=document.getElementById('mixDot_'+songObj.id);
-        var lbl=document.getElementById('clickLbl_'+songObj.id);
-        if(clickOn){
-          togBtn.dataset.on='1';
-          togBtn.style.background='#5a5a64';
-          togBtn.querySelector('div').style.left='22px';
-          if(dot)dot.style.display='';
-          if(lbl)lbl.style.color='#c0392b';
-          // Восстанавливаем громкость клика
-          if(cardState&&cardState.clickMasterGain) cardState.clickMasterGain.gain.setTargetAtTime(clickVolLocal, cardState.actx.currentTime, 0.01);
-          if(cardState&&cardState.tPlaying && !cardState.clickTimer){
-            if(cardState._startClickNow) cardState._startClickNow();
-          }
-        } else {
-          togBtn.dataset.on='0';
-          togBtn.style.background='#2e2e38';
-          togBtn.querySelector('div').style.left='2px';
-          if(dot)dot.style.display='none';
-          if(lbl)lbl.style.color='#a8a4a0';
-          if(cardState){clearInterval(cardState.clickTimer);cardState.clickTimer=null;}
-          bDots.forEach(function(d){d.className='lc-beat';});
-          // Глушим gain немедленно чтобы остановить уже запланированные осцилляторы
-          if(cardState&&cardState.clickMasterGain) cardState.clickMasterGain.gain.setTargetAtTime(0, cardState.actx.currentTime, 0.01);
-        }
-      });
-    })(s, tog, beatDots);
-
-    clickRight.appendChild(tog);
-    clickRow.appendChild(clickLeft);clickRow.appendChild(clickRight);
-    mixBody.appendChild(clickRow);
-
     // Ползунок трека
     var trackMuted=false;var trackVolBeforeMute=0.8;
     var tRow=document.createElement('div');tRow.className='lc-mix-row';
@@ -7662,6 +7599,7 @@ function _renderLiveCards(songs){
 } // end _renderLiveCards
 
 function openLiveFullTab(s,tabId,uniqueKey){
+  lftFontSz=22; // сброс к дефолтному размеру при каждом открытии песни — не должен "наследоваться" из предыдущей песни/сессии
   lftCurrentSongId=uniqueKey!==undefined&&uniqueKey!==null?uniqueKey:s.id;
   liveCurrentTabId=tabId;
   ['lyrics','form','notes'].forEach(function(t){
@@ -7734,8 +7672,14 @@ function openLiveFullTab(s,tabId,uniqueKey){
       var cproContainer=document.createElement('div');
       cproContainer.className='lft-chords-view';
       cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose||0);
-      trD2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)-1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose);autofitCproFont(cproContainer,content);});
-      trU2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)+1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose);autofitCproFont(cproContainer,content);});
+      // Применяем текущий размер шрифта
+      function applyCproFont(){
+        cproContainer.querySelectorAll('.cpro-word').forEach(function(el){el.style.fontSize=lftFontSz+'px';});
+        cproContainer.querySelectorAll('.cpro-chord,.cpro-chord-only').forEach(function(el){el.style.fontSize=Math.round(lftFontSz*0.5)+'px';});
+      }
+      applyCproFont();
+      trD2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)-1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose);applyCproFont();});
+      trU2.addEventListener('click',function(){s.chordProTranspose=(s.chordProTranspose||0)+1;if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;save();trN2.textContent=(s.chordProTranspose>0?"+":"")+s.chordProTranspose;cproContainer.innerHTML=renderChordPro(lyricsText,s.chordProTranspose);applyCproFont();});
       trRow2.appendChild(trLbl2);trRow2.appendChild(trD2);trRow2.appendChild(trN2);trRow2.appendChild(trU2);
       content.appendChild(trRow2);
       content.appendChild(cproContainer);
