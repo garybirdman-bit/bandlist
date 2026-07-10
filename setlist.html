@@ -84,7 +84,7 @@ body{display:flex;flex-direction:column;height:100vh;height:100dvh;font-family:'
 .hero-btn-add span.lbl{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:500;color:#fff;line-height:1;display:flex;align-items:center;margin:0;padding:0;}
 
 /* BOTTOM NAV (replaces top nav-tabs) */
-.bottom-nav{display:flex;align-items:stretch;border-top:1px solid var(--br);background:var(--bg);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,4px);}
+.bottom-nav{display:flex;align-items:stretch;background:var(--bg);flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,4px);}
 /* Участник/гость группы — только просмотр: прячем всё, что меняет данные */
 /* Три роли: leader (полный доступ), admin (редактирование), member (только просмотр) */
 body.role-member [data-editable]{display:none!important;}
@@ -166,6 +166,8 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .psec-row{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;}
 .psec-row+.psec-row{border-top:1px solid var(--br);}
 .psec-row span.lbl3{flex:1;font-family:'Golos Text',sans-serif;font-size:15px;color:var(--tx2);}
+.gmp-code-txt{font-family:'Inter',sans-serif;font-size:19px;font-weight:500;letter-spacing:5px;color:#fff;margin-bottom:16px;text-align:center;}
+.gmp-code-txt.empty{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:400;letter-spacing:normal;color:var(--mu2);text-align:left;}
 .psec-row .val3{font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);}
 .psec-row.disabled{opacity:.4;cursor:default;}
 .psec-row.disabled .soon-tag{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);background:var(--s3);padding:2px 7px;border-radius:8px;}
@@ -184,11 +186,9 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 /* SEARCH */
 .search-wrap{padding:8px 24px;background:var(--bg);flex-shrink:0;}
 .search-inner{position:relative;}
-.search-inp{width:100%;background:transparent;border:1px solid #44444f;border-radius:8px;color:var(--tx);padding:9px 14px 9px 36px;font-size:13px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
-.search-inp:focus{border-color:#5a5a66;}
-.search-inp:focus{border-color:var(--mu2);}
+.search-inp{width:100%;background:transparent;border:none;border-radius:0;color:var(--tx);padding:9px 4px 9px 26px;font-size:14px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
 .search-inp::placeholder{color:#8a8a92;}
-.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.search-icon{position:absolute;left:2px;top:50%;transform:translateY(-50%);pointer-events:none;}
 
 .divl{height:1px;background:var(--br);flex-shrink:0;}
 
@@ -858,7 +858,6 @@ textarea.fi.tall{min-height:120px;}
 <!-- SETLIST VIEW -->
 <div id="viewSetlist" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
   <div class="ctabs" id="ctabs"></div>
-  <div class="divl"></div>
   <div class="lw" id="lw">
     <div class="phdr-print" id="phdrp"></div>
     <div id="list"></div>
@@ -883,7 +882,6 @@ textarea.fi.tall{min-height:120px;}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
   </div>
-  <div class="divl"></div>
   <div class="search-wrap">
     <div class="search-inner">
       <svg class="search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
@@ -1072,7 +1070,7 @@ textarea.fi.tall{min-height:120px;}
         <div id="gmpMembersBox" style="background:var(--s1);border:1px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:20px;"></div>
 
         <div style="font-size:11px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:8px;" id="gmpCodeLbl">Код группы</div>
-        <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:400;letter-spacing:6px;color:#fff;margin-bottom:16px;" id="gmpCodeTxt">—</div>
+        <div class="gmp-code-txt" id="gmpCodeTxt">—</div>
         <div id="gmpQrWrap" style="display:flex;justify-content:center;margin-bottom:16px;">
           <div style="background:#fff;border-radius:16px;padding:16px;display:inline-flex;align-items:center;justify-content:center;"></div>
         </div>
@@ -2175,7 +2173,9 @@ function toggleGroupManagePanel(){
   panel.style.display=opening?"block":"none";
   if(opening){
     var code=currentGroupId||"";
-    document.getElementById("gmpCodeTxt").textContent=code||(LANG==="en"?"No active group":"Нет активной группы");
+    var gmpCodeEl=document.getElementById("gmpCodeTxt");
+    gmpCodeEl.textContent=code||(LANG==="en"?"No active group":"Нет активной группы");
+    gmpCodeEl.classList.toggle("empty",!code);
     // Переводим статичные лейблы панели
     var codeLbl=document.getElementById("gmpCodeLbl");if(codeLbl)codeLbl.textContent=LANG==="en"?"GROUP CODE":"КОД ГРУППЫ";
     var myGroupsLbl=document.getElementById("gmpMyGroupsLbl");if(myGroupsLbl)myGroupsLbl.textContent=LANG==="en"?"MY GROUPS":"МОИ ГРУППЫ";
@@ -2896,7 +2896,10 @@ function updateProfileScreenTexts(){
     if(el) el.textContent=map[id];
   });
   var gmpTxt=document.getElementById("gmpCodeTxt");
-  if(gmpTxt) gmpTxt.textContent=currentGroupId||(LANG==="en"?"No active group":"Нет активной группы");
+  if(gmpTxt){
+    gmpTxt.textContent=currentGroupId||(LANG==="en"?"No active group":"Нет активной группы");
+    gmpTxt.classList.toggle("empty",!currentGroupId);
+  }
   var gmpJoinInp=document.getElementById("gmpJoinCodeInp");
   if(gmpJoinInp) gmpJoinInp.placeholder=LANG==="en"?"GROUP-CODE":"КОД-ГРУППЫ";
   var gmpPanel=document.getElementById("groupManagePanel");
