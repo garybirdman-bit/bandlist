@@ -10,7 +10,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png?v=3">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bandlist</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@300;400;500&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1977,10 +1977,17 @@ var _groupListenersAttached=false;
 function attachGroupListeners(){
   if(!db||!currentGroupId||_groupListenersAttached)return;
   _groupListenersAttached=true;
+  var _wasConnectedOnce=false;
   db.ref(".info/connected").on("value",function(snap){
-    var dot=document.getElementById("syncDot");if(!dot)return;
-    dot.style.background=snap.val()?"var(--tx2)":"#555";
-    dot.title=snap.val()?authT("Онлайн · синхронизировано","Online · synced"):authT("Офлайн","Offline");
+    var dot=document.getElementById("syncDot");
+    var lftDot=document.getElementById("lftSyncDot");
+    var online=!!snap.val();
+    if(online)_wasConnectedOnce=true;
+    [dot,lftDot].forEach(function(d){
+      if(!d)return;
+      d.style.background=online?"var(--tx2)":(_wasConnectedOnce?"#e05a4e":"#555");
+      d.title=online?authT("Онлайн · синхронизировано","Online · synced"):authT("Офлайн — показываю последние сохранённые данные","Offline — showing last saved data");
+    });
     // Присутствие в группе: если связь установлена — отмечаемся "онлайн" и
     // настраиваем onDisconnect(), который САМ переключит на "офлайн", если
     // связь обрывается (закрыли приложение, сел телефон, пропал интернет) —
@@ -2262,8 +2269,8 @@ function renderGmpMembers(members,presence){
     }
     var role=m.role||"member";
     var roleLbl=roleLabels[role]||roleLabels.member;
-    // Лидер может менять роль других участников (не самого себя)
-    var canChangeRole=currentRole==="leader"&&currentUser&&uid!==currentUser.uid&&role!=="leader";
+    // Лидер и админы могут менять роль участников (не самого себя, не лидера)
+    var canChangeRole=(currentRole==="leader"||currentRole==="admin")&&currentUser&&uid!==currentUser.uid&&role!=="leader";
     var roleCell=canChangeRole
       ? '<button onclick="gmpChangeRole(\''+uid+'\',\''+role+'\')" style="background:var(--s3);border:1px solid var(--br);border-radius:6px;color:var(--tx2);font-size:11px;font-family:Inter,sans-serif;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;">'+roleLbl+' ›</button>'
       : '<div class="gmp-role-badge">'+roleLbl+'</div>';
@@ -2320,7 +2327,7 @@ function gmpChangeRole(uid,currentRoleOfMember){
           }
         );
       } else {
-        if(!db||!currentGroupId||currentRole!=='leader')return;
+        if(!db||!currentGroupId||(currentRole!=='leader'&&currentRole!=='admin'))return;
         db.ref('groups/'+currentGroupId+'/members/'+uid+'/role').set(a.role).then(function(){
           db.ref('groups/'+currentGroupId+'/members').once('value').then(function(s){
             var members=s.val()||{};
@@ -4865,6 +4872,10 @@ function initAudio(s){
       if(rec){
         s.trackData=rec.data;s.trackName=rec.name;
         initAudio(s); // повторный вызов теперь с готовым trackData
+      } else if(s.trackUrl){
+        // Локально трека нет (например, загружен с другого устройства) — берём напрямую из Storage,
+        // иначе кнопка Play молча ничего не делает
+        _initAudioFromUrl(s);
       }
     });
     return;
@@ -4873,6 +4884,21 @@ function initAudio(s){
   audioTrackSongId=s.id;
   audioObj=new Audio(s.trackData);audioObj.volume=audioVolume;
   hookAudioEvents();}
+function _initAudioFromUrl(s){
+  if(audioObj){audioObj.pause();audioObj=null;}
+  audioTrackSongId=s.id;
+  audioObj=new Audio(s.trackUrl);audioObj.volume=audioVolume;
+  hookAudioEvents();
+  // Заодно кэшируем в IDB, чтобы в следующий раз не тянуть по сети
+  fetch(s.trackUrl).then(function(r){return r.blob();}).then(function(blob){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      s.trackData=e.target.result;
+      saveTrackIDB(s.id,s.trackData,s.trackName||'track');
+    };
+    reader.readAsDataURL(blob);
+  }).catch(function(){});
+}
 function hookAudioEvents(){
   if(!audioObj)return;
   var self=audioObj; // ловим устаревшие события от старого объекта после переключения трека
@@ -6368,6 +6394,7 @@ if('serviceWorker' in navigator){
     <button onclick="closeLiveFullTab()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span style="font-size:12px;color:#b0aaa4;font-family:'Inter',sans-serif;letter-spacing:1px;" id="lftBackBtn">НАЗАД</span>
+      <div id="lftSyncDot" style="width:6px;height:6px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s;" title="Офлайн"></div>
     </button>
     <div style="text-align:center;flex:1;min-width:0;overflow:hidden;">
       <div id="lftTitle" style="font-size:12px;color:#f0ece4;font-family:'Golos Text',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
@@ -6858,6 +6885,7 @@ function setLiveSong(idx){
     var prevKey=prevCard.dataset.songId;
     var prevCs=liveCardStates[prevKey];
     if(prevCs&&prevCs.stop)prevCs.stop();
+    if(prevCs&&prevCs.resetPosition)prevCs.resetPosition();
   }
   liveActiveSongIdx=idx;
   cards.forEach(function(c,i){
@@ -7045,7 +7073,7 @@ function startLivePlayerSync(){
       if(window._jsErr){parts.push('JS: '+window._jsErr);}
       if(cs&&cs.cardState){
         var d=cs.cardState.dbg||{};
-        var hasProblem=d.createErr||d.audioErr||d.playErr||(d.hasTrackData===false);
+        var hasProblem=d.createErr||d.audioErr||d.playErr;
         if(hasProblem){
           var ctxState=cs.cardState.actx?cs.cardState.actx.state:'no-ctx';
           parts.push('data:'+(d.hasTrackData?'yes('+d.trackDataLen+')':'NO')
@@ -7341,7 +7369,11 @@ function _renderLiveCards(songs){
           beatDots.forEach(function(d){d.className='lc-beat';});
           pushLiveSync({uniqueKey:sid,songIdx:liveActiveSongIdx,playing:false,pausedElapsed:tOffset,startTs:null,bpm:songObj.tempo||120});
         }
-        liveCardStates[sid]={cardState:cardState,stop:stopAll,resetBuf:function(){
+        liveCardStates[sid]={cardState:cardState,stop:stopAll,resetPosition:function(){
+          tOffset=0;cardState.liveElapsed=0;
+          if(fill)fill.style.width='0%';
+          if(timeEl)timeEl.textContent='0:00';
+        },resetBuf:function(){
           trackBuf=null;loadStarted=false;tOffset=0;
           var dotEl=document.getElementById('lcLoadDot_'+sid);
           if(dotEl){dotEl.classList.remove('ready');dotEl.title='Трек декодируется';}
