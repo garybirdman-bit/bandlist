@@ -177,7 +177,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 
 /* CONCERT TABS */
 .ctabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:10px 24px;background:var(--bg);flex-shrink:0;max-height:2000px;overflow:hidden;}
-.ctab{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:6px 10px;height:38px;border-radius:10px;font-size:11px;font-family:'Golos Text',sans-serif;font-weight:500;letter-spacing:0.1px;cursor:pointer;border:1px solid transparent;background:var(--s1);color:var(--tx2);transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
+.ctab{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:6px 10px;height:38px;min-width:0;width:100%;box-sizing:border-box;border-radius:10px;font-size:11px;font-family:'Golos Text',sans-serif;font-weight:500;letter-spacing:0.1px;cursor:pointer;border:1px solid transparent;background:var(--s1);color:var(--tx2);transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
 .ctab.on{background:var(--s2);border-color:var(--tx2);color:#fff;font-weight:600;}
 .ctab input{background:none;border:none;outline:none;color:#fff;font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1px;width:100%;padding:0;text-align:center;}
 .cadd{display:inline-flex;align-items:center;justify-content:center;height:38px;border-radius:10px;border:1px solid transparent;background:var(--s1);color:var(--tx2);font-size:18px;cursor:pointer;}
@@ -260,7 +260,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .rep-dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:8px;}
 .rep-del:hover{color:#e05252;}
 .status-filter{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:10px 24px;flex-shrink:0;max-height:2000px;overflow:hidden;background:var(--bg);}
-.sf-btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:6px 10px;height:38px;border-radius:10px;font-size:11px;font-family:'Golos Text',sans-serif;font-weight:500;letter-spacing:0.1px;cursor:pointer;border:1px solid transparent;background:var(--s1);color:var(--tx2);transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;gap:5px;}
+.sf-btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:6px 10px;height:38px;min-width:0;width:100%;box-sizing:border-box;border-radius:10px;font-size:11px;font-family:'Golos Text',sans-serif;font-weight:500;letter-spacing:0.1px;cursor:pointer;border:1px solid transparent;background:var(--s1);color:var(--tx2);transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;gap:5px;}
 .sf-btn.on{border-color:var(--tx2);color:#fff;font-weight:600;background:var(--s2);}
 
 /* SLIDE PANEL */
@@ -1616,7 +1616,7 @@ function showStatusPicker(s,noteSq){
     '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;">'+
     statuses.map(function(st){
       var active=s.status===st.id;
-      return '<button data-stid="'+st.id+'" style="height:38px;border-radius:10px;border:1px solid '+(active?'var(--tx2)':'transparent')+';background:'+(active?'var(--s2)':'var(--s1)')+';color:'+(active?'#fff':'var(--tx2)')+';font-family:Golos Text,sans-serif;font-size:11px;font-weight:'+(active?'600':'500')+';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;overflow:hidden;white-space:nowrap;">'+
+      return '<button data-stid="'+st.id+'" style="height:38px;min-width:0;width:100%;box-sizing:border-box;border-radius:10px;border:1px solid '+(active?'var(--tx2)':'transparent')+';background:'+(active?'var(--s2)':'var(--s1)')+';color:'+(active?'#fff':'var(--tx2)')+';font-family:Golos Text,sans-serif;font-size:11px;font-weight:'+(active?'600':'500')+';cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;overflow:hidden;white-space:nowrap;">'+
               '<div style="width:6px;height:6px;border-radius:50%;background:'+st.color+';flex-shrink:0;"></div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">'+st.label+'</span></button>';
     }).join('')+
     '</div>';
