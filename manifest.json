@@ -1,0 +1,32 @@
+{
+  "name": "Bandlist",
+  "short_name": "Bandlist",
+  "description": "Setlist and performance management for bands",
+  "start_url": "/bandlist/setlist.html",
+  "scope": "/bandlist/",
+  "display": "standalone",
+  "background_color": "#111015",
+  "theme_color": "#111015",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "share_target": {
+    "action": "/bandlist/setlist.html",
+    "method": "GET",
+    "params": {
+      "title": "shared_title",
+      "text": "shared_text",
+      "url": "shared_url"
+    }
+  }
+}
