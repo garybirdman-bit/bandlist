@@ -1284,7 +1284,7 @@ function rStatusMgrList(){
     var isDefault=DEFAULT_STATUSES.some(function(d){return d.id===st.id;});
     return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--s1);border-radius:10px;">'
       +'<div style="width:10px;height:10px;border-radius:50%;background:'+st.color+';flex-shrink:0;"></div>'
-      +'<div style="flex:1;font-family:\'Golos Text\',sans-serif;font-size:15px;color:#fff;">'+esc(st.label)+'</div>'
+      +'<div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:\'Golos Text\',sans-serif;font-size:15px;color:#fff;">'+esc(st.label)+'</div>'
       +'<button onclick="openEditStatus(\''+st.id+'\')" style="background:none;border:none;color:#aaa;cursor:pointer;padding:6px 8px;display:flex;align-items:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg></button>'
       +(!isDefault?'<button onclick="deleteStatus(\''+st.id+'\')" style="background:none;border:none;color:#c0392b;cursor:pointer;padding:6px 8px;display:flex;align-items:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>':'')
       +'</div>';
@@ -1779,7 +1779,7 @@ var _trackTargetSongId=null;
 var currentView="setlist";
 var repStatusFilter="all";
 var pickedForSection=null;
-var _remoteIgnore=false;
+var _lastSentJson=null;
 
 /* ============ AUTH / GROUPS ============ */
 var currentUser=null;       // firebase auth user object (or null)
@@ -1970,7 +1970,7 @@ function setActiveGroup(code){
     try{db.ref("groups/"+currentGroupId+"/presence").off("value");}catch(e){}
   }
   _groupListenersAttached=false;
-  _remoteIgnore=false;
+  _lastSentJson=null;
   currentGroupId=code;
   try{localStorage.setItem("bandlist_groupId",code);}catch(e){}
   hideOnboarding();
@@ -1994,11 +1994,10 @@ function save(){
   try{localStorage.setItem("bandlist_v3",JSON.stringify(toSave));}catch(e){}
   if(db&&currentGroupId&&!isGuestMode){
     try{
-      _remoteIgnore=true;
-      db.ref("groups/"+currentGroupId+"/data").set(toSave,function(){
-        setTimeout(function(){_remoteIgnore=false;},3000);
-      });
-    }catch(e){_remoteIgnore=false;}
+      var sentJson=JSON.stringify(toSave);
+      _lastSentJson=sentJson;
+      db.ref("groups/"+currentGroupId+"/data").set(toSave);
+    }catch(e){}
   }
 }
 
@@ -2030,7 +2029,9 @@ function attachGroupListeners(){
   });
   db.ref("groups/"+currentGroupId+"/data").on("value",function(snap){
     var remote=snap.val();
-    if(_remoteIgnore)return;
+    // Игнорируем только точное эхо нашей собственной последней записи — любое
+    // РЕАЛЬНОЕ изменение от других участников применяется немедленно, без окна ожидания
+    if(remote&&_lastSentJson&&JSON.stringify(remote)===_lastSentJson)return;
     // Если у группы нет данных в Firebase (новая группа или первый вход лидера) —
     // инициализируем ПУСТЫМ шаблоном и сразу сохраняем, не тянем данные от предыдущей группы
     if(!remote){
