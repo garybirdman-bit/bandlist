@@ -21,9 +21,12 @@ self.addEventListener('activate', function(e){
 });
 
 self.addEventListener('fetch', function(e){
-  // Network first — always try to get fresh content
+  // Network first — always try to get fresh content.
+  // cache:'no-store' forces a real network round-trip and bypasses
+  // the browser's own HTTP cache, which could otherwise return a
+  // stale response even though this handler is "network first".
   e.respondWith(
-    fetch(e.request).then(function(response){
+    fetch(e.request, {cache: 'no-store'}).then(function(response){
       // Cache the fresh response
       if(response && response.status === 200){
         var copy = response.clone();
