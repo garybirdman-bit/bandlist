@@ -19,6 +19,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
@@ -30,7 +31,7 @@ window.addEventListener('error',function(e){
   window._jsErr=e.message+' @'+(e.filename||'')+':'+(e.lineno||'');
   setTimeout(function(){window._jsErr=null;},5000);
 });
-var db=null,auth=null;
+var db=null,auth=null,analytics=null;
 try{
   firebase.initializeApp({
     apiKey:"AIzaSyCOUlsS9gumRqtioIPTu7rzV0hVpXgVnRA",
@@ -40,11 +41,33 @@ try{
     storageBucket:"bandlist-c750c.firebasestorage.app",
     messagingSenderId:"946709262652",
     appId:"1:946709262652:web:547467b3add1e1d5d6ee39"
+    // measurementId:"G-XXXXXXXXXX" — добавь сюда после включения Google Analytics
+    // в консоли Firebase (Project settings → Integrations → Google Analytics),
+    // иначе logEvent() ниже просто ничего не будет делать (безопасно, без ошибок)
   });
   db=firebase.database();
   auth=firebase.auth();
+  try{analytics=firebase.analytics();}catch(e){console.log("Analytics недоступна — добавь measurementId в конфиг");}
 }catch(e){console.log("Firebase недоступен — работаем локально");}
+// Безопасная обёртка — можно звать где угодно, даже если Analytics не настроена
+function logEvent(name,params){
+  try{if(analytics)analytics.logEvent(name,params||{});}catch(e){}
+}
 </script>
+<style>
+@media (min-width:700px){
+  /* Планшет/ноутбук: текст, плеер и Редактировать держим в комфортной
+     читаемой колонке по центру, а не растягиваем на всю ширину экрана */
+  #lftContent{max-width:720px;margin:0 auto;font-size:24px!important;}
+  #lftPlayerFooter,.perf-footer,#lftActions,#lftSecNav{max-width:720px;margin-left:auto!important;margin-right:auto!important;}
+  #editSheetContent{max-width:560px;margin:0 auto;}
+  .lft-chords-view{font-size:17px!important;}
+}
+@media (min-width:1100px){
+  #lftContent{max-width:840px;}
+  #editSheetContent{max-width:600px;}
+}
+</style>
 <style>
 :root{
   --or:var(--tx2);--or-dim:rgba(255,255,255,0.15);--chord-clr:#e8994d;
@@ -428,7 +451,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 /* ChordPro рендер */
 .cpro-wrap{padding:4px 0 12px;font-family:'Golos Text',sans-serif;}
 .perf-line .cpro-wrap{padding:0;}
-.cpro-directive{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#555;margin:22px 0 16px;font-family:'Inter',sans-serif;font-weight:600;}
+.cpro-directive{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#a8a4a0;margin:22px 0 16px;font-family:'Inter',sans-serif;font-weight:600;}
 .cpro-directive:first-child{margin-top:0;}
 .cpro-line{display:flex;flex-wrap:wrap;align-items:flex-end;margin-bottom:0;margin-top:6px;line-height:1;column-gap:0.28em;row-gap:2px;}
 .cpro-directive+.cpro-line{margin-top:0;}
@@ -536,7 +559,7 @@ textarea.fi.tall{min-height:120px;}
 .perf-body{flex:1;min-height:0;overflow-y:auto;padding:16px 24px 40px;scrollbar-width:none;}
 .perf-body::-webkit-scrollbar{display:none;}
 .perf-section{margin-bottom:20px;}
-.perf-lhd{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--tx2);margin:12px 0 12px;opacity:0.8;}
+.perf-lhd{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a8a4a0;margin:12px 0 12px;opacity:0.9;}
 .perf-line{font-size:13px;font-weight:500;line-height:1.65;color:#f0ece4;letter-spacing:0.2px;}
 .perf-footer{display:flex;align-items:center;gap:10px;padding:10px 20px;border-top:1px solid #2a2a2a;flex-shrink:0;background:#111114;}
 #perfFooter{flex-direction:column;align-items:stretch;transition:opacity .25s ease, transform .25s ease;}
@@ -4304,6 +4327,7 @@ function openSong(id){
   })();
   openLiveFullTab(s,'lyrics',uniqueKey);
   history.pushState({panel:id},"","");
+  logEvent('song_opened',{song_title:s.title});
 }
 function closePanel(){
   closeCtx();
@@ -4574,6 +4598,7 @@ function enterLyricsTapMode(){
   lyricsTapUndoStack=[];
   var s=findR(panel.id);if(!s)return;
   lyricsTapSongId=+s.id;
+  logEvent('tap_sections_used',{song_title:s.title});
   var songRef=s;
   var lines=(s.lyrics||'').split('\n');
   var secs=[];
@@ -6682,6 +6707,7 @@ function openImportModal(explicitSongId){
           save();
           ov.remove();
           panel.tab='lyrics';
+          logEvent('import_from_text_used',{song_title:s.title});
           // Обновляем реально видимый экран — это liveFullTab, старая панель больше не показывается
           var lftEl=document.getElementById('liveFullTab');
           if(lftEl && lftEl.classList.contains('open')){
@@ -7291,6 +7317,31 @@ function renderChordPro(text,semitones){
     if(!trimmed){html+='<div class="cpro-line-empty"></div>';return;}
     // Строка без аккордов
     if(trimmed.indexOf('[')<0){
+      // Но может быть строкой из "голых" аккордов без скобок — как в
+      // проигрышах с amdm.ru: "D G D D A Bm }x2". Проверяем: если каждое
+      // слово либо аккорд, либо метка повтора (x2, }x2, (x2), ×2) — красим
+      // как аккорды, а не как обычный текст.
+      var bareTokens=trimmed.split(/\s+/);
+      var chordTokenRe=/^[A-Ga-g][#b]?(?:m|maj7?|min|dim|aug|sus[24]?|add\d?|\d)*(?:\/[A-Ga-g][#b]?)?$/;
+      var repeatTokenRe=/^[\}\(]?[x×]\d+[\)]?$/i;
+      var hasRealChord=false;
+      var allBareOk=bareTokens.length>0&&bareTokens.every(function(tok){
+        if(chordTokenRe.test(tok)){hasRealChord=true;return true;}
+        return repeatTokenRe.test(tok);
+      });
+      if(allBareOk&&hasRealChord){
+        html+='<div class="cpro-line">';
+        bareTokens.forEach(function(tok){
+          if(chordTokenRe.test(tok)){
+            html+='<span class="cpro-chord-only">'+esc(transposeChord(tok,semitones))+'</span>';
+          } else {
+            var cleanTok=tok.replace(/[\{\}\(\)]/g,'');
+            html+='<span class="cpro-chord-only" style="color:#fff;">'+esc(cleanTok)+'</span>';
+          }
+        });
+        html+='</div>';
+        return;
+      }
       html+='<div class="cpro-line"><div class="cpro-chunk"><div class="cpro-chord"></div><div class="cpro-word">'+esc(line)+'</div></div></div>';
       return;
     }
@@ -7305,7 +7356,8 @@ function renderChordPro(text,semitones){
       var chordLikeRe=/^[A-Ga-g][#b]?(?:m|maj7?|min|dim|aug|sus[24]?|add\d?|\d)*(?:\/[A-Ga-g][#b]?)?$/;
       var looksLikeSection=chordsFound.length===1&&!chordLikeRe.test(chordsFound[0].trim());
       if(looksLikeSection){
-        html+='<div class="cpro-directive">'+esc(chordsFound[0])+'</div>';
+        var sectionLabel=chordsFound[0].split('|')[0].trim();
+        html+='<div class="cpro-directive">'+esc(sectionLabel)+'</div>';
         return;
       }
       html+='<div class="cpro-line">';
@@ -7695,6 +7747,7 @@ function openEditSheet(songId){
   rEditSheet();
   document.getElementById('editSheet').style.display='flex';
   history.pushState({editSheet:true},'','');
+  logEvent('edit_sheet_opened',{});
 }
 function _cleanupEmptyNewSong(s){
   // Если это только что созданная песня, и пользователь так и не ввёл ни
@@ -7703,7 +7756,7 @@ function _cleanupEmptyNewSong(s){
   if(!s||_pendingNewSongId==null||+s.id!==+_pendingNewSongId)return false;
   var titleVal=(s.title||'').trim();
   var artistVal=(s.artist||'').trim();
-  if(titleVal||artistVal){_pendingNewSongId=null;return false;}
+  if(titleVal||artistVal){_pendingNewSongId=null;logEvent('song_created',{song_title:titleVal});return false;}
   D.repertoire=D.repertoire.filter(function(x){return +x.id!==+s.id;});
   save();
   rList();rRep();
@@ -8004,6 +8057,7 @@ function toggleLiveMode(){
     startLivePlayerSync();
     attachLiveSync();
     updateDeviceRoleBadge();
+    logEvent('live_session_started',{has_group:!!currentGroupId});
     // Показываем выбор роли при каждом входе в Live (если есть группа)
     if(currentGroupId) setTimeout(openDeviceRoleSheet, 300);
   } else {
