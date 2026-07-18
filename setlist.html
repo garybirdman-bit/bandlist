@@ -9127,7 +9127,7 @@ function _smoothScrollTo(el,targetTop,durationMs){
 function toggleLftScroll(forcedSongId){
   lftScrollOn=!lftScrollOn;
   var btn=document.getElementById('lftScrollBtn');
-  if(btn){btn.classList.toggle('on',lftScrollOn);btn.innerHTML=lftScrollOn?'■<br>STOP':'AUTO<br>SCROLL';}
+  if(btn){btn.classList.toggle('on',lftScrollOn);btn.innerHTML=lftScrollOn?'STOP':'AUTO<br>SCROLL';}
   if(lftScrollOn){
     var c=document.getElementById('lftContent');
     // Собираем секции с таймкодами
@@ -9146,34 +9146,51 @@ function toggleLftScroll(forcedSongId){
       return null;
     };
     if(sections.length>0){
-      // Умный скролл по таймкодам — как в Сцена
+      // Умный скролл по таймкодам — теперь НЕПРЕРЫВНЫЙ: вместо того чтобы
+      // стоять на месте и резко прыгать к следующей секции в момент её
+      // начала, каждый кадр вычисляем промежуточную позицию между текущей
+      // и следующей секцией, пропорционально прошедшему времени внутри
+      // этого интервала — движение плавное на всём протяжении, а не рывками.
       var lastIdx=-1;
       var allLftSecs=c?Array.prototype.slice.call(c.querySelectorAll('.perf-section')):[];
-      lftScrollInterval=setInterval(function(){
+      function _sectionScrollTop(idx){
+        var b=document.getElementById('lftContent');
+        var el=sections[idx]&&sections[idx].el;
+        if(!b||!el)return 0;
+        var bRect=b.getBoundingClientRect();
+        var eRect=el.getBoundingClientRect();
+        return b.scrollTop+(eRect.top-bRect.top)-4;
+      }
+      function _smartScrollFrame(){
+        if(!lftScrollOn)return;
         var lft=document.getElementById('liveFullTab');
-        if(!lft||!lft.classList.contains('open')){clearInterval(lftScrollInterval);return;}
+        if(!lft||!lft.classList.contains('open')){lftScrollOn=false;return;}
         var ct=getAudioTime();
-        if(ct===null) return;
-        var curIdx=-1;
-        for(var i=0;i<sections.length;i++){
-          if(ct>=sections[i].time) curIdx=i;
-        }
-        if(curIdx!==lastIdx && curIdx>=0){
-          lastIdx=curIdx;
+        if(ct!==null){
+          var curIdx=-1;
+          for(var i=0;i<sections.length;i++){if(ct>=sections[i].time) curIdx=i;}
           var b=document.getElementById('lftContent');
-          var el=sections[curIdx].el;
-          if(b&&el){
-            var bRect=b.getBoundingClientRect();
-            var eRect=el.getBoundingClientRect();
-            var scrollTarget=b.scrollTop+(eRect.top-bRect.top)-4;
-            _smoothScrollTo(b,Math.max(0,scrollTarget),700);
+          if(curIdx>=0&&b){
+            var startPos=_sectionScrollTop(curIdx);
+            var targetPos=startPos;
+            if(curIdx+1<sections.length){
+              var span=sections[curIdx+1].time-sections[curIdx].time;
+              var progress=span>0?Math.min(1,Math.max(0,(ct-sections[curIdx].time)/span)):0;
+              var endPos=_sectionScrollTop(curIdx+1);
+              targetPos=startPos+(endPos-startPos)*progress;
+            }
+            b.scrollTop=Math.max(0,targetPos);
+            if(curIdx!==lastIdx){
+              lastIdx=curIdx;
+              var navIdx=allLftSecs.indexOf(sections[curIdx].el);
+              if(navIdx>=0) lftSetActiveNav2(navIdx,document.getElementById('lftSecNav'));
+              if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
+            }
           }
-          var navIdx=allLftSecs.indexOf(sections[curIdx].el);
-          if(navIdx>=0) lftSetActiveNav2(navIdx,document.getElementById('lftSecNav'));
-          // Держим экран включённым
-          if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
         }
-      },200);
+        lftScrollInterval=requestAnimationFrame(_smartScrollFrame);
+      }
+      lftScrollInterval=requestAnimationFrame(_smartScrollFrame);
     } else {
       // Нет таймкодов — обычный автоскролл
       // Нет таймкодов — обычный автоскролл. Скорость масштабируем под размер
