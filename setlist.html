@@ -1122,6 +1122,16 @@ textarea.fi.tall{min-height:120px;}
     <span id="evGotoSetlistTxt">Перейти к сетлисту</span>
   </button>
 
+  <!-- Архив — для прошедших событий со снимком: список песен только для чтения,
+       застывший на момент события, не связан с текущим (возможно изменившимся) сетлистом -->
+  <div id="evArchiveBlock" style="display:none;margin-top:8px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:9px;letter-spacing:1.5px;background:var(--s2);color:var(--mu);padding:3px 8px;border-radius:5px;text-transform:uppercase;">Архив</span>
+      <span id="evArchiveLbl" style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:1px;">Что играли</span>
+    </div>
+    <div id="evArchiveList" style="display:flex;flex-direction:column;gap:1px;border-radius:10px;overflow:hidden;"></div>
+  </div>
+
   <!-- Редактировать — редкое административное действие, поэтому тусклая кнопка и вторая -->
   <button id="eventEditBtn" data-editable onclick="enterEventEditMode()" style="display:none;width:100%;padding:14px;background:var(--s2);border:1.5px solid var(--br);border-radius:10px;color:#fff;font-size:13px;font-weight:600;letter-spacing:0.5px;cursor:pointer;font-family:'Golos Text',sans-serif;margin-top:8px;align-items:center;justify-content:center;gap:8px;">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -2975,9 +2985,32 @@ function evShiftMonth(delta){
 }
 function evPad(n){return n<10?'0'+n:''+n;}
 function evDateStr(y,m,d){return y+'-'+evPad(m+1)+'-'+evPad(d);}
+function takeEventSnapshotsIfNeeded(){
+  if(!D.events)return;
+  var now=new Date();
+  var todayStr=evDateStr(now.getFullYear(),now.getMonth(),now.getDate());
+  var changed=false;
+  D.events.forEach(function(ev){
+    if(ev.songsSnapshot)return; // уже есть снимок — не трогаем
+    if(!ev.date||ev.date>=todayStr)return; // событие ещё не наступило
+    if(!ev.concertId)return; // не привязан сетлист — нечего снимать
+    var secs=D.sections[ev.concertId];
+    if(!secs)return;
+    var songIds=[];
+    secs.forEach(function(sec){(sec.songs||[]).forEach(function(sid){if(songIds.indexOf(sid)<0)songIds.push(sid);});});
+    var snap=songIds.map(function(sid){
+      var s=findR(sid);
+      return s?{id:s.id,title:s.title,artist:s.artist,key:s.key}:null;
+    }).filter(Boolean);
+    ev.songsSnapshot=snap; // застывший список — дальше не меняется, даже если сетлист поменяют
+    changed=true;
+  });
+  if(changed) save();
+}
 
 function rEvents(){
   if(!D.events)D.events=[];
+  takeEventSnapshotsIfNeeded();
   var monthNamesRu=['Января','Февраля','Марта','Апреля','Мая','Июня','Июля','Августа','Сентября','Октября','Ноября','Декабря'];
   var monthNamesEn=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var lbl=document.getElementById('evMonthLabel');
@@ -3132,7 +3165,27 @@ function openEventEditor(id){
   updateConcertBtnLabel();
   var gotoBtn=document.getElementById('evGotoSetlistBtn');
   var hasLinkedConcert=ev&&ev.concertId&&D.concerts.find(function(c){return c.id===ev.concertId;});
-  if(gotoBtn) gotoBtn.style.display=hasLinkedConcert?'flex':'none';
+  var archiveBlock=document.getElementById('evArchiveBlock');
+  if(ev&&ev.songsSnapshot&&ev.songsSnapshot.length){
+    // Прошедшее событие со снимком — показываем архив, живую ссылку на сетлист прячем
+    if(gotoBtn) gotoBtn.style.display='none';
+    if(archiveBlock){
+      archiveBlock.style.display='block';
+      var lbl=document.getElementById('evArchiveLbl');
+      if(lbl) lbl.textContent=LANG==='en'?'What we played':'Что играли';
+      var listEl=document.getElementById('evArchiveList');
+      listEl.innerHTML=ev.songsSnapshot.map(function(s){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);">'
+          +'<div style="flex:1;min-width:0;"><div style="font-size:14px;color:var(--tx);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(s.title)+'</div>'
+          +'<div style="font-size:11px;color:var(--mu);margin-top:1px;">'+esc(s.artist||'')+'</div></div>'
+          +'<div style="font-size:13px;color:var(--tx2);font-weight:700;flex-shrink:0;">'+esc(s.key||'')+'</div>'
+          +'</div>';
+      }).join('');
+    }
+  } else {
+    if(gotoBtn) gotoBtn.style.display=hasLinkedConcert?'flex':'none';
+    if(archiveBlock) archiveBlock.style.display='none';
+  }
   document.getElementById('eventEditor').style.display='flex';
   history.pushState({eventEditor:true},'','');
   if(ev){
