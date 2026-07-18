@@ -9330,13 +9330,12 @@ function lftFontChange(d){
 }
 
 function lftScrollSpeedChange(d){
-  lftScrollSpeed=Math.max(0.2,Math.min(10,Math.round((lftScrollSpeed+d*0.2)*10)/10));
-  if(lftScrollOn){
-    clearInterval(lftScrollInterval);
-    lftScrollInterval=setInterval(function(){
-      var c=document.getElementById('lftContent');if(c)c.scrollTop+=lftScrollSpeed;
-    },50);
-  }
+  // Раньше шаг был фиксированным числом (+0.2) — на низкой скорости (0.2-0.5)
+  // это огромный относительный скачок (почти удвоение), на высокой —
+  // незаметно. Теперь шаг пропорциональный (±15%), ощущается одинаково
+  // плавно на любом уровне скорости.
+  var factor=d>0?1.15:(1/1.15);
+  lftScrollSpeed=Math.max(0.2,Math.min(10,Math.round(lftScrollSpeed*factor*100)/100));
 }
 
 // Плавная анимация скролла к нужной позиции с ease-in-out — встроенный
@@ -9433,16 +9432,16 @@ function toggleLftScroll(forcedSongId){
       // между кадрами — раньше был setInterval с фиксированным шагом раз в
       // 50мс, что при развесе кадров браузера выглядело дёргано, особенно
       // на большом шаге (крупный шрифт).
-      var _scrollScale=Math.max(1,lftFontSz/13);
-      var _pxPerSec=lftScrollSpeed*_scrollScale*20; // подобрано так, чтобы визуально совпадать со старой скоростью
       var _lastTs=null;
       function _scrollFrame(ts){
         if(!lftScrollOn)return;
         var b=document.getElementById('lftContent');
         if(!b){lftScrollInterval=requestAnimationFrame(_scrollFrame);return;}
         if(_lastTs!==null){
-          var dt=(ts-_lastTs)/1000;
-          b.scrollTop+=_pxPerSec*dt;
+          var dt=Math.min(0.1,(ts-_lastTs)/1000); // ограничиваем скачок времени — если кадр задержался (подвисание), не даём резкий рывок вперёд
+          var scrollScale=Math.max(1,lftFontSz/13);
+          var pxPerSec=lftScrollSpeed*scrollScale*20; // читаем актуальные значения каждый кадр — регулятор скорости срабатывает сразу
+          b.scrollTop+=pxPerSec*dt;
           if(b.scrollTop+b.clientHeight>=b.scrollHeight){toggleLftScroll();return;}
         }
         _lastTs=ts;
