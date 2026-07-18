@@ -95,7 +95,7 @@ function logEvent(name,params){
   #viewEvents .hero-row{grid-column:1;grid-row:1;}
   #viewEvents .ev-month-row{grid-column:1;grid-row:2;}
   #viewEvents .ev-cal{grid-column:1;grid-row:3;align-self:start;}
-  #viewEvents .ev-section-lbl{grid-column:2;grid-row:1;align-self:end;margin-bottom:8px;}
+  #viewEvents #evTabRow{grid-column:2;grid-row:1;align-self:end;margin-bottom:8px;padding-left:0;padding-right:0;}
   #viewEvents .lw{grid-column:2;grid-row:2/4;overflow-y:auto;}
 }
 </style>
@@ -1021,13 +1021,16 @@ textarea.fi.tall{min-height:120px;}
 
 <!-- EVENTS VIEW -->
 <div id="viewEvents" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-  <div class="hero-row" style="padding:0 18px;margin-top:2px;">
+  <div class="hero-row" style="padding:0 18px;margin-top:2px;gap:8px;">
     <button class="hero-btn-add" id="evAddBtn" data-editable onclick="openEventEditor(null)" style="flex:1;">
       <span class="add-icon-wrap">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#2dd4bf" stroke-width="2.4" stroke-linecap="round"/></svg>
       </span>
       <span class="lbl" id="evAddBtnTxt" style="color:#2dd4bf;">Добавить событие</span>
       <span class="add-icon-wrap" aria-hidden="true"></span>
+    </button>
+    <button onclick="openStatsDashboard()" title="Статистика" style="width:38px;height:38px;flex-shrink:0;border-radius:10px;background:var(--s2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
     </button>
   </div>
   <div class="ev-month-row">
@@ -1041,13 +1044,25 @@ textarea.fi.tall{min-height:120px;}
     <div class="ev-weekdays" id="evWeekdays"></div>
     <div class="ev-grid" id="evGrid"></div>
   </div>
-  <div class="ev-section-lbl" id="evListLbl">Ближайшие</div>
+  <div id="evTabRow" style="display:flex;gap:8px;padding:12px 20px 8px;flex-shrink:0;">
+    <button id="evTabUpcoming" onclick="setEvListTab('upcoming')" style="flex:1;height:38px;border-radius:10px;border:none;background:var(--s2);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
+    <button id="evTabArchive" onclick="setEvListTab('archive')" style="flex:1;height:38px;border-radius:10px;border:none;background:transparent;color:var(--mu2);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
+  </div>
   <div class="lw" style="overflow-y:auto;flex:1;">
     <div class="ev-list" id="evList"></div>
   </div>
 </div>
 
 <!-- Карточка события: создание/редактирование, привязка сетлиста -->
+<!-- Дашборд статистики: концерты, топ песен, площадки — считается из архива событий -->
+<div id="statsDashboard" style="display:none;position:fixed;inset:0;background:#111015;z-index:200;flex-direction:column;overflow-y:auto;padding:24px 20px 40px;box-sizing:border-box;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+    <button onclick="closeStatsDashboard()" style="background:none;border:none;color:var(--tx2);font-size:20px;cursor:pointer;">‹</button>
+    <div style="font-family:'Golos Text',sans-serif;font-size:17px;font-weight:600;color:#fff;" id="statsTitle">Статистика</div>
+  </div>
+  <div id="statsContent"></div>
+</div>
+
 <div id="eventEditor" style="display:none;position:fixed;inset:0;background:#111015;z-index:200;flex-direction:column;overflow-y:auto;padding:24px 20px 40px;box-sizing:border-box;">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;position:relative;">
     <button onclick="closeEventEditor()" style="background:none;border:none;color:var(--tx2);font-size:20px;cursor:pointer;z-index:1;">‹</button>
@@ -3007,6 +3022,156 @@ function takeEventSnapshotsIfNeeded(){
   });
   if(changed) save();
 }
+function openStatsDashboard(){
+  document.getElementById('statsTitle').textContent=LANG==='en'?'Statistics':'Статистика';
+  renderStatsDashboard();
+  document.getElementById('statsDashboard').style.display='flex';
+  history.pushState({statsDashboard:true},'','');
+}
+function closeStatsDashboard(){
+  history.back();
+}
+function _hideStatsDashboard(){
+  document.getElementById('statsDashboard').style.display='none';
+}
+var statsPeriod='all'; // '1','3','6','12','all' — сколько месяцев назад учитывать
+var STATS_PERIODS=[
+  {key:'1',ru:'Месяц',en:'Month'},
+  {key:'3',ru:'3 мес',en:'3 mo'},
+  {key:'6',ru:'6 мес',en:'6 mo'},
+  {key:'12',ru:'Год',en:'Year'},
+  {key:'all',ru:'Всё время',en:'All time'}
+];
+function toggleStatsPeriodPicker(){
+  var p=document.getElementById('statsPeriodPicker');
+  if(!p)return;
+  if(p.style.display==='block'){p.style.display='none';return;}
+  var itemsHtml=STATS_PERIODS.map(function(o,i){
+    var active=o.key===statsPeriod;
+    var borderStyle=i<STATS_PERIODS.length-1?'border-bottom:1px solid rgba(255,255,255,0.08);':'';
+    var checkSvg=active?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>':'';
+    return '<div onclick="selectStatsPeriod(\''+o.key+'\')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;font-family:\'Inter\',sans-serif;font-size:14px;color:'+(active?'#fff':'#d2d2d2')+';font-weight:'+(active?'700':'400')+';cursor:pointer;'+borderStyle+'"><span>'+(LANG==='en'?o.en:o.ru)+'</span>'+checkSvg+'</div>';
+  }).join('');
+  p.innerHTML=itemsHtml;
+  p.style.display='block';
+}
+function selectStatsPeriod(key){
+  statsPeriod=key;
+  var lbl=document.getElementById('statsPeriodLbl');
+  var opt=STATS_PERIODS.find(function(o){return o.key===key;});
+  if(lbl&&opt) lbl.textContent=LANG==='en'?opt.en:opt.ru;
+  var p=document.getElementById('statsPeriodPicker');
+  if(p) p.style.display='none';
+  renderStatsDashboard();
+}
+document.addEventListener('click',function(e){
+  var p=document.getElementById('statsPeriodPicker');
+  var btn=document.getElementById('statsPeriodBtn');
+  if(!p||p.style.display!=='block')return;
+  if(p.contains(e.target)||(btn&&btn.contains(e.target)))return;
+  p.style.display='none';
+});
+function setStatsPeriod(k){
+  statsPeriod=k;
+  renderStatsDashboard();
+}
+function renderStatsDashboard(){
+  var c=document.getElementById('statsContent');
+  if(!c)return;
+  var now=new Date();
+  var todayStr=evDateStr(now.getFullYear(),now.getMonth(),now.getDate());
+  var allPlayed=(D.events||[]).filter(function(e){return e.date<todayStr&&e.songsSnapshot&&e.songsSnapshot.length;});
+
+  var curOpt=STATS_PERIODS.find(function(o){return o.key===statsPeriod;})||STATS_PERIODS[STATS_PERIODS.length-1];
+  var periodRow='<div style="position:relative;margin-bottom:20px;">'
+    +'<button id="statsPeriodBtn" onclick="toggleStatsPeriodPicker()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--tx2);font-family:\'Inter\',sans-serif;font-size:15px;cursor:pointer;padding:4px 2px;">'
+      +'<span id="statsPeriodLbl">'+(LANG==='en'?curOpt.en:curOpt.ru)+'</span>'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="19,12 12,19 5,12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>'
+    +'</button>'
+    +'<div id="statsPeriodPicker" style="display:none;position:absolute;top:36px;left:0;background:#363940;border:none;border-radius:14px;padding:4px 0;z-index:50;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.4);"></div>'
+    +'</div>';
+
+  if(!allPlayed.length){
+    c.innerHTML=periodRow+'<div style="text-align:center;padding:60px 20px;color:var(--mu2);font-size:13px;line-height:1.6;">'+
+      (LANG==='en'
+        ?'No data yet.<br>Statistics will appear here once events with a linked setlist happen and move to the archive.'
+        :'Данных пока нет.<br>Статистика появится, когда события с привязанным сетлистом пройдут и попадут в архив.')+
+      '</div>';
+    return;
+  }
+
+  var played=allPlayed;
+  if(statsPeriod!=='all'){
+    var cutoff=new Date(now);
+    cutoff.setMonth(cutoff.getMonth()-parseInt(statsPeriod,10));
+    var cutoffStr=evDateStr(cutoff.getFullYear(),cutoff.getMonth(),cutoff.getDate());
+    played=allPlayed.filter(function(e){return e.date>=cutoffStr;});
+  }
+  var countAll=played.length;
+
+  if(!countAll){
+    c.innerHTML=periodRow+'<div style="text-align:center;padding:60px 20px;color:var(--mu2);font-size:13px;line-height:1.6;">'+
+      (LANG==='en'?'No concerts in this period.':'За этот период концертов не было.')+
+      '</div>';
+    return;
+  }
+
+  var songCounts={};
+  played.forEach(function(ev){
+    ev.songsSnapshot.forEach(function(s){
+      var key=s.id;
+      if(!songCounts[key]) songCounts[key]={title:s.title,artist:s.artist,count:0};
+      songCounts[key].count++;
+    });
+  });
+  var topSongs=Object.keys(songCounts).map(function(k){return songCounts[k];}).sort(function(a,b){return b.count-a.count;}).slice(0,10);
+
+  var venueCounts={};
+  played.forEach(function(ev){
+    if(!ev.location)return;
+    venueCounts[ev.location]=(venueCounts[ev.location]||0)+1;
+  });
+  var topVenues=Object.keys(venueCounts).map(function(k){return {name:k,count:venueCounts[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,5);
+
+  var html=periodRow;
+  html+='<div style="margin-bottom:28px;">'
+    +_statBox(countAll,LANG==='en'?'Concerts':'Концертов')
+    +'</div>';
+
+  html+='<div style="font-size:11px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;margin-bottom:10px;">'+(LANG==='en'?'Most played':'Чаще всего играли')+'</div>';
+  if(topSongs.length){
+    html+='<div style="display:flex;flex-direction:column;gap:1px;border-radius:10px;overflow:hidden;margin-bottom:28px;">'
+      +topSongs.map(function(s,i){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);">'
+          +'<div style="font-size:12px;color:var(--mu2);width:16px;flex-shrink:0;">'+(i+1)+'</div>'
+          +'<div style="flex:1;min-width:0;"><div style="font-size:14px;color:var(--tx);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(s.title)+'</div>'
+          +'<div style="font-size:11px;color:var(--mu);margin-top:1px;">'+esc(s.artist||'')+'</div></div>'
+          +'<div style="font-size:13px;color:#2dd4bf;font-weight:700;flex-shrink:0;">×'+s.count+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }
+
+  if(topVenues.length){
+    html+='<div style="font-size:11px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;margin-bottom:10px;">'+(LANG==='en'?'Venues':'Площадки')+'</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:1px;border-radius:10px;overflow:hidden;">'
+      +topVenues.map(function(v){
+        return '<div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);">'
+          +'<div style="flex:1;min-width:0;font-size:14px;color:var(--tx);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(v.name)+'</div>'
+          +'<div style="font-size:13px;color:#2dd4bf;font-weight:700;flex-shrink:0;">×'+v.count+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }
+
+  c.innerHTML=html;
+}
+function _statBox(num,lbl){
+  return '<div style="flex:1;background:var(--s1);border-radius:12px;padding:16px 10px;text-align:center;">'
+    +'<div style="font-size:26px;font-weight:800;color:#fff;font-family:\'Golos Text\',sans-serif;">'+num+'</div>'
+    +'<div style="font-size:10px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-top:4px;">'+lbl+'</div>'
+    +'</div>';
+}
 
 function rEvents(){
   if(!D.events)D.events=[];
@@ -3045,22 +3210,28 @@ function rEvents(){
     }
   }
 
-  var listLbl=document.getElementById('evListLbl');
-  if(listLbl) listLbl.textContent=LANG==='en'?'Upcoming':'Ближайшие';
   var list=document.getElementById('evList');
   if(!list)return;
   list.innerHTML='';
-  var sorted=D.events.slice().sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time);});
-  if(!sorted.length){
-    list.innerHTML='<div class="ev-empty">'+(LANG==='en'?'No events yet':'Событий пока нет')+'</div>';
+  var todayStr2=evDateStr(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  var upcoming=D.events.filter(function(e){return e.date>=todayStr2;}).sort(function(a,b){return (a.date+a.time).localeCompare(b.date+b.time);});
+  var past=D.events.filter(function(e){return e.date<todayStr2;}).sort(function(a,b){return (b.date+b.time).localeCompare(a.date+a.time);}); // архив — сначала недавние
+  var tabUp=document.getElementById('evTabUpcoming');
+  var tabArch=document.getElementById('evTabArchive');
+  if(tabUp) tabUp.textContent=(LANG==='en'?'Upcoming':'Ближайшие')+' ('+upcoming.length+')';
+  if(tabArch) tabArch.textContent=(LANG==='en'?'Archive':'Архив')+' ('+past.length+')';
+  var activeList=evListTab==='archive'?past:upcoming;
+  if(!activeList.length){
+    list.innerHTML='<div class="ev-empty">'+(evListTab==='archive'?(LANG==='en'?'Archive is empty':'Архив пуст'):(LANG==='en'?'No upcoming events':'Ближайших событий нет'))+'</div>';
     return;
   }
   var monthsShortRu=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
   var monthsShortEn=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-  sorted.forEach(function(ev){
+  activeList.forEach(function(ev){
     var parts=ev.date.split('-');
     var mIdx=+parts[1]-1;
     var card=document.createElement('div');card.className='ev-card';
+    if(evListTab==='archive') card.style.opacity='0.72';
     card.innerHTML=
       '<div class="ev-date-box"><div class="d">'+parts[2]+'</div><div class="m">'+(LANG==='en'?monthsShortEn[mIdx]:monthsShortRu[mIdx])+'</div></div>'+
       '<div class="ev-info">'+
@@ -3071,6 +3242,15 @@ function rEvents(){
     card.addEventListener('click',function(){openEventCard(ev.id);});
     list.appendChild(card);
   });
+}
+var evListTab='upcoming';
+function setEvListTab(t){
+  evListTab=t;
+  var tabUp=document.getElementById('evTabUpcoming');
+  var tabArch=document.getElementById('evTabArchive');
+  if(tabUp){tabUp.style.background=t==='upcoming'?'var(--s2)':'transparent';tabUp.style.color=t==='upcoming'?'#fff':'var(--mu2)';}
+  if(tabArch){tabArch.style.background=t==='archive'?'var(--s2)':'transparent';tabArch.style.color=t==='archive'?'#fff':'var(--mu2)';}
+  rEvents();
 }
 
 // Тап по карточке/дате — всегда открывает информацию о событии (с возможностью
@@ -9324,6 +9504,8 @@ window.addEventListener('popstate',function(){
   }
   var mixSheet=document.getElementById('liveMyMixSheet');
   if(mixSheet && mixSheet.style.display!=='none' && mixSheet.style.display!==''){_hideLiveMyMixSheet();return;}
+  var statsEl=document.getElementById('statsDashboard');
+  if(statsEl && statsEl.style.display!=='none' && statsEl.style.display!==''){_hideStatsDashboard();return;}
   if(document.getElementById('liveFullTab').classList.contains('open')){closeLiveFullTab();return;}
   if(document.getElementById('liveOverlay').classList.contains('open')){toggleLiveMode();return;}
 });
