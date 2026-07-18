@@ -9360,98 +9360,76 @@ function toggleLftScroll(forcedSongId){
   lftScrollOn=!lftScrollOn;
   var btn=document.getElementById('lftScrollBtn');
   if(btn){btn.classList.toggle('on',lftScrollOn);btn.innerHTML=lftScrollOn?'STOP':'AUTO<br>SCROLL';}
-  if(lftScrollOn){
-    var c=document.getElementById('lftContent');
-    // Собираем секции с таймкодами
-    var sections=[];
-    if(c) c.querySelectorAll('.perf-section[data-time]').forEach(function(el){
-      sections.push({el:el,time:parseFloat(el.dataset.time)});
-    });
-    // Источник аудио — конкретная песня, если передан songId явно, иначе активная карточка списка
-    var getAudioTime=function(){
-      var sid=forcedSongId!==undefined&&forcedSongId!==null?forcedSongId:lftCurrentSongId;
-      if(sid===undefined||sid===null) return null;
-      var cs=liveCardStates[sid];
-      if(cs&&cs.cardState&&typeof cs.cardState.liveElapsed==='number'&&cs.cardState.tPlaying){
-        return cs.cardState.liveElapsed;
-      }
-      return null;
-    };
-    if(sections.length>0){
-      // Умный скролл по таймкодам — теперь НЕПРЕРЫВНЫЙ: вместо того чтобы
-      // стоять на месте и резко прыгать к следующей секции в момент её
-      // начала, каждый кадр вычисляем промежуточную позицию между текущей
-      // и следующей секцией, пропорционально прошедшему времени внутри
-      // этого интервала — движение плавное на всём протяжении, а не рывками.
-      var lastIdx=-1;
-      var allLftSecs=c?Array.prototype.slice.call(c.querySelectorAll('.perf-section')):[];
-      function _sectionScrollTop(idx){
-        var b=document.getElementById('lftContent');
-        var el=sections[idx]&&sections[idx].el;
-        if(!b||!el)return 0;
-        var bRect=b.getBoundingClientRect();
-        var eRect=el.getBoundingClientRect();
-        return b.scrollTop+(eRect.top-bRect.top)-4;
-      }
-      function _smartScrollFrame(){
-        if(!lftScrollOn)return;
-        var lft=document.getElementById('liveFullTab');
-        if(!lft||!lft.classList.contains('open')){lftScrollOn=false;return;}
-        var ct=getAudioTime();
-        if(ct!==null){
-          var curIdx=-1;
-          for(var i=0;i<sections.length;i++){if(ct>=sections[i].time) curIdx=i;}
-          var b=document.getElementById('lftContent');
-          if(curIdx>=0&&b){
-            var startPos=_sectionScrollTop(curIdx);
-            var targetPos=startPos;
-            if(curIdx+1<sections.length){
-              var span=sections[curIdx+1].time-sections[curIdx].time;
-              var progress=span>0?Math.min(1,Math.max(0,(ct-sections[curIdx].time)/span)):0;
-              var endPos=_sectionScrollTop(curIdx+1);
-              targetPos=startPos+(endPos-startPos)*progress;
-            }
-            b.scrollTop=Math.max(0,targetPos);
-            if(curIdx!==lastIdx){
-              lastIdx=curIdx;
-              var navIdx=allLftSecs.indexOf(sections[curIdx].el);
-              if(navIdx>=0) lftSetActiveNav2(navIdx,document.getElementById('lftSecNav'));
-              if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
-            }
-          }
-        }
-        lftScrollInterval=requestAnimationFrame(_smartScrollFrame);
-      }
-      lftScrollInterval=requestAnimationFrame(_smartScrollFrame);
-    } else {
-      // Нет таймкодов — обычный автоскролл
-      // Нет таймкодов — обычный автоскролл. Скорость масштабируем под размер
-      // шрифта — иначе на крупном тексте (ноутбук/суфлёр) прежняя скорость,
-      // рассчитанная под мелкий текст на телефоне, почти незаметна глазу.
-      // Двигаем через requestAnimationFrame с расчётом по реальному времени
-      // между кадрами — раньше был setInterval с фиксированным шагом раз в
-      // 50мс, что при развесе кадров браузера выглядело дёргано, особенно
-      // на большом шаге (крупный шрифт).
-      var _lastTs=null;
-      function _scrollFrame(ts){
-        if(!lftScrollOn)return;
-        var b=document.getElementById('lftContent');
-        if(!b){lftScrollInterval=requestAnimationFrame(_scrollFrame);return;}
-        if(_lastTs!==null){
-          var dt=Math.min(0.1,(ts-_lastTs)/1000); // ограничиваем скачок времени — если кадр задержался (подвисание), не даём резкий рывок вперёд
-          var scrollScale=Math.max(1,lftFontSz/13);
-          var pxPerSec=lftScrollSpeed*scrollScale*20; // читаем актуальные значения каждый кадр — регулятор скорости срабатывает сразу
-          b.scrollTop+=pxPerSec*dt;
-          if(b.scrollTop+b.clientHeight>=b.scrollHeight){toggleLftScroll();return;}
-        }
-        _lastTs=ts;
-        lftScrollInterval=requestAnimationFrame(_scrollFrame);
-      }
-      lftScrollInterval=requestAnimationFrame(_scrollFrame);
+  clearInterval(lftScrollInterval);lftScrollInterval=null;
+  if(!lftScrollOn)return;
+
+  var c=document.getElementById('lftContent');
+  var sections=[];
+  if(c) c.querySelectorAll('.perf-section[data-time]').forEach(function(el){
+    sections.push({el:el,time:parseFloat(el.dataset.time)});
+  });
+  var allLftSecs=c?Array.prototype.slice.call(c.querySelectorAll('.perf-section')):[];
+  var lastIdx=-1;
+
+  var getAudioTime=function(){
+    var sid=forcedSongId!==undefined&&forcedSongId!==null?forcedSongId:lftCurrentSongId;
+    if(sid===undefined||sid===null) return null;
+    var cs=liveCardStates[sid];
+    if(cs&&cs.cardState&&typeof cs.cardState.liveElapsed==='number'&&cs.cardState.tPlaying){
+      return cs.cardState.liveElapsed;
     }
-  } else {
-    clearInterval(lftScrollInterval);lftScrollInterval=null;
+    return null;
+  };
+  function sectionScrollTop(idx){
+    var b=document.getElementById('lftContent');
+    var el=sections[idx]&&sections[idx].el;
+    if(!b||!el)return 0;
+    var bRect=b.getBoundingClientRect();
+    var eRect=el.getBoundingClientRect();
+    return b.scrollTop+(eRect.top-bRect.top)-4;
   }
+
+  // Единый простой цикл — тикает каждые 30мс, одинаково на телефоне и на
+  // компьютере. Если песня размечена по времени И аудио реально играет —
+  // едем синхронно с треком (интерполяция между секциями, без рывков).
+  // Во ВСЕХ остальных случаях (нет разметки, звук не запущен, что угодно
+  // пошло не так) — просто равномерный скролл на постоянной скорости,
+  // чтобы текст ГАРАНТИРОВАННО двигался сразу при нажатии, а не молча стоял.
+  lftScrollInterval=setInterval(function(){
+    var lft=document.getElementById('liveFullTab');
+    if(!lft||!lft.classList.contains('open')){clearInterval(lftScrollInterval);lftScrollInterval=null;lftScrollOn=false;return;}
+    var b=document.getElementById('lftContent');
+    if(!b)return;
+    var scrollScale=Math.max(1,lftFontSz/13);
+    var ct=sections.length>0?getAudioTime():null;
+
+    if(ct!==null){
+      // Синхронно с таймкодами трека
+      var curIdx=-1;
+      for(var i=0;i<sections.length;i++){if(ct>=sections[i].time) curIdx=i;}
+      if(curIdx>=0){
+        var startPos=sectionScrollTop(curIdx);
+        var targetPos=startPos;
+        if(curIdx+1<sections.length){
+          var span=sections[curIdx+1].time-sections[curIdx].time;
+          var progress=span>0?Math.min(1,Math.max(0,(ct-sections[curIdx].time)/span)):0;
+          var endPos=sectionScrollTop(curIdx+1);
+          targetPos=startPos+(endPos-startPos)*progress;
+        }
+        b.scrollTop=Math.max(0,targetPos);
+        if(curIdx!==lastIdx){
+          lastIdx=curIdx;
+          var navIdx=allLftSecs.indexOf(sections[curIdx].el);
+          if(navIdx>=0) lftSetActiveNav2(navIdx,document.getElementById('lftSecNav'));
+          if(!globalWakeLock||globalWakeLock.released) requestGlobalWakeLock();
+        }
+      }
+    } else {
+      // Резервный/обычный режим — постоянная скорость, регулируется кнопками -/+
+      b.scrollTop+=lftScrollSpeed*scrollScale;
+      if(b.scrollTop+b.clientHeight>=b.scrollHeight){toggleLftScroll();return;}
+    }
+  },30);
 }
 
 function closeLiveFullTab(){
