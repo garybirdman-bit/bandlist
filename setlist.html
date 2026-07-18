@@ -69,11 +69,26 @@ function logEvent(name,params){
   #editSheetContent{max-width:560px;margin:0 auto;}
   #lftContent .cpro-chord{min-height:34px;}
   #lftContent .cpro-line{margin-bottom:6px;}
+  #lftContent .map-canvas{gap:10px;}
+  #lftContent .map-blk{width:64px;height:64px;border-radius:12px;}
+  #lftContent .map-blk-lbl{font-size:14px;}
 }
 @media (min-width:1100px){
   #lftContent{max-width:1000px;}
   #editSheetContent{max-width:600px;}
   #lftContent .cpro-chord{min-height:42px;}
+  #lftContent .map-blk{width:80px;height:80px;border-radius:14px;}
+  #lftContent .map-blk-lbl{font-size:16px;}
+}
+@media (min-width:820px){
+  /* Экран Событий на широком экране: календарь компактной колонкой слева
+     (как на мобильном, просто не во всю ширину), события — столбиком справа */
+  #viewEvents{display:grid!important;grid-template-columns:380px 1fr;grid-template-rows:auto auto 1fr;column-gap:40px;row-gap:0;overflow:visible;max-width:1100px;margin:0 auto;width:100%;}
+  #viewEvents .hero-row{grid-column:1;grid-row:1;}
+  #viewEvents .ev-month-row{grid-column:1;grid-row:2;}
+  #viewEvents .ev-cal{grid-column:1;grid-row:3;align-self:start;}
+  #viewEvents .ev-section-lbl{grid-column:2;grid-row:1;align-self:end;margin-bottom:8px;}
+  #viewEvents .lw{grid-column:2;grid-row:2/4;overflow-y:auto;}
 }
 </style>
 <style>
@@ -7183,12 +7198,12 @@ if('serviceWorker' in navigator){
 <div id="deviceRoleSheet" style="display:none;position:fixed;left:0;right:0;bottom:0;background:rgba(28,29,31,0.92);backdrop-filter:saturate(180%) blur(40px);-webkit-backdrop-filter:saturate(180%) blur(40px);border-top:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:20px 20px calc(34px + env(safe-area-inset-bottom,0px));z-index:231;box-shadow:0 -8px 30px rgba(0,0,0,.4);">
   <div style="width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 20px;"></div>
   <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;text-align:center;margin-bottom:20px;" id="deviceRoleSheetTitle">РОЛЬ УСТРОЙСТВА</div>
-  <div style="display:flex;flex-direction:column;gap:10px;">
-    <button onclick="setDeviceRole('master')" id="drBtnMaster" style="width:100%;padding:16px;background:var(--s1);border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+  <div style="display:flex;flex-direction:column;gap:18px;">
+    <button onclick="setDeviceRole('master')" id="drBtnMaster" style="width:100%;padding:22px 16px;background:var(--s1);border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
       <span id="drLblMaster">Мастер</span>
       <span style="font-family:'Inter',sans-serif;font-size:10px;color:#aaa;letter-spacing:1px;" id="drSubMaster">ЗВУК В КОЛОНКИ</span>
     </button>
-    <button onclick="setDeviceRole('view')" id="drBtnView" style="width:100%;padding:16px;background:var(--s1);border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+    <button onclick="setDeviceRole('view')" id="drBtnView" style="width:100%;padding:22px 16px;background:var(--s1);border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
       <span id="drLblView">Участник</span>
       <span style="font-family:'Inter',sans-serif;font-size:10px;color:#aaa;letter-spacing:1px;" id="drSubView">ТЕКСТ И АККОРДЫ</span>
     </button>
@@ -8234,6 +8249,7 @@ function toggleLiveMode(){
     startLivePlayerSync();
     attachLiveSync();
     updateDeviceRoleBadge();
+    updateLiveSyncFollowerUI(); // на случай если роль осталась от прошлого захода — пересчитываем сразу, не дожидаясь выбора
     logEvent('live_session_started',{has_group:!!currentGroupId});
     // Показываем выбор роли при каждом входе в Live (если есть группа)
     if(currentGroupId) setTimeout(openDeviceRoleSheet, 300);
@@ -9134,11 +9150,26 @@ function toggleLftScroll(forcedSongId){
       // Нет таймкодов — обычный автоскролл. Скорость масштабируем под размер
       // шрифта — иначе на крупном тексте (ноутбук/суфлёр) прежняя скорость,
       // рассчитанная под мелкий текст на телефоне, почти незаметна глазу.
+      // Двигаем через requestAnimationFrame с расчётом по реальному времени
+      // между кадрами — раньше был setInterval с фиксированным шагом раз в
+      // 50мс, что при развесе кадров браузера выглядело дёргано, особенно
+      // на большом шаге (крупный шрифт).
       var _scrollScale=Math.max(1,lftFontSz/13);
-      lftScrollInterval=setInterval(function(){
+      var _pxPerSec=lftScrollSpeed*_scrollScale*20; // подобрано так, чтобы визуально совпадать со старой скоростью
+      var _lastTs=null;
+      function _scrollFrame(ts){
+        if(!lftScrollOn)return;
         var b=document.getElementById('lftContent');
-        if(b){b.scrollTop+=lftScrollSpeed*_scrollScale;if(b.scrollTop+b.clientHeight>=b.scrollHeight){toggleLftScroll();}}
-      },50);
+        if(!b){lftScrollInterval=requestAnimationFrame(_scrollFrame);return;}
+        if(_lastTs!==null){
+          var dt=(ts-_lastTs)/1000;
+          b.scrollTop+=_pxPerSec*dt;
+          if(b.scrollTop+b.clientHeight>=b.scrollHeight){toggleLftScroll();return;}
+        }
+        _lastTs=ts;
+        lftScrollInterval=requestAnimationFrame(_scrollFrame);
+      }
+      lftScrollInterval=requestAnimationFrame(_scrollFrame);
     }
   } else {
     clearInterval(lftScrollInterval);lftScrollInterval=null;
