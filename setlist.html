@@ -55,6 +55,14 @@ function logEvent(name,params){
 }
 </script>
 <style>
+/* Приглушённый скроллбар вместо яркого системного — особенно заметно на
+   широких экранах (ноутбук/десктоп), где браузер не скрывает его сам, в
+   отличие от мобильных ОС. Тонкий, тёмно-серый, в тон приложению. */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#3a3a40;border-radius:8px;}
+::-webkit-scrollbar-thumb:hover{background:#4a4a52;}
+*{scrollbar-width:thin;scrollbar-color:#3a3a40 transparent;}
 @media (min-width:700px){
   /* Планшет/ноутбук: текст, плеер и Редактировать держим в комфортной
      читаемой колонке по центру, а не растягиваем на всю ширину экрана.
@@ -9095,6 +9103,24 @@ function lftScrollSpeedChange(d){
   }
 }
 
+// Плавная анимация скролла к нужной позиции с ease-in-out — встроенный
+// scrollTo(behavior:'smooth') слишком резкий/короткий для перехода между
+// секциями песни (Куплет→Припев), особенно на длинных прыжках.
+function _smoothScrollTo(el,targetTop,durationMs){
+  var startTop=el.scrollTop;
+  var delta=targetTop-startTop;
+  if(Math.abs(delta)<2)return;
+  var startTs=null;
+  function easeInOutQuad(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+  function step(ts){
+    if(startTs===null)startTs=ts;
+    var elapsed=ts-startTs;
+    var t=Math.min(1,elapsed/durationMs);
+    el.scrollTop=startTop+delta*easeInOutQuad(t);
+    if(t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
 function toggleLftScroll(forcedSongId){
   lftScrollOn=!lftScrollOn;
   var btn=document.getElementById('lftScrollBtn');
@@ -9137,7 +9163,7 @@ function toggleLftScroll(forcedSongId){
             var bRect=b.getBoundingClientRect();
             var eRect=el.getBoundingClientRect();
             var scrollTarget=b.scrollTop+(eRect.top-bRect.top)-4;
-            b.scrollTo({top:Math.max(0,scrollTarget),behavior:'smooth'});
+            _smoothScrollTo(b,Math.max(0,scrollTarget),700);
           }
           var navIdx=allLftSecs.indexOf(sections[curIdx].el);
           if(navIdx>=0) lftSetActiveNav2(navIdx,document.getElementById('lftSecNav'));
