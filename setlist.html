@@ -91,7 +91,7 @@ function logEvent(name,params){
 @media (min-width:820px){
   /* Экран Событий на широком экране: календарь компактной колонкой слева
      (как на мобильном, просто не во всю ширину), события — столбиком справа */
-  #viewEvents{display:grid!important;grid-template-columns:380px 1fr;grid-template-rows:auto auto 1fr;column-gap:40px;row-gap:0;overflow:visible;max-width:1100px;margin:0 auto;width:100%;}
+  #viewEvents.grid-layout{display:grid;grid-template-columns:380px 1fr;grid-template-rows:auto auto 1fr;column-gap:40px;row-gap:0;overflow:visible;max-width:1100px;margin:0 auto;width:100%;}
   #viewEvents .hero-row{grid-column:1;grid-row:1;}
   #viewEvents .ev-month-row{grid-column:1;grid-row:2;}
   #viewEvents .ev-cal{grid-column:1;grid-row:3;align-self:start;}
@@ -2940,7 +2940,10 @@ function switchView(v){
   currentView=v;
   document.getElementById("viewSetlist").style.display=v==="setlist"?"flex":"none";
   document.getElementById("viewRep").style.display=v==="rep"?"flex":"none";
-  document.getElementById("viewEvents").style.display=v==="events"?"flex":"none";
+  var _evEl=document.getElementById("viewEvents");
+  var _evWide=window.innerWidth>=820;
+  _evEl.classList.toggle("grid-layout", v==="events"&&_evWide);
+  _evEl.style.display=v==="events"?(_evWide?"grid":"flex"):"none";
   document.getElementById("navSetlist").classList.toggle("on",v==="setlist");
   document.getElementById("navRep").classList.toggle("on",v==="rep");
   document.getElementById("navEvents").classList.toggle("on",v==="events");
