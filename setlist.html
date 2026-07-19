@@ -614,7 +614,7 @@ textarea.fi.tall{min-height:120px;}
 .map-blk:active{transform:scale(.88);}
 .map-blk-num{font-size:8px;font-weight:600;color:rgba(0,0,0,0.3);position:absolute;top:3px;left:4px;}
 .map-blk-note{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(0,0,0,0.5);text-align:center;padding:2px;line-height:1.2;}
-.map-blk-del{width:18px;height:18px;border-radius:50%;border:none;background:#2a2a2a;color:#555;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:1px;}
+.map-blk-del{width:24px;height:24px;border-radius:50%;border:none;background:#2a2a2a;color:#777;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:3px;}
 .map-blk-add{width:44px;height:44px;border-radius:8px;border:1.5px dashed #3a3a46;background:transparent;color:#555;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .map-blk-add:active{border-color:var(--tx2);color:var(--tx2);}
 .mc-intro {background:#E8C49A;}
@@ -629,7 +629,7 @@ textarea.fi.tall{min-height:120px;}
 .mc-other {background:#C8C8C8;}
 
 /* MAP SHEET */
-.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#202020;border-radius:8px 16px 0 0;z-index:100;padding:14px 16px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#202020;border-radius:8px 16px 0 0;z-index:262;padding:14px 16px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
 .map-sheet.open{transform:translateY(0);}
 .map-sheet-handle{width:36px;height:4px;background:#3a3a46;border-radius:8px;margin:0 auto 12px;}
 .map-sheet-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
@@ -645,11 +645,11 @@ textarea.fi.tall{min-height:120px;}
 .map-bars-btn{width:32px;height:32px;border-radius:8px;border:1px solid #3a3a46;background:none;color:#c0bbb5;font-size:16px;cursor:pointer;}
 .map-bars-val{font-size:20px;font-weight:600;color:#fff;min-width:30px;text-align:center;}
 .map-sheet-ok{width:100%;padding:11px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
-.map-sheet-ov{position:fixed;inset:0;z-index:99;display:none;}
+.map-sheet-ov{position:fixed;inset:0;z-index:261;display:none;}
 .map-sheet-ov.open{display:block;}
 
 /* MAP NOTE */
-.map-note-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:110;display:none;align-items:flex-end;}
+.map-note-ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:263;display:none;align-items:flex-end;}
 .map-note-ov.open{display:flex;}
 .map-note-box{background:#22222a;border-radius:8px 16px 0 0;padding:18px 16px 36px;width:100%;}
 .map-note-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
@@ -6459,6 +6459,25 @@ function renderMapCanvas(s, canvas){
   addRow.appendChild(addBtn);
   addW.appendChild(addL);addW.appendChild(addRow);
   canvas.appendChild(addW);
+
+  // Масштабируем и обычные квадраты, и кнопку добавления ВМЕСТЕ — раньше
+  // это делалось только для режима просмотра отдельным куском кода, из-за
+  // чего на широком экране "+" оставался в старом мелком размере, а
+  // обычные блоки — в новом, отсюда и ощущение "плюсик меньше и не на месте"
+  var _ww2=window.innerWidth||0;
+  if(_ww2>=700){
+    var blkSize2=_ww2>=1100?58:50;
+    var blkRadius2=_ww2>=1100?12:10;
+    canvas.querySelectorAll('.map-blk,.map-blk-add').forEach(function(el){
+      el.style.width=blkSize2+'px';
+      el.style.height=blkSize2+'px';
+      el.style.borderRadius=blkRadius2+'px';
+    });
+    canvas.querySelectorAll('.map-blk-lbl').forEach(function(el){
+      el.style.fontSize=(_ww2>=1100?'13px':'12px');
+    });
+    canvas.style.gap='8px';
+  }
 
   // landscape scale — актуально только для старой панели #pb (мобильный
   // ландшафтный режим). Если её нет или она скрыта (например, в новом
