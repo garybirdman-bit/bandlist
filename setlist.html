@@ -681,8 +681,8 @@ textarea.fi.tall{min-height:120px;}
 
 
 /* Map block context menu */
-.map-ctx-ov{position:fixed;inset:0;z-index:149;}
-.map-ctx{position:fixed;background:#22222a;border:1px solid #3a3a46;border-radius:8px;overflow:hidden;z-index:150;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:cxi .14s ease;}
+.map-ctx-ov{position:fixed;inset:0;z-index:264;}
+.map-ctx{position:fixed;background:#22222a;border:1px solid #3a3a46;border-radius:8px;overflow:hidden;z-index:265;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:cxi .14s ease;}
 .map-ctx-item{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .map-ctx-item:hover{background:var(--s3);}
 .map-ctx-item+.map-ctx-item{border-top:1px solid var(--br);}
@@ -6421,7 +6421,7 @@ function renderMapCanvas(s, canvas){
     var secRow=document.createElement('div');
     secRow.style.cssText='display:flex;align-items:center;gap:6px;';
     var menuBtn=document.createElement('button');
-    menuBtn.style.cssText='width:22px;height:22px;border-radius:8px;border:none;background:#2a2a2a;color:#666;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;';
+    menuBtn.style.cssText='width:22px;height:22px;border-radius:8px;border:none;background:#38383f;color:#c8c8ce;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;font-weight:700;';
     menuBtn.textContent='⋮';
     (function(gIdx){
       menuBtn.addEventListener('click',function(e){e.stopPropagation();openMapCtx(sid,gIdx,e);});
@@ -9152,6 +9152,14 @@ function openLiveFullTab(s,tabId,uniqueKey){
   var labels={form:LANG==='en'?'FORM':'ФОРМА',lyrics:LANG==='en'?'LYRICS':'ТЕКСТ',notes:LANG==='en'?'NOTES':'ЗАМЕТКИ'};
   document.getElementById('lftTitle').textContent=s.title||'';
   document.getElementById('lftTabLabel').textContent=labels[tabId]||tabId;
+  var aaBtn=document.getElementById('lpFontScrollBtn');
+  if(aaBtn){
+    var isLyrics=(tabId==='lyrics');
+    aaBtn.style.opacity=isLyrics?'1':'0.3';
+    aaBtn.style.pointerEvents=isLyrics?'auto':'none';
+    var pop2=document.getElementById('lftFontScrollPopover');
+    if(pop2&&!isLyrics) pop2.style.display='none';
+  }
   document.getElementById('lftKey').textContent=s.key||'—';
   document.getElementById('lftBpm').textContent=s.tempo||'—';
   var scrollBtnEl=document.getElementById('lftScrollBtn');
@@ -9370,6 +9378,8 @@ function autofitCproFont(container,parentEl){
 
 function toggleFontScrollPopover(e){
   if(e) e.stopPropagation();
+  var isLyricsTabNow=(typeof liveCurrentTabId==='undefined')||liveCurrentTabId==='lyrics';
+  if(!isLyricsTabNow) return; // на Форме/Заметках это меню вообще не должно открываться
   var pop=document.getElementById('lftFontScrollPopover');
   if(!pop) return;
   var willShow=(pop.style.display==='none'||!pop.style.display);
@@ -9393,6 +9403,15 @@ function toggleFontScrollPopover(e){
     if(speedLblEl){
       speedLblEl.textContent=hasTimecodes?(LANG==='en'?'SYNC':'СИНХРО'):'S';
       speedLblEl.title=hasTimecodes?(LANG==='en'?'Synced to track timecodes — manual speed not used':'Синхронизировано с таймкодами трека — ручная скорость не используется'):'';
+    }
+    // AUTO SCROLL имеет смысл только на вкладке Текст — на Форме/Заметках
+    // нечего синхронно прокручивать вместе с треком
+    var isLyricsTab=(typeof liveCurrentTabId==='undefined')||liveCurrentTabId==='lyrics';
+    var scrollBtn2=document.getElementById('lftScrollBtn');
+    if(scrollBtn2){
+      scrollBtn2.disabled=!isLyricsTab;
+      scrollBtn2.style.opacity=isLyricsTab?'1':'0.3';
+      scrollBtn2.style.pointerEvents=isLyricsTab?'auto':'none';
     }
   }
 }
