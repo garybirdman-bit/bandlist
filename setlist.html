@@ -6356,6 +6356,28 @@ function getMapSec(name){
   return sec||{id:'other',name:name,enName:name,color:'#C8C8C8',cls:'mc-other'};
 }
 
+function openFormEditor(songId){
+  var s=findR(songId);if(!s)return;
+  var old=document.getElementById('formEditorOv');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='formEditorOv';
+  ov.style.cssText='position:fixed;inset:0;background:var(--bg);z-index:260;display:flex;flex-direction:column;';
+  ov.innerHTML=
+    '<div style="padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #202020;flex-shrink:0;">'
+    +'<button id="formEditorBackBtn" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">'
+    +'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    +'<span style="font-size:12px;color:#b0aaa4;font-family:Inter,sans-serif;letter-spacing:1px;">'+(LANG==='en'?'BACK':'НАЗАД')+'</span></button>'
+    +'<div style="flex:1;text-align:center;font-size:12px;color:#f0ece4;font-family:\'Golos Text\',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(s.title||'')+'</div>'
+    +'<div style="width:60px;flex-shrink:0;"></div>'
+    +'</div>'
+    +'<div id="formEditorContent" style="flex:1;min-height:0;overflow-y:auto;padding:20px;"></div>';
+  document.body.appendChild(ov);
+  var canvas=document.createElement('div');
+  canvas.className='map-canvas';
+  canvas.id='mapCanvas_'+songId;
+  document.getElementById('formEditorContent').appendChild(canvas);
+  renderMapCanvas(s,canvas);
+  document.getElementById('formEditorBackBtn').onclick=function(){ov.remove();};
+}
 function rFormTab(s){
   var pb=document.getElementById('pb');
   pb.innerHTML='';
@@ -6477,6 +6499,14 @@ function renderMapCanvas(s, canvas){
       el.style.fontSize=(_ww2>=1100?'13px':'12px');
     });
     canvas.style.gap='8px';
+    // Каждая секция — на своей строке целиком (не подряд одна за другой),
+    // только на широком экране. На телефоне места мало по горизонтали,
+    // там всё так же компактно, построчным потоком, чтобы не пришлось
+    // свайпать вбок.
+    canvas.querySelectorAll('.map-blk-grp').forEach(function(el){
+      el.style.flexBasis='100%';
+      el.style.width='100%';
+    });
   }
 
   // landscape scale — актуально только для старой панели #pb (мобильный
@@ -9155,17 +9185,9 @@ function openLiveFullTab(s,tabId,uniqueKey){
       // визуально должно быть один в один, просто без возможности редактировать
       var mapCanvas=document.createElement('div');
       mapCanvas.className='map-canvas';
+      mapCanvas.id='mapCanvas_'+s.id; // без этого id функции добавления/вставки/удаления такта не находят канвас для обновления
       content.appendChild(mapCanvas);
       renderMapCanvas(s, mapCanvas);
-      // Прячем элементы редактирования (удаление секции, добавление заметки,
-      // троеточие) — в Live это только просмотр
-      mapCanvas.querySelectorAll('.map-blk-del,.map-blk-grp>div:first-child button:last-child').forEach(function(el){
-        el.style.display='none';
-      });
-      mapCanvas.querySelectorAll('.map-blk').forEach(function(el){
-        el.style.cursor='default';
-        el.style.pointerEvents='none';
-      });
       // Прямое масштабирование через JS для широких экранов — работает
       // гарантированно, независимо от того, почему CSS-медиазапрос мог не
       // сработать (инлайн-стиль всегда побеждает любые правила из <style>).
