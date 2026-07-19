@@ -6398,12 +6398,16 @@ function renderMapCanvas(s, canvas){
 
   if(!s.form||s.form.length===0){
     var empty=document.createElement('div');
-    empty.style.cssText='display:flex;flex-direction:column;width:100%;';
+    empty.style.cssText='display:flex;align-items:center;gap:12px;';
     var emptyBtn=document.createElement('button');
-    emptyBtn.style.cssText='display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:1px solid rgba(255,255,255,0.6);border-radius:8px;background:transparent;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
-    emptyBtn.textContent=LANG==='en'?'+ Add first section':'+ Добавить секцию';
+    emptyBtn.className='map-blk-add';
+    emptyBtn.textContent='+';
     (function(id){emptyBtn.addEventListener('click',function(){openMapSheet(id);});})(sid);
+    var emptyLbl=document.createElement('span');
+    emptyLbl.style.cssText='color:var(--mu);font-family:Inter,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;';
+    emptyLbl.textContent=LANG==='en'?'Add first section':'Добавить первую секцию';
     empty.appendChild(emptyBtn);
+    empty.appendChild(emptyLbl);
     canvas.appendChild(empty);
     return;
   }
