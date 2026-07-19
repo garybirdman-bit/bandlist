@@ -6409,6 +6409,18 @@ function renderMapCanvas(s, canvas){
     empty.appendChild(emptyBtn);
     empty.appendChild(emptyLbl);
     canvas.appendChild(empty);
+    // То же масштабирование под широкий экран, что и у обычных квадратиков —
+    // иначе кнопка на пустом экране отличалась по размеру от той же кнопки,
+    // когда секции уже есть
+    var _wwEmpty=window.innerWidth||0;
+    if(_wwEmpty>=700){
+      var blkSizeEmpty=_wwEmpty>=1100?58:50;
+      var blkRadiusEmpty=_wwEmpty>=1100?12:10;
+      emptyBtn.style.width=blkSizeEmpty+'px';
+      emptyBtn.style.height=blkSizeEmpty+'px';
+      emptyBtn.style.borderRadius=blkRadiusEmpty+'px';
+      emptyLbl.style.fontSize=(_wwEmpty>=1100?'13px':'12px');
+    }
     return;
   }
 
