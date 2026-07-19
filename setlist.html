@@ -9186,41 +9186,34 @@ function openLiveFullTab(s,tabId,uniqueKey){
   content.innerHTML='';
   content.style.cssText='flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:24px 20px 40px;font-size:'+lftFontSz+'px;line-height:1.8;color:#f0ece4;font-family:Golos Text,sans-serif;';
   if(tabId==='form'){
-    var form=s.form||[];
-    if(!form.length){
-      content.innerHTML='<div class="empty-state">'+(LANG==='en'?'No form data':'Нет данных формы')+'</div>';
-    } else {
-      // Используем тот же рендер квадратиков, что и в редакторе песни —
-      // визуально должно быть один в один, просто без возможности редактировать
-      var mapCanvas=document.createElement('div');
-      mapCanvas.className='map-canvas';
-      mapCanvas.id='mapCanvas_'+s.id; // без этого id функции добавления/вставки/удаления такта не находят канвас для обновления
-      content.appendChild(mapCanvas);
-      renderMapCanvas(s, mapCanvas);
-      // Прямое масштабирование через JS для широких экранов — работает
-      // гарантированно, независимо от того, почему CSS-медиазапрос мог не
-      // сработать (инлайн-стиль всегда побеждает любые правила из <style>).
-      // Применяем и сразу, и повторно через небольшую паузу — на случай,
-      // если что-то ещё перерисовывает форму следом и сбрасывает размер.
-      var _ww=window.innerWidth||0;
-      function _scaleFormBlocks(){
-        if(_ww<700)return;
-        var blkSize=_ww>=1100?58:50;
-        var blkRadius=_ww>=1100?12:10;
-        mapCanvas.querySelectorAll('.map-blk').forEach(function(el){
-          el.style.width=blkSize+'px';
-          el.style.height=blkSize+'px';
-          el.style.borderRadius=blkRadius+'px';
-        });
-        mapCanvas.querySelectorAll('.map-blk-lbl').forEach(function(el){
-          el.style.fontSize=(_ww>=1100?'13px':'12px');
-        });
-        mapCanvas.style.gap='8px';
-      }
-      _scaleFormBlocks();
-      setTimeout(_scaleFormBlocks,120);
-      setTimeout(_scaleFormBlocks,500);
+    var mapCanvas=document.createElement('div');
+    mapCanvas.className='map-canvas';
+    mapCanvas.id='mapCanvas_'+s.id; // без этого id функции добавления/вставки/удаления такта не находят канвас для обновления
+    content.appendChild(mapCanvas);
+    renderMapCanvas(s, mapCanvas); // сама умеет показать и заполненную форму, и пустую (с кнопкой "+ Добавить секцию")
+    // Прямое масштабирование через JS для широких экранов — работает
+    // гарантированно, независимо от того, почему CSS-медиазапрос мог не
+    // сработать (инлайн-стиль всегда побеждает любые правила из <style>).
+    // Применяем и сразу, и повторно через небольшую паузу — на случай,
+    // если что-то ещё перерисовывает форму следом и сбрасывает размер.
+    var _ww=window.innerWidth||0;
+    function _scaleFormBlocks(){
+      if(_ww<700)return;
+      var blkSize=_ww>=1100?58:50;
+      var blkRadius=_ww>=1100?12:10;
+      mapCanvas.querySelectorAll('.map-blk').forEach(function(el){
+        el.style.width=blkSize+'px';
+        el.style.height=blkSize+'px';
+        el.style.borderRadius=blkRadius+'px';
+      });
+      mapCanvas.querySelectorAll('.map-blk-lbl').forEach(function(el){
+        el.style.fontSize=(_ww>=1100?'13px':'12px');
+      });
+      mapCanvas.style.gap='8px';
     }
+    _scaleFormBlocks();
+    setTimeout(_scaleFormBlocks,120);
+    setTimeout(_scaleFormBlocks,500);
   } else if(tabId==='lyrics'){
     content.style.whiteSpace='';
     var lyricsText=s.lyrics||'';
