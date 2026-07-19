@@ -9141,6 +9141,23 @@ function openLiveFullTab(s,tabId,uniqueKey){
         el.style.cursor='default';
         el.style.pointerEvents='none';
       });
+      // Прямое масштабирование через JS для широких экранов — работает
+      // гарантированно, независимо от того, почему CSS-медиазапрос мог не
+      // сработать (инлайн-стиль всегда побеждает любые правила из <style>)
+      var _ww=window.innerWidth||0;
+      if(_ww>=700){
+        var blkSize=_ww>=1100?80:64;
+        var blkRadius=_ww>=1100?14:12;
+        mapCanvas.querySelectorAll('.map-blk').forEach(function(el){
+          el.style.width=blkSize+'px';
+          el.style.height=blkSize+'px';
+          el.style.borderRadius=blkRadius+'px';
+        });
+        mapCanvas.querySelectorAll('.map-blk-lbl').forEach(function(el){
+          el.style.fontSize=(_ww>=1100?'16px':'14px');
+        });
+        mapCanvas.style.gap='10px';
+      }
     }
   } else if(tabId==='lyrics'){
     content.style.whiteSpace='';
@@ -9306,6 +9323,25 @@ function toggleFontScrollPopover(e){
   pop.style.display=willShow?'flex':'none';
   var btn=document.getElementById('lpFontScrollBtn');
   if(btn) btn.classList.toggle('active',willShow);
+  if(willShow){
+    // Показываем сразу, синхронизирована ли песня по времени — иначе не
+    // понятно, почему регулятор скорости иногда «ничего не делает» (он и
+    // правда не действует, если песня размечена и трек играет — в этом
+    // случае скролл идёт по таймкодам трека, а не по ручной скорости)
+    var lc=document.getElementById('lftContent');
+    var hasTimecodes=lc?lc.querySelectorAll('.perf-section[data-time]').length>0:false;
+    var speedMinusEl=document.getElementById('lftSpeedMinusBtn');
+    var speedPlusEl=document.getElementById('lftSpeedPlusBtn');
+    var speedLblEl=document.getElementById('lftSpeedLbl');
+    if(speedMinusEl) speedMinusEl.disabled=hasTimecodes;
+    if(speedPlusEl) speedPlusEl.disabled=hasTimecodes;
+    if(speedMinusEl) speedMinusEl.style.opacity=hasTimecodes?'0.3':'1';
+    if(speedPlusEl) speedPlusEl.style.opacity=hasTimecodes?'0.3':'1';
+    if(speedLblEl){
+      speedLblEl.textContent=hasTimecodes?(LANG==='en'?'SYNC':'СИНХРО'):'S';
+      speedLblEl.title=hasTimecodes?(LANG==='en'?'Synced to track timecodes — manual speed not used':'Синхронизировано с таймкодами трека — ручная скорость не используется'):'';
+    }
+  }
 }
 document.addEventListener('click',function(e){
   var pop=document.getElementById('lftFontScrollPopover');
