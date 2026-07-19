@@ -629,7 +629,7 @@ textarea.fi.tall{min-height:120px;}
 .mc-other {background:#C8C8C8;}
 
 /* MAP SHEET */
-.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#202020;border-radius:8px 16px 0 0;z-index:262;padding:14px 16px 36px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
+.map-sheet{position:fixed;bottom:0;left:0;right:0;background:#202020;border-radius:8px 16px 0 0;z-index:262;padding:14px 16px calc(36px + env(safe-area-inset-bottom, 0px));transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
 .map-sheet.open{transform:translateY(0);}
 .map-sheet-handle{width:36px;height:4px;background:#3a3a46;border-radius:8px;margin:0 auto 12px;}
 .map-sheet-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
@@ -6638,6 +6638,7 @@ function deleteMapSection(sid,gi){
 }
 
 function openMapSheet(sid,insertAtIdx,insertPos){
+  closeMapCtx(); // подстраховка — если меню "⋮" почему-то не закрылось, оно может невидимо перехватывать клики поверх этого окна
   mapPickerSongId=sid;
   mapPickerInsertIdx=(insertAtIdx!==undefined&&insertAtIdx!==null)?insertAtIdx:null;
   mapPickerInsertPos=insertPos||null;
