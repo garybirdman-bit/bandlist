@@ -606,10 +606,10 @@ textarea.fi.tall{min-height:120px;}
 
 /* SONG MAP */
 .map-canvas{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;align-items:flex-end;padding-bottom:20px;}
-.map-blk-grp{display:flex;flex-direction:column;gap:3px;flex-shrink:0;}
+.map-blk-grp{display:flex;flex-direction:column;gap:3px;flex-shrink:0;max-width:100%;}
 .map-blk-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding-left:1px;white-space:nowrap;}
 @media (orientation:landscape) and (max-height:600px){.map-blk-lbl{font-size:13px!important;font-weight:700!important;letter-spacing:1.5px!important;}}
-.map-blk-row{display:flex;gap:3px;align-items:center;}
+.map-blk-row{display:flex;flex-wrap:wrap;gap:3px;align-items:center;row-gap:3px;}
 .map-blk{width:44px;height:44px;border-radius:8px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;}
 .map-blk:active{transform:scale(.88);}
 .map-blk-num{font-size:8px;font-weight:600;color:rgba(0,0,0,0.3);position:absolute;top:3px;left:4px;}
@@ -4988,40 +4988,39 @@ function enterLyricsTapMode(){
     ov.style.cssText='position:fixed;inset:0;background:#111015;z-index:250;display:flex;flex-direction:column;';
     document.body.appendChild(ov);
   }
-  var h='<div style="padding:14px 16px;border-bottom:1px solid #202020;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">'
+  var h='<div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">'
     +'<div><div style="font-size:16px;font-weight:600;color:#f0ece4;">'+esc(s.title||'')+'</div>'
     +'<div style="font-size:10px;color:var(--tx2);letter-spacing:2px;font-family:Inter,sans-serif;margin-top:2px;">РЕЖИМ РАЗМЕТКИ</div></div>'
-    +'<button onclick="exitLyricsTap()" style="background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:8px;color:#c0392b;padding:8px 14px;font-size:11px;font-family:Inter,sans-serif;cursor:pointer;">✕ Выйти</button>'
+    +'<button onclick="exitLyricsTap()" style="background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#e05252;height:38px;padding:0 16px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">✕ Выйти</button>'
     +'</div>'
-    +'<div style="padding:12px 16px;background:#1a1a22;border-bottom:1px solid #202020;flex-shrink:0;">'
-    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">'
-    +'<button onclick="lyricsTapTogglePlay()" id="lyricsTapBtn" style="width:36px;height:36px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">'
+    +'<div style="padding:14px 16px 0;background:var(--bg);flex-shrink:0;">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
+    +'<button onclick="lyricsTapTogglePlay()" id="lyricsTapBtn" style="width:36px;height:36px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
     +'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="3,2 16,9 3,16" fill="var(--tx2)"/></svg></button>'
     +'<div id="lyricsTapBar" style="flex:1;height:28px;display:flex;align-items:center;cursor:pointer;">'
-    +'<div style="width:100%;height:4px;background:#252530;border-radius:8px;position:relative;">'
+    +'<div style="width:100%;height:4px;background:#2a2a2a;border-radius:8px;position:relative;">'
     +'<div id="lyricsTapFill" style="width:0%;height:100%;background:#fff;border-radius:8px;"></div>'
     +'<div id="lyricsTapDot" style="position:absolute;top:50%;transform:translateY(-50%);left:0%;width:12px;height:12px;border-radius:50%;background:#fff;margin-left:-6px;"></div>'
     +'</div></div>'
-    +'<span id="lyricsTapTime" style="font-size:13px;color:var(--tx2);font-family:Inter,sans-serif;min-width:36px;">0:00</span>'
+    +'<span id="lyricsTapTime" style="font-size:13px;color:var(--tx2);font-family:Inter,sans-serif;min-width:36px;text-align:right;">0:00</span>'
     +'</div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;">'
-    +'<div id="lyricsTapHint" style="font-size:11px;color:#555;font-family:Inter,sans-serif;">Нажми ▶ затем тапай на секцию</div>'
-    +'<div style="display:flex;gap:8px;">'
-    +'<button id="lyricsTapUndoBtn" onclick="lyricsTapUndo()" style="background:none;border:1px solid #3a3a46;border-radius:8px;color:#888;font-family:Inter,sans-serif;font-size:10px;padding:4px 10px;cursor:pointer;">↩ Отменить</button>'
-    +'<button onclick="lyricsTapReset()" style="background:none;border:1px solid #3a3a46;border-radius:8px;color:#888;font-family:Inter,sans-serif;font-size:10px;padding:4px 10px;cursor:pointer;">Сбросить</button>'
+    +'<div id="lyricsTapHint" style="font-size:11px;color:#555;font-family:Inter,sans-serif;min-height:0;margin-bottom:0;"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:2px;">'
+    +'<button id="lyricsTapUndoBtn" onclick="lyricsTapUndo()" style="flex:1;height:38px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Отменить</button>'
+    +'<button onclick="lyricsTapReset()" style="flex:1;height:38px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Сбросить</button>'
     +'</div>'
-    +'</div></div>'
+    +'</div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px;"><div style="display:flex;flex-direction:column;gap:10px;">';
   secs.forEach(function(sec){
     var hasTap=sec.time!==null;
     var tStr=hasTap?fmtLyricsTime(sec.time):'';
     h+='<button id="lhd_'+sec.idx+'" data-idx="'+sec.idx+'" data-name="'+esc(sec.name)+'" class="tap-sec-btn" style="'
-      +'width:100%;padding:18px 20px;display:flex;align-items:center;gap:12px;'
-      +'background:rgba(255,255,255,0.02);border:1.5px dashed '+(hasTap?'rgba(255,255,255,0.4)':'#3a3a46')+';'
-      +'border-radius:8px;cursor:pointer;text-align:left;">'
-      +'<div id="dot_'+sec.idx+'" style="width:8px;height:8px;border-radius:50%;background:'+(hasTap?'var(--tx2)':'#3a3a46')+';flex-shrink:0;"></div>'
-      +'<span id="name_'+sec.idx+'" style="font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:'+(hasTap?'var(--tx2)':'#888')+';font-family:Inter,sans-serif;">'+esc(sec.name)+'</span>'
-      +'<span id="time_'+sec.idx+'" style="margin-left:auto;font-size:12px;color:#888;font-family:Inter,sans-serif;">'+(hasTap?tStr:(LANG==='en'?'tap →':'тап →'))+'</span>'
+      +'width:100%;min-height:56px;padding:14px 20px;display:flex;align-items:center;gap:12px;'
+      +'background:var(--s1);border:1.5px solid '+(hasTap?'#2dd4bf':'transparent')+';'
+      +'border-radius:10px;cursor:pointer;text-align:left;">'
+      +'<div id="dot_'+sec.idx+'" style="width:8px;height:8px;border-radius:50%;background:'+(hasTap?'#2dd4bf':'#3a3a46')+';flex-shrink:0;"></div>'
+      +'<span id="name_'+sec.idx+'" style="font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:'+(hasTap?'var(--tx)':'#888')+';font-family:Inter,sans-serif;">'+esc(sec.name)+'</span>'
+      +'<span id="time_'+sec.idx+'" style="margin-left:auto;font-size:12px;color:'+(hasTap?'#2dd4bf':'#888')+';font-family:Inter,sans-serif;font-weight:'+(hasTap?'700':'400')+';">'+(hasTap?tStr:(LANG==='en'?'tap →':'тап →'))+'</span>'
       +'</button>';
   });
   h+='</div></div>';
@@ -5080,7 +5079,7 @@ function enterLyricsTapMode(){
           if(timeEl) timeEl.textContent=(LANG==='en'?'tap →':'тап →');
           if(nameEl) nameEl.style.color='#888';
           if(btnEl){
-            btnEl.style.border='1.5px dashed #3a3a46';
+            btnEl.style.border='1.5px solid transparent';
             btnEl.style.background='rgba(255,255,255,0.05)';
             setTimeout(function(){if(btnEl)btnEl.style.background='rgba(255,255,255,0.02)';},250);
           }
@@ -5101,18 +5100,40 @@ function enterLyricsTapMode(){
         var btnEl=document.getElementById('lhd_'+lineIdx);
         var v=Math.floor(t);
         var tStr=Math.floor(v/60)+':'+(v%60<10?'0':'')+v%60;
-        if(dotEl) dotEl.style.background='#fff';
+        if(dotEl) dotEl.style.background='#2dd4bf';
         if(timeEl) timeEl.textContent=tStr;
-        if(nameEl) nameEl.style.color='var(--tx2)';
+        if(nameEl) nameEl.style.color='var(--tx)';
         if(btnEl){
-          btnEl.style.border='1.5px dashed rgba(255,255,255,0.4)';
+          btnEl.style.border='1.5px solid #2dd4bf';
           btnEl.style.background='rgba(255,255,255,0.2)';
           setTimeout(function(){if(btnEl)btnEl.style.background='rgba(255,255,255,0.02)';},250);
         }
         var hint=document.getElementById('lyricsTapHint');
         if(hint) hint.textContent='✓ '+secName+' '+tStr;
       }
-      btn3.addEventListener('touchstart',function(e){e.preventDefault();doTap();},{passive:false});
+      // Раньше preventDefault стоял прямо на touchstart — это отменяло
+      // скролл, если палец начинал движение с самой кнопки (а кнопки
+      // занимают почти весь экран, промахнуться мимо них сложно). Теперь
+      // просто отслеживаем, сдвинулся ли палец заметно: если да — это
+      // скролл, ничего не делаем и не мешаем браузеру прокручивать; если
+      // палец остался на месте — считаем тапом.
+      var _tStartX=null,_tStartY=null,_tMoved=false;
+      btn3.addEventListener('touchstart',function(e){
+        var t=e.touches[0];
+        _tStartX=t.clientX;_tStartY=t.clientY;_tMoved=false;
+      },{passive:true});
+      btn3.addEventListener('touchmove',function(e){
+        if(_tStartX===null)return;
+        var t=e.touches[0];
+        if(Math.abs(t.clientX-_tStartX)>10||Math.abs(t.clientY-_tStartY)>10)_tMoved=true;
+      },{passive:true});
+      btn3.addEventListener('touchend',function(e){
+        if(_tStartX!==null&&!_tMoved){
+          e.preventDefault(); // гасим последующий synthetic click, чтобы не сработало дважды
+          doTap();
+        }
+        _tStartX=null;
+      },{passive:false});
       btn3.addEventListener('click',function(){doTap();});
     })(sec.idx,sec.name);
   });
@@ -5180,10 +5201,10 @@ function lyricsTapUndo(){
   var timeEl=document.getElementById('time_'+last.lineIdx);
   var nameEl=document.getElementById('name_'+last.lineIdx);
   var btnEl=document.getElementById('lhd_'+last.lineIdx);
-  if(dotEl) dotEl.style.background=hasTap?'#fff':'#3a3a46';
+  if(dotEl) dotEl.style.background=hasTap?'#2dd4bf':'#3a3a46';
   if(timeEl) timeEl.textContent=hasTap?fmtLyricsTime(parsed.time):(LANG==='en'?'tap →':'тап →');
-  if(nameEl) nameEl.style.color=hasTap?'var(--tx2)':'#888';
-  if(btnEl) btnEl.style.border='1.5px dashed '+(hasTap?'rgba(255,255,255,0.4)':'#3a3a46');
+  if(nameEl) nameEl.style.color=hasTap?'var(--tx)':'#888';
+  if(btnEl) btnEl.style.border='1.5px solid '+(hasTap?'#2dd4bf':'transparent');
   if(hint) hint.textContent=(LANG==='en'?'↩ undone':'↩ отменено')+(parsed?' — '+parsed.section:'');
 }
 
@@ -5213,7 +5234,7 @@ function lyricsTapSection(lineIdx, secName){
     if(dotEl) dotEl.style.background='#3a3a46';
     if(timeEl) timeEl.textContent=(LANG==='en'?'tap →':'тап →');
     if(nameEl) nameEl.style.color='#888';
-    if(btnEl){btnEl.style.border='1.5px dashed #3a3a46';btnEl.style.background='rgba(255,255,255,0.05)';setTimeout(function(){if(btnEl)btnEl.style.background='rgba(255,255,255,0.02)';},250);}
+    if(btnEl){btnEl.style.border='1.5px solid transparent';btnEl.style.background='var(--s2)';setTimeout(function(){if(btnEl)btnEl.style.background='var(--s1)';},250);}
     if(hint) hint.textContent='✕ '+secName+(LANG==='en'?' — deleted':' — удалено');
     return;
   }
@@ -5226,10 +5247,10 @@ function lyricsTapSection(lineIdx, secName){
   save();
   var v=Math.floor(t);
   var tStr=Math.floor(v/60)+':'+(v%60<10?'0':'')+v%60;
-  if(dotEl) dotEl.style.background='#fff';
+  if(dotEl) dotEl.style.background='#2dd4bf';
   if(timeEl) timeEl.textContent=tStr;
-  if(nameEl) nameEl.style.color='var(--tx2)';
-  if(btnEl){btnEl.style.border='1.5px dashed rgba(255,255,255,0.4)';btnEl.style.background='rgba(255,255,255,0.2)';setTimeout(function(){if(btnEl)btnEl.style.background='rgba(255,255,255,0.02)';},250);}
+  if(nameEl) nameEl.style.color='var(--tx)';
+  if(btnEl){btnEl.style.border='1.5px solid #2dd4bf';btnEl.style.background='var(--s2)';setTimeout(function(){if(btnEl)btnEl.style.background='var(--s1)';},250);}
   if(hint) hint.textContent='✓ '+secName+' '+tStr;
 }
 
@@ -6619,10 +6640,13 @@ function renameMapSection(sid,gi){
   cancel.textContent=LANG==='en'?'Cancel':'Отмена';
   function doSave(){
     var val=inp.value.trim();
-    if(val){s.form[gi].n=val;save();}
     ov.remove();
-    var canvas=document.getElementById('mapCanvas_'+sid);
-    if(canvas){var s2=findR(sid);renderMapCanvas(s2,canvas);}
+    if(val){
+      s.form[gi].n=val;
+      var canvas=document.getElementById('mapCanvas_'+sid);
+      if(canvas){var s2=findR(sid);renderMapCanvas(s2,canvas);}
+      setTimeout(save,0);
+    }
   }
   ok.addEventListener('click',doSave);
   cancel.addEventListener('click',function(){ov.remove();});
@@ -6641,16 +6665,17 @@ function insertMapSection(sid,gi,pos){
 function changeMapBars(sid,gi,delta){
   var s=findR(sid);if(!s||!s.form[gi])return;
   s.form[gi].b=Math.max(1,Math.min(32,(s.form[gi].b||4)+delta));
-  save();
   var canvas=document.getElementById('mapCanvas_'+sid);
   if(canvas){var s2=findR(sid);renderMapCanvas(s2,canvas);}
+  setTimeout(save,0);
 }
 
 function deleteMapSection(sid,gi){
   var s=findR(sid);if(!s)return;
-  s.form.splice(gi,1);save();
+  s.form.splice(gi,1);
   var canvas=document.getElementById('mapCanvas_'+sid);
   if(canvas){var s2=findR(sid);renderMapCanvas(s2,canvas);}
+  setTimeout(save,0);
 }
 
 function openMapSheet(sid,insertAtIdx,insertPos){
@@ -6699,9 +6724,10 @@ function mapDoAdd(){
     s.form.push(newSec);
   }
   mapPickerInsertIdx=null;mapPickerInsertPos=null;
-  save();closeMapSheet();
+  closeMapSheet();
   var canvas=document.getElementById('mapCanvas_'+mapPickerSongId);
   if(canvas){var s2=findR(mapPickerSongId);renderMapCanvas(s2,canvas);}
+  setTimeout(save,0); // save() тяжёлая (сериализует весь объект данных) — не блокируем ей визуальное обновление
 }
 
 function openMapNote(sid,gi,bi){
@@ -9498,13 +9524,44 @@ function toggleLftScroll(forcedSongId){
     }
     return null;
   };
-  function sectionScrollTop(idx){
-    var b=document.getElementById('lftContent');
-    var el=sections[idx]&&sections[idx].el;
-    if(!b||!el)return 0;
-    var bRect=b.getBoundingClientRect();
-    var eRect=el.getBoundingClientRect();
-    return b.scrollTop+(eRect.top-bRect.top)-4;
+  // Считаем позицию каждой секции ОДИН РАЗ здесь, а не на каждом тике —
+  // getBoundingClientRect() вызывает пересчёт layout браузером, и делать это
+  // каждые 30мс (для двух элементов на тик) было основной причиной рывков,
+  // особенно заметных на компьютере с более тяжёлым layout.
+  if(c&&sections.length){
+    var _bRect=c.getBoundingClientRect();
+    sections.forEach(function(sec){
+      var eRect=sec.el.getBoundingClientRect();
+      sec.scrollTop=c.scrollTop+(eRect.top-_bRect.top)-4;
+    });
+  }
+
+  // Ручной скролл во время автоскролла: пока палец реально касается и
+  // двигает текст — не мешаем, автоскролл на паузе. Как только палец
+  // отпущен, через паузу бездействия синхронизация возвращается сама
+  // (как в Spotify/Musixmatch — тронул текст пальцем, почитал что нужно,
+  // и он сам находит трек снова, не нужно самому нажимать заново).
+  var _userTouching=false;
+  var _resumeTimer=null;
+  var RESUME_DELAY_MS=2500;
+  var _onTouchStart=function(){
+    _userTouching=true;
+    if(_resumeTimer){clearTimeout(_resumeTimer);_resumeTimer=null;}
+  };
+  var _onTouchEnd=function(){
+    if(_resumeTimer)clearTimeout(_resumeTimer);
+    _resumeTimer=setTimeout(function(){_userTouching=false;},RESUME_DELAY_MS);
+  };
+  if(c){
+    if(c._lftScrollTouchHandlers){
+      // На случай если предыдущий цикл почему-то не убрал за собой —
+      // подчищаем перед тем как вешать новые, чтобы не копились дубли
+      c.removeEventListener('touchstart',c._lftScrollTouchHandlers.start);
+      c.removeEventListener('touchend',c._lftScrollTouchHandlers.end);
+    }
+    c._lftScrollTouchHandlers={start:_onTouchStart,end:_onTouchEnd};
+    c.addEventListener('touchstart',_onTouchStart,{passive:true});
+    c.addEventListener('touchend',_onTouchEnd,{passive:true});
   }
 
   // Единый простой цикл — тикает каждые 30мс, одинаково на телефоне и на
@@ -9516,6 +9573,7 @@ function toggleLftScroll(forcedSongId){
   lftScrollInterval=setInterval(function(){
     var lft=document.getElementById('liveFullTab');
     if(!lft||!lft.classList.contains('open')){clearInterval(lftScrollInterval);lftScrollInterval=null;lftScrollOn=false;return;}
+    if(_userTouching)return; // палец сейчас на экране — не спорим с ним
     var b=document.getElementById('lftContent');
     if(!b)return;
     var scrollScale=Math.max(1,lftFontSz/13);
@@ -9526,12 +9584,12 @@ function toggleLftScroll(forcedSongId){
       var curIdx=-1;
       for(var i=0;i<sections.length;i++){if(ct>=sections[i].time) curIdx=i;}
       if(curIdx>=0){
-        var startPos=sectionScrollTop(curIdx);
+        var startPos=sections[curIdx].scrollTop;
         var targetPos=startPos;
         if(curIdx+1<sections.length){
           var span=sections[curIdx+1].time-sections[curIdx].time;
           var progress=span>0?Math.min(1,Math.max(0,(ct-sections[curIdx].time)/span)):0;
-          var endPos=sectionScrollTop(curIdx+1);
+          var endPos=sections[curIdx+1].scrollTop;
           targetPos=startPos+(endPos-startPos)*progress;
         }
         b.scrollTop=Math.max(0,targetPos);
