@@ -2458,6 +2458,7 @@ function startGmpMembersWatch(){
     if(currentGroupId!==groupAtStart)return;
     if(latestMembers!==null&&latestPresence!==null)renderGmpMembers(latestMembers,latestPresence);
   }
+  db.ref("groups/"+currentGroupId+"/meta/createdBy").once("value").then(function(cs){window._gmpCreatedBy=cs.val();tryRender();}).catch(function(){});
   _gmpMembersRef=db.ref("groups/"+currentGroupId+"/members");
   _gmpMembersRef.on("value",function(memSnap){
     latestMembers=memSnap.val()||{};
@@ -2507,16 +2508,35 @@ function renderGmpMembers(members,presence){
     var role=m.role||"member";
     var roleLbl=roleLabels[role]||roleLabels.member;
     // Лидер и админы могут менять роль участников (не самого себя, не лидера)
-    var canChangeRole=(currentRole==="leader"||currentRole==="admin")&&currentUser&&uid!==currentUser.uid&&role!=="leader";
+    var isCreator=window._gmpCreatedBy&&uid===window._gmpCreatedBy;
+    var canManage=(currentRole==="leader"||currentRole==="admin")&&currentUser&&uid!==currentUser.uid&&!isCreator;
+    var canChangeRole=canManage&&role!=="leader";
+    var trashBtn=canManage
+      ? '<button onclick="gmpRemoveMember(\''+uid+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'" style="flex-shrink:0;margin-left:6px;width:32px;height:32px;border-radius:8px;border:1px solid var(--br);background:none;color:#e05252;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg></button>'
+      : '';
     var roleCell=canChangeRole
       ? '<button onclick="gmpChangeRole(\''+uid+'\',\''+role+'\')" style="background:var(--s3);border:1px solid var(--br);border-radius:6px;color:var(--tx2);font-size:11px;font-family:Inter,sans-serif;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;">'+roleLbl+' ›</button>'
       : '<div class="gmp-role-badge">'+roleLbl+'</div>';
     return '<div class="gmp-member-row">'+
       '<div class="gmp-avatar">'+esc(initial)+'<div class="gmp-status-dot '+(isOnline?'online':'offline')+'"></div></div>'+
       '<div class="gmp-member-info"><div class="gmp-member-name">'+esc(name)+'</div><div class="gmp-member-meta">'+meta+'</div></div>'+
-      roleCell+
+      roleCell+trashBtn+
     '</div>';
   }).join("");
+}
+function gmpRemoveMember(uid,name){
+  var en=LANG==='en';
+  showConfirmSheet(
+    (en?'Remove ':'Удалить ')+(name||(en?'this member':'участника'))+(en?' from the group?':' из группы?'),
+    en?'Remove':'Удалить',
+    function(){
+      if(!db||!currentGroupId||(currentRole!=='leader'&&currentRole!=='admin'))return;
+      var gid=currentGroupId;
+      db.ref('groups/'+gid+'/members/'+uid).remove();
+      db.ref('groups/'+gid+'/presence/'+uid).remove().catch(function(){});
+      db.ref('users/'+uid+'/groups/'+gid).remove().catch(function(){});
+    }
+  );
 }
 function gmpChangeRole(uid,currentRoleOfMember){
   var en=LANG==='en';
@@ -2552,7 +2572,9 @@ function gmpChangeRole(uid,currentRoleOfMember){
           en?'Remove this member from the group?':'Удалить участника из группы?',
           en?'Remove':'Удалить',
           function(){
-            if(!db||!currentGroupId||currentRole!=='leader')return;
+            if(!db||!currentGroupId||(currentRole!=='leader'&&currentRole!=='admin'))return;
+            db.ref('users/'+uid+'/groups/'+currentGroupId).remove().catch(function(){});
+            db.ref('groups/'+currentGroupId+'/presence/'+uid).remove().catch(function(){});
             db.ref('groups/'+currentGroupId+'/members/'+uid).remove().then(function(){
               db.ref('groups/'+currentGroupId+'/members').once('value').then(function(s){
                 var members=s.val()||{};
@@ -2744,7 +2766,7 @@ try{
   var _joinParam=_joinParams.get("join");
   if(_joinParam){
     window._pendingJoinCode=_joinParam.toUpperCase();
-    window._pendingJoinRole=_joinParams.get("as")==="admin"?"leader":"member";
+    window._pendingJoinRole=_joinParams.get("as")==="admin"?"admin":"member";
   }
 }catch(e){}
 function obFinishOnboarding(){
