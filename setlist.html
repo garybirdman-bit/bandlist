@@ -248,10 +248,28 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .gmp-grp-active{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#2dd4bf;flex-shrink:0;}
 .gmp-icon-btn{flex-shrink:0;width:32px;height:32px;border-radius:8px;border:none;background:none;color:var(--mu2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .gmp-icon-btn:hover{background:var(--s2);color:#e05252;}
+.gmp-icon-btn.gmp-icon-edit:hover{color:#fff;}
+/* Профиль: один шрифт, четыре размера, три толщины */
+.profile-screen,.profile-screen *{font-family:'Golos Text',sans-serif!important;}
+.profile-screen .psec-lbl,.profile-screen .gmp-lbl,.profile-screen .gmp-code-cap{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);}
+.profile-screen .psec-lbl,.profile-screen .gmp-lbl{margin-top:20px;margin-bottom:8px;padding-left:2px;}
+.profile-screen .lbl3,.profile-screen .gmp-member-name,.profile-screen .gmp-grp-name{font-size:15px;font-weight:500;color:var(--tx);}
+.profile-screen .gmp-member-meta,.profile-screen .gmp-grp-code{font-size:13px;font-weight:400;letter-spacing:0;color:var(--mu2);margin-top:2px;}
+.profile-screen .gmp-grp-active{font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;}
+.profile-screen .gmp-role-badge{font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--tx2);background:none;border:1px solid var(--br);border-radius:8px;padding:5px 10px;flex-shrink:0;}
+.profile-screen .gmp-role-btn{cursor:pointer;}
+.profile-screen .gmp-role-btn:hover{border-color:var(--mu2);color:#fff;}
+.profile-screen .gmp-avatar,.profile-screen .gmp-grp-ico{font-size:14px;font-weight:600;}
+.profile-screen .gmp-code-txt{font-size:20px;font-weight:600;letter-spacing:1.5px;}
+.profile-screen .gmp-btn,.profile-screen #logoutBtn{font-size:14px;font-weight:500;}
+.profile-screen .gmp-btn-primary{font-weight:600;}
+.profile-screen .lang-switch button{font-size:13px;font-weight:600;letter-spacing:.5px;}
+.profile-screen #gmpJoinCodeInp{font-size:15px!important;}
 @media (min-width:700px){.profile-screen-body>*{max-width:600px;margin-left:auto;margin-right:auto;}#logoutBtn{display:block;}}
 .gmp-row-actions .gmp-btn{flex:1 1 150px;}
 .gmp-row-actions{flex-wrap:wrap;}
-@media (max-width:420px){.gmp-invite{flex-direction:column;align-items:stretch;}.gmp-qr{align-self:center;}}
+@media (max-width:420px){.gmp-invite{flex-direction:column;align-items:stretch;}.gmp-qr{align-self:center;}.gmp-row-actions .gmp-btn{flex-basis:100%;}}
+.profile-screen .gmp-member-meta,.profile-screen .gmp-member-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gmp-code-copy-btn{background:none;border:none;color:var(--mu2);cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;}
 .gmp-code-copy-btn:active{color:#fff;}
 .psec-row .val3{font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);}
@@ -314,6 +332,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .row-menu-popup{display:none;}
 .row-action-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;}
 .row-action-sheet-overlay.open{display:block;}
+@media(min-width:700px){#confirmDialogBox{left:50%!important;right:auto!important;width:400px;transform:translate(-50%,-50%)!important;}.row-action-sheet{left:50%!important;right:auto!important;width:480px;transform:translateX(-50%);}}
 .row-action-sheet{position:fixed;left:0;right:0;bottom:-100%;background:rgba(28,29,31,0.96);backdrop-filter:saturate(180%) blur(40px);-webkit-backdrop-filter:saturate(180%) blur(40px);border-top:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:20px 0 calc(24px + env(safe-area-inset-bottom,0px));z-index:401;box-shadow:0 -8px 30px rgba(0,0,0,.4);transition:bottom .25s cubic-bezier(.32,.72,0,1);}
 .row-action-sheet.open{bottom:0;}
 .row-action-sheet-handle{width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 14px;}
@@ -2541,7 +2560,7 @@ function renderGmpMembers(members,presence){
       ? '<button onclick="gmpRemoveMember(\''+uid+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'" class="gmp-icon-btn" style="margin-left:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg></button>'
       : '';
     var roleCell=canChangeRole
-      ? '<button onclick="gmpChangeRole(\''+uid+'\',\''+role+'\')" style="background:var(--s3);border:1px solid var(--br);border-radius:6px;color:var(--tx2);font-size:11px;font-family:Inter,sans-serif;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;">'+roleLbl+' ›</button>'
+      ? '<button class="gmp-role-badge gmp-role-btn" onclick="gmpChangeRole(\''+uid+'\',\''+role+'\')">'+roleLbl+' ›</button>'
       : '<div class="gmp-role-badge">'+roleLbl+'</div>';
     return '<div class="gmp-member-row">'+
       '<div class="gmp-avatar">'+esc(initial)+'<div class="gmp-status-dot '+(isOnline?'online':'offline')+'"></div></div>'+
@@ -2660,8 +2679,9 @@ function renderGmpGroupsList(){
     // активная группа — первой
     codes.sort(function(a,b){return (a===currentGroupId?-1:0)-(b===currentGroupId?-1:0);});
     return Promise.all(codes.map(function(code){
-      return db.ref("groups/"+code+"/meta/name").once("value").then(function(n){return n.val();}).catch(function(){return null;});
-    })).then(function(names){
+      return db.ref("groups/"+code+"/meta").once("value").then(function(n){return n.val()||{};}).catch(function(){return {};});
+    })).then(function(metas){
+      var names=metas.map(function(m){return m.name||null;});
       var trashIcon='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
       wrap.innerHTML=codes.map(function(code,i){
         var isActive=code===currentGroupId;
@@ -2669,10 +2689,11 @@ function renderGmpGroupsList(){
         return '<div class="gmp-grp-row'+(isActive?'':' click')+'"'+(isActive?'':' onclick="gmpSwitchGroup(\''+code+'\')"')+'>'+
           '<div class="gmp-grp-ico">'+esc(name.charAt(0).toUpperCase())+'</div>'+
           '<div class="gmp-grp-info"><div class="gmp-grp-name">'+esc(name)+'</div>'+(name!==code?'<div class="gmp-grp-code">'+esc(code)+'</div>':'')+'</div>'+
-          (isActive
-            ?'<span class="gmp-grp-active">'+(LANG==="en"?"Active":"Активна")+'</span>'
-            :'<button class="gmp-icon-btn" onclick="event.stopPropagation();gmpDeleteGroup(\''+code+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'">'+trashIcon+'</button>'
-             +'<span style="color:var(--mu2);font-size:16px;flex-shrink:0;">›</span>')+
+          (isActive?'<span class="gmp-grp-active">'+(LANG==="en"?"Active":"Активна")+'</span>':'')+
+          ((metas[i].createdBy===currentUser.uid||(isActive&&(currentRole==="leader"||currentRole==="admin")))
+            ?'<button class="gmp-icon-btn gmp-icon-edit" onclick="event.stopPropagation();gmpRenameGroup(\''+code+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Rename":"Переименовать")+'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
+            :'<span class="gmp-icon-btn" style="visibility:hidden"></span>')+
+          '<button class="gmp-icon-btn" onclick="event.stopPropagation();gmpDeleteGroup(\''+code+'\')" title="'+(LANG==="en"?"Delete or leave":"Удалить или выйти")+'">'+trashIcon+'</button>'+
         '</div>';
       }).join("");
     });
@@ -2693,21 +2714,149 @@ function closeConfirmDialog(){
   document.getElementById("confirmDialogOverlay").classList.remove("open");
   document.getElementById("confirmDialogBox").style.display="none";
 }
-function gmpDeleteGroup(code){
-  if(code===currentGroupId){
-    alert(LANG==="en"?"Switch to another group first.":"Сначала переключись на другую группу.");
-    return;
-  }
+// После удаления/выхода из группы: перейти в другую группу или, если групп
+// больше нет, — на экран создания/входа в группу
+function _gmpAfterLeave(code,preferCode){
+  if(code!==currentGroupId){renderGmpGroupsList();return;}
+  db.ref("users/"+currentUser.uid+"/groups").once("value").then(function(snap){
+    var left=Object.keys(snap.val()||{}).filter(function(c){return c!==code;});
+    closeProfileScreen();
+    if(left.length){setActiveGroup(preferCode&&left.indexOf(preferCode)>=0?preferCode:left[0]);return;}
+    try{db.ref("groups/"+currentGroupId+"/data").off("value");}catch(e){}
+    _groupListenersAttached=false;
+    currentGroupId=null;currentRole=null;
+    try{localStorage.removeItem("bandlist_groupId");}catch(e){}
+    db.ref("users/"+currentUser.uid+"/activeGroup").remove().catch(function(){});
+    var defId=Date.now();
+    D=JSON.parse(JSON.stringify(DEF));
+    D.concerts=[{id:defId,name:LANG==="en"?"Setlist 1":"Сетлист 1"}];
+    D.sections={};D.sections[defId]=[{id:defId+1,name:LANG==="en"?"Part 1":"1 отделение",songs:[]}];
+    D.active=defId;D.repertoire=[];D.events=[];
+    try{localStorage.setItem("bandlist_v3",JSON.stringify(D));}catch(e){}
+    rConcerts();rList();rRep();
+    openOnboarding();
+  });
+}
+// Копирует песни удаляемой группы в другую группу (без дублей по названию+исполнителю).
+// Треки в облаке не трогаем — ссылки на них продолжают работать.
+function _gmpMoveSongs(fromCode,toCode){
+  return Promise.all([
+    db.ref("groups/"+fromCode+"/data/repertoire").once("value"),
+    db.ref("groups/"+toCode+"/data/repertoire").once("value")
+  ]).then(function(r){
+    var src=r[0].val()||[]; if(!Array.isArray(src))src=Object.values(src);
+    var dst=r[1].val()||[]; if(!Array.isArray(dst))dst=Object.values(dst);
+    var seen={},ids={},moved=0;
+    dst.forEach(function(x){seen[((x.title||'')+'|'+(x.artist||'')).toLowerCase().trim()]=1;ids[x.id]=1;});
+    var nextId=Date.now();
+    src.forEach(function(x){
+      var key=((x.title||'')+'|'+(x.artist||'')).toLowerCase().trim();
+      if(seen[key])return;
+      var copy=JSON.parse(JSON.stringify(x));delete copy.trackData;
+      if(ids[copy.id])copy.id=nextId++;
+      ids[copy.id]=1;seen[key]=1;dst.push(copy);moved++;
+    });
+    return db.ref("groups/"+toCode+"/data/repertoire").set(dst).then(function(){return moved;});
+  });
+}
+function _gmpConfirmDelete(code,name,members,moveTo){
+  var en=LANG==="en";
+  var others=Object.keys(members).filter(function(u){return u!==currentUser.uid;}).length;
+  var what=moveTo
+    ?(en?'Songs will be copied to "'+moveTo.name+'". Setlists and events of this group will be deleted':'Песни будут перенесены в «'+moveTo.name+'». Сетлисты и события этой группы удалятся')
+    :(en?"Songs, setlists, events and audio tracks of this group will be deleted":"Будут удалены песни, сетлисты, события и аудиотреки этой группы");
   showConfirmDialog(
-    (LANG==="en"?'Remove "':'Удалить «')+code+(LANG==="en"?'"?':'»?'),
-    LANG==="en"?"You will lose access unless you rejoin with the code or invite link.":"Ты потеряешь доступ, если не зайдёшь заново по коду или ссылке.",
-    LANG==="en"?"Remove":"Удалить",
+    (en?'Delete "':'Удалить группу «')+name+(en?'"?':'»?'),
+    what+(others?(en?" — for all "+others+" other member(s) too.":" — в том числе у остальных участников ("+others+")."):".")+(en?"\n\nThis cannot be undone.":"\n\nОтменить это нельзя."),
+    en?"Delete":"Удалить",
     function(){
-      db.ref("users/"+currentUser.uid+"/groups/"+code).remove().then(function(){
-        renderGmpGroupsList();
-      });
+      var step=moveTo?_gmpMoveSongs(code,moveTo.code):Promise.resolve(0);
+      step.then(function(moved){
+        var updates={};
+        Object.keys(members).forEach(function(u){updates["users/"+u+"/groups/"+code]=null;});
+        updates["users/"+currentUser.uid+"/groups/"+code]=null;
+        updates["groups/"+code]=null;
+        if(!moveTo){
+          try{firebase.storage().ref("groups/"+code+"/tracks").listAll().then(function(res){
+            res.items.forEach(function(it){it.delete().catch(function(){});});
+          }).catch(function(){});}catch(e){}
+        }
+        return db.ref().update(updates).then(function(){
+          if(moveTo&&code===currentGroupId){_gmpAfterLeave(code,moveTo.code);}else{_gmpAfterLeave(code);}
+          if(moveTo)showUndoToast((en?moved+' songs moved to "':'Перенесено песен: '+moved+' → «')+moveTo.name+(en?'"':'»'));
+        });
+      }).catch(function(e){alert((en?"Could not delete: ":"Не удалось удалить: ")+e.message);});
     }
   );
+}
+function gmpRenameGroup(code,curName){
+  var en=LANG==="en";
+  var old=document.getElementById('gmpRenameOv');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='gmpRenameOv';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:450;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML='<div style="background:rgba(28,29,31,0.98);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:22px;width:100%;max-width:380px;font-family:\'Golos Text\',sans-serif;">'
+    +'<div style="font-size:17px;font-weight:600;color:#fff;text-align:center;margin-bottom:16px;">'+(en?'Rename group':'Переименовать группу')+'</div>'
+    +'<input id="gmpRenameInp" style="width:100%;height:44px;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:#fff;padding:0 14px;font-size:15px;font-family:\'Golos Text\',sans-serif;outline:none;box-sizing:border-box;">'
+    +'<div style="display:flex;gap:10px;margin-top:16px;">'
+    +'<button id="gmpRenameCancel" style="flex:1;height:42px;border-radius:10px;border:1px solid var(--br);background:none;color:var(--tx2);font-family:\'Golos Text\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">'+(en?'Cancel':'Отмена')+'</button>'
+    +'<button id="gmpRenameOk" style="flex:1;height:42px;border-radius:10px;border:none;background:#fff;color:#111015;font-family:\'Golos Text\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">'+(en?'Save':'Сохранить')+'</button>'
+    +'</div></div>';
+  document.body.appendChild(ov);
+  var inp=document.getElementById('gmpRenameInp');inp.value=curName||'';
+  setTimeout(function(){inp.focus();inp.select();},50);
+  function done(){
+    var v=inp.value.trim();ov.remove();
+    if(!v||v===curName)return;
+    db.ref("groups/"+code+"/meta/name").set(v).then(function(){renderGmpGroupsList();})
+      .catch(function(e){alert((en?"Could not rename: ":"Не удалось переименовать: ")+e.message);});
+  }
+  document.getElementById('gmpRenameOk').onclick=done;
+  document.getElementById('gmpRenameCancel').onclick=function(){ov.remove();};
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  inp.onkeydown=function(e){if(e.key==='Enter')done();if(e.key==='Escape')ov.remove();};
+}
+function gmpDeleteGroup(code){
+  var en=LANG==="en";
+  Promise.all([
+    db.ref("groups/"+code+"/meta").once("value").then(function(s){return s.val()||{};}).catch(function(){return {};}),
+    db.ref("groups/"+code+"/members").once("value").then(function(s){return s.val()||{};}).catch(function(){return {};})
+  ]).then(function(r){
+    var meta=r[0],members=r[1];
+    var name=meta.name||code;
+    var isOwner=meta.createdBy===currentUser.uid;
+    if(!isOwner){
+      // Не создатель — просто выходит из группы, у остальных всё остаётся
+      showConfirmDialog(
+        (en?'Leave "':'Выйти из группы «')+name+(en?'"?':'»?'),
+        en?"The group stays for other members. You can rejoin with the code or invite link.":"Группа останется у остальных участников. Вернуться можно по коду или ссылке.",
+        en?"Leave":"Выйти",
+        function(){
+          db.ref("groups/"+code+"/members/"+currentUser.uid).remove().catch(function(){});
+          db.ref("groups/"+code+"/presence/"+currentUser.uid).remove().catch(function(){});
+          db.ref("users/"+currentUser.uid+"/groups/"+code).remove().then(function(){_gmpAfterLeave(code);});
+        }
+      );
+      return;
+    }
+    // Создатель — удаляет группу. Сначала спрашиваем, что делать с песнями.
+    db.ref("users/"+currentUser.uid+"/groups").once("value").then(function(gs){
+      var otherCodes=Object.keys(gs.val()||{}).filter(function(c){return c!==code;});
+      var keepIcon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+      var delIcon='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
+      var items=[];
+      if(otherCodes.length){
+        items.push({icon:keepIcon,label:en?'Move songs to another group, then delete':'Перенести песни в другую группу и удалить',onClick:function(){
+          Promise.all(otherCodes.map(function(c){return db.ref("groups/"+c+"/meta/name").once("value").then(function(n){return {code:c,name:n.val()||c};});})).then(function(list){
+            openRowActionSheet(en?'Move songs to':'Куда перенести песни',list.map(function(g){
+              return {icon:keepIcon,label:g.name,onClick:function(){_gmpConfirmDelete(code,name,members,g)}};
+            }));
+          });
+        }});
+      }
+      items.push({icon:delIcon,label:en?'Delete group with all songs':'Удалить группу вместе с песнями',danger:true,onClick:function(){_gmpConfirmDelete(code,name,members,null);}});
+      openRowActionSheet((en?'Delete "':'Удалить «')+name+(en?'"':'»'),items);
+    });
+  });
 }
 function gmpCreateNewGroup(){
   var btn=document.getElementById("gmpCreateBtn");
