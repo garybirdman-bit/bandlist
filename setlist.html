@@ -639,6 +639,8 @@ textarea.fi.tall{min-height:120px;}
 .perf-section{margin-bottom:20px;}
 .perf-lhd{font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:#a8a4a0;margin:12px 0 12px;opacity:0.9;}
 .perf-line{font-size:13px;font-weight:500;line-height:1.65;color:#f0ece4;letter-spacing:0.2px;}
+/* Полноэкранный текст: строки берут размер из настройки Аа (lftFontSz), как и песни с аккордами */
+#lftContent .perf-line{font-size:inherit;line-height:1.5;}
 .perf-footer{display:flex;align-items:center;gap:10px;padding:10px 20px;border-top:1px solid #2a2a2a;flex-shrink:0;background:#111114;}
 #perfFooter{flex-direction:column;align-items:stretch;transition:opacity .25s ease, transform .25s ease;}
 #perfFooter.perf-controls-hidden{opacity:0;pointer-events:none;transform:translateY(8px);}
@@ -6487,6 +6489,8 @@ function exitPerfMode(){
 function perfFontSize(d){
   perfFontSz = Math.max(14, Math.min(38, perfFontSz + d));
   document.querySelectorAll('.perf-line .cpro-word').forEach(function(el){ el.style.fontSize = perfFontSz + 'px'; });
+  // Строки без аккордов тоже растут вместе с Аа
+  document.querySelectorAll('#perfBody .perf-line').forEach(function(el){ if(!el.querySelector('.cpro-word')) el.style.fontSize = perfFontSz + 'px'; });
 }
 
 var perfMetrOn=false;
