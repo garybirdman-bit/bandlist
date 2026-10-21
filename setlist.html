@@ -220,10 +220,38 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .psec-row{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;}
 .psec-row+.psec-row{border-top:1px solid var(--br);}
 .psec-row span.lbl3{flex:1;font-family:'Golos Text',sans-serif;font-size:15px;color:var(--tx2);}
-.gmp-code-chip{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--s1);border:1px solid var(--br);border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.gmp{padding:4px 16px 18px;border-top:1px solid var(--br);}
+.gmp-lbl{font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu2);margin:18px 2px 8px;}
+.gmp-card{background:var(--s1);border:1px solid var(--br);border-radius:12px;overflow:hidden;}
+.gmp-invite{display:flex;gap:16px;align-items:center;padding:14px;}
+.gmp-qr{flex-shrink:0;cursor:pointer;line-height:0;}
+.gmp-qr>div{background:#fff;border-radius:10px;padding:8px;display:inline-block;}
+.gmp-invite-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+.gmp-code-cap{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mu2);}
+.gmp-code-chip{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
 .gmp-code-chip.empty{justify-content:flex-start;}
-.gmp-code-txt{font-family:'JetBrains Mono','Courier New',monospace;font-size:19px;font-weight:600;letter-spacing:3px;color:#fff;}
-.gmp-code-txt.empty{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:400;letter-spacing:normal;color:var(--mu2);text-align:left;}
+.gmp-code-txt{flex:1;min-width:0;font-family:'JetBrains Mono','Courier New',monospace;font-size:18px;font-weight:600;letter-spacing:2.5px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gmp-code-txt.empty{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:400;letter-spacing:normal;color:var(--mu2);}
+.gmp-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;border-radius:10px;font-family:'Golos Text',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.gmp-btn-primary{background:#fff;border:none;color:#111015;}
+.gmp-btn-ghost{background:none;border:1px solid var(--br);color:var(--tx2);font-weight:500;}
+.gmp-btn-ghost:hover{border-color:var(--mu2);color:#fff;}
+.gmp-row-actions{display:flex;gap:8px;margin-top:8px;}
+.gmp-grp-row{display:flex;align-items:center;gap:12px;padding:11px 14px;}
+.gmp-grp-row+.gmp-grp-row{border-top:1px solid var(--br);}
+.gmp-grp-row.click{cursor:pointer;}
+.gmp-grp-row.click:hover{background:var(--s2);}
+.gmp-grp-ico{width:34px;height:34px;border-radius:9px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;color:var(--tx2);flex-shrink:0;}
+.gmp-grp-info{flex:1;min-width:0;}
+.gmp-grp-name{font-size:14.5px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gmp-grp-code{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;color:var(--mu2);margin-top:1px;}
+.gmp-grp-active{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#2dd4bf;flex-shrink:0;}
+.gmp-icon-btn{flex-shrink:0;width:32px;height:32px;border-radius:8px;border:none;background:none;color:var(--mu2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.gmp-icon-btn:hover{background:var(--s2);color:#e05252;}
+@media (min-width:700px){.profile-screen-body>*{max-width:600px;margin-left:auto;margin-right:auto;}#logoutBtn{display:block;}}
+.gmp-row-actions .gmp-btn{flex:1 1 150px;}
+.gmp-row-actions{flex-wrap:wrap;}
+@media (max-width:420px){.gmp-invite{flex-direction:column;align-items:stretch;}.gmp-qr{align-self:center;}}
 .gmp-code-copy-btn{background:none;border:none;color:var(--mu2);cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;}
 .gmp-code-copy-btn:active{color:#fff;}
 .psec-row .val3{font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);}
@@ -1194,44 +1222,42 @@ textarea.fi.tall{min-height:120px;}
         <span class="lbl3" id="psecGroupRowLbl">Управление группой и участниками</span>
         <span style="color:var(--mu2);font-size:13px;">›</span>
       </div>
-      <div id="groupManagePanel" style="display:none;padding:16px;border-top:1px solid var(--br);">
-        <div style="font-size:11px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:8px;" id="gmpMembersLbl"></div>
-        <div id="gmpMembersBox" style="background:var(--s1);border:1px solid var(--br);border-radius:10px;overflow:hidden;margin-bottom:20px;"></div>
+      <div id="groupManagePanel" class="gmp" style="display:none;">
+        <div class="gmp-lbl" id="gmpMembersLbl"></div>
+        <div id="gmpMembersBox" class="gmp-card"></div>
 
-        <div style="font-size:11px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:8px;" id="gmpCodeLbl">Код группы</div>
-        <div class="gmp-code-chip" id="gmpCodeChip">
-          <span class="gmp-code-txt" id="gmpCodeTxt" style="flex:1;">—</span>
-          <button class="gmp-code-copy-btn" id="gmpCodeCopyBtn" onclick="copyGroupCodeOnly()" title="Скопировать код">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          </button>
-        </div>
-        <div id="gmpQrWrap" onclick="toggleQrFullscreen()" style="display:flex;justify-content:center;margin-bottom:16px;cursor:pointer;">
-          <div style="background:#fff;border-radius:16px;padding:16px;display:inline-flex;align-items:center;justify-content:center;transition:transform .25s ease;"></div>
+        <div class="gmp-lbl" id="gmpInviteLbl">Пригласить в группу</div>
+        <div class="gmp-card gmp-invite">
+          <div id="gmpQrWrap" class="gmp-qr" onclick="toggleQrFullscreen()" title="Увеличить"></div>
+          <div class="gmp-invite-main">
+            <div class="gmp-code-cap" id="gmpCodeLbl">Код группы</div>
+            <div class="gmp-code-chip" id="gmpCodeChip">
+              <span class="gmp-code-txt" id="gmpCodeTxt">—</span>
+              <button class="gmp-code-copy-btn" id="gmpCodeCopyBtn" onclick="copyGroupCodeOnly()" title="Скопировать код">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <button onclick="shareGroupInviteLink()" id="gmpShareBtn" class="gmp-btn gmp-btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <span id="gmpShareBtnTxt">Поделиться ссылкой</span>
+            </button>
+            <button onclick="copyGroupInviteLink('gmpCopyAdminBtn',true)" id="gmpCopyAdminBtn" class="gmp-btn gmp-btn-ghost">Пригласить как админа</button>
+          </div>
         </div>
         <div id="gmpQrFullOverlay" onclick="toggleQrFullscreen()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;align-items:center;justify-content:center;cursor:pointer;">
           <div id="gmpQrFullBox" style="background:#fff;border-radius:24px;padding:28px;display:inline-flex;align-items:center;justify-content:center;"></div>
         </div>
-        <button onclick="shareGroupInviteLink()" id="gmpShareBtn" style="width:100%;height:38px;background:var(--s2);border:1px solid var(--tx2);border-radius:10px;color:#fff;font-family:'Golos Text',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          <span id="gmpShareBtnTxt">Поделиться ссылкой</span>
-        </button>
-        <div style="text-align:center;margin-bottom:18px;">
-          <span onclick="copyGroupInviteLink('gmpCopyAdminBtn',true)" id="gmpCopyAdminBtn" style="color:var(--mu2);font-family:'Golos Text',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline;">Пригласить как админа</span>
-        </div>
 
-        <div style="font-size:11px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:8px;" id="gmpMyGroupsLbl">Мои группы</div>
-        <div id="gmpGroupsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-        <button onclick="gmpCreateNewGroup()" id="gmpCreateBtn" style="width:100%;padding:11px;background:none;border:1px solid var(--br);border-radius:8px;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px;">+ Создать новую группу</button>
-
-        <div id="gmpManualJoinToggle" onclick="gmpToggleManualJoin()" style="text-align:center;color:var(--mu2);font-family:'Inter',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:6px 0;">Ввести код вручную ›</div>
-        <div id="gmpManualJoinWrap" style="display:none;gap:8px;margin-top:10px;">
-          <input id="gmpJoinCodeInp" placeholder="КОД-ГРУППЫ" style="flex:1;background:var(--s2);border:1px solid var(--br);border-radius:8px;color:#fff;padding:11px;font-size:13px;text-transform:uppercase;letter-spacing:1px;outline:none;font-family:'Golos Text',sans-serif;">
-          <button onclick="gmpJoinOtherGroup()" id="gmpJoinBtn" style="background:var(--s2);border:1px solid var(--br);border-radius:8px;color:#fff;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Golos Text',sans-serif;white-space:nowrap;">Войти</button>
+        <div class="gmp-lbl" id="gmpMyGroupsLbl">Мои группы</div>
+        <div id="gmpGroupsList" class="gmp-card"></div>
+        <div class="gmp-row-actions">
+          <button onclick="gmpCreateNewGroup()" id="gmpCreateBtn" class="gmp-btn gmp-btn-ghost">+ Создать новую группу</button>
+          <button onclick="gmpToggleManualJoin()" id="gmpManualJoinToggle" class="gmp-btn gmp-btn-ghost">Ввести код вручную</button>
         </div>
-      </div>
-      <div class="psec-row disabled">
-        <span class="lbl3" id="psecAuthRowLbl">Вход / регистрация</span>
-        <span class="soon-tag" id="psecSoonTag2">Скоро</span>
+        <div id="gmpManualJoinWrap" style="display:none;gap:8px;margin-top:8px;">
+          <input id="gmpJoinCodeInp" placeholder="КОД-ГРУППЫ" style="flex:1;min-width:0;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:#fff;padding:0 14px;height:42px;font-size:14px;text-transform:uppercase;letter-spacing:1px;outline:none;font-family:'Golos Text',sans-serif;">
+          <button onclick="gmpJoinOtherGroup()" id="gmpJoinBtn" class="gmp-btn gmp-btn-primary" style="width:auto;padding:0 18px;">Войти</button>
+        </div>
       </div>
     </div>
 
@@ -2409,21 +2435,21 @@ function toggleGroupManagePanel(){
     var gmpChip=document.getElementById("gmpCodeChip");if(gmpChip)gmpChip.classList.toggle("empty",!code);
     var gmpCopyBtn2=document.getElementById("gmpCodeCopyBtn");if(gmpCopyBtn2)gmpCopyBtn2.style.display=code?"flex":"none";
     // Переводим статичные лейблы панели
-    var codeLbl=document.getElementById("gmpCodeLbl");if(codeLbl)codeLbl.textContent=LANG==="en"?"GROUP CODE":"КОД ГРУППЫ";
-    var myGroupsLbl=document.getElementById("gmpMyGroupsLbl");if(myGroupsLbl)myGroupsLbl.textContent=LANG==="en"?"MY GROUPS":"МОИ ГРУППЫ";
+    var codeLbl=document.getElementById("gmpCodeLbl");if(codeLbl)codeLbl.textContent=LANG==="en"?"Group code":"Код группы";
+    var myGroupsLbl=document.getElementById("gmpMyGroupsLbl");if(myGroupsLbl)myGroupsLbl.textContent=LANG==="en"?"My groups":"Мои группы";
     var createBtn=document.getElementById("gmpCreateBtn");if(createBtn)createBtn.textContent=LANG==="en"?"+ Create new group":"+ Создать новую группу";
     var joinInp=document.getElementById("gmpJoinCodeInp");if(joinInp)joinInp.placeholder=LANG==="en"?"GROUP-CODE":"КОД-ГРУППЫ";
     var joinBtn=document.getElementById("gmpJoinBtn");if(joinBtn)joinBtn.textContent=LANG==="en"?"Join":"Войти";
     var copyBtn=document.getElementById("gmpShareBtnTxt");if(copyBtn)copyBtn.textContent=LANG==="en"?"Share link":"Поделиться ссылкой";
     var copyAdminBtn=document.getElementById("gmpCopyAdminBtn");if(copyAdminBtn)copyAdminBtn.textContent=LANG==="en"?"Invite as admin":"Пригласить как админа";
-    var manualToggle=document.getElementById("gmpManualJoinToggle");if(manualToggle)manualToggle.textContent=(LANG==="en"?"Enter code manually":"Ввести код вручную")+" ›";
+    var manualToggle=document.getElementById("gmpManualJoinToggle");if(manualToggle)manualToggle.textContent=LANG==="en"?"Enter code":"Ввести код вручную";
+    var inviteLbl=document.getElementById("gmpInviteLbl");if(inviteLbl)inviteLbl.textContent=LANG==="en"?"Invite to group":"Пригласить в группу";
     var qrWrap=document.getElementById("gmpQrWrap");
-    qrWrap.innerHTML="";
+    qrWrap.innerHTML="";qrWrap.style.display=code?"":"none";
     if(code&&window.QRCode){
       var qrBox=document.createElement("div");
-      qrBox.style.cssText="background:#fff;border-radius:16px;padding:16px;display:inline-flex;align-items:center;justify-content:center;";
       qrWrap.appendChild(qrBox);
-      try{new QRCode(qrBox,{text:code,width:150,height:150,colorDark:"#111015",colorLight:"#ffffff"});}catch(e){}
+      try{new QRCode(qrBox,{text:code,width:104,height:104,colorDark:"#111015",colorLight:"#ffffff"});}catch(e){}
     }
     renderGmpGroupsList();
     startGmpMembersWatch();
@@ -2512,7 +2538,7 @@ function renderGmpMembers(members,presence){
     var canManage=(currentRole==="leader"||currentRole==="admin")&&currentUser&&uid!==currentUser.uid&&!isCreator;
     var canChangeRole=canManage&&role!=="leader";
     var trashBtn=canManage
-      ? '<button onclick="gmpRemoveMember(\''+uid+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'" style="flex-shrink:0;margin-left:6px;width:32px;height:32px;border-radius:8px;border:1px solid var(--br);background:none;color:#e05252;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg></button>'
+      ? '<button onclick="gmpRemoveMember(\''+uid+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'" class="gmp-icon-btn" style="margin-left:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg></button>'
       : '';
     var roleCell=canChangeRole
       ? '<button onclick="gmpChangeRole(\''+uid+'\',\''+role+'\')" style="background:var(--s3);border:1px solid var(--br);border-radius:6px;color:var(--tx2);font-size:11px;font-family:Inter,sans-serif;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;">'+roleLbl+' ›</button>'
@@ -2629,19 +2655,27 @@ function renderGmpGroupsList(){
   if(!db||!currentUser){wrap.innerHTML="";return;}
   db.ref("users/"+currentUser.uid+"/groups").once("value").then(function(snap){
     var groups=snap.val();
-    if(!groups){wrap.innerHTML='<div style="color:var(--mu2);font-size:13px;">'+(LANG==="en"?"No groups yet":"Пока нет групп")+'</div>';return;}
+    if(!groups){wrap.innerHTML='<div class="gmp-grp-row" style="color:var(--mu2);font-size:13px;">'+(LANG==="en"?"No groups yet":"Пока нет групп")+'</div>';return;}
     var codes=Object.keys(groups);
-    var trashIcon='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
-    wrap.innerHTML=codes.map(function(code){
-      var isActive=code===currentGroupId;
-      return '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<div onclick="'+(isActive?'':'gmpSwitchGroup(\''+code+'\')')+'" style="flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:'+(isActive?'var(--s3)':'var(--s2)')+';border:1px solid '+(isActive?'#fff':'var(--br)')+';border-radius:8px;cursor:'+(isActive?'default':'pointer')+';">'+
-          '<span style="color:#fff;font-family:Inter,sans-serif;letter-spacing:1px;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+code+'</span>'+
-          (isActive?'<span style="color:var(--mu2);font-size:11px;flex-shrink:0;margin-left:8px;">'+(LANG==="en"?"ACTIVE":"АКТИВНА")+'</span>':'<span style="color:var(--mu2);font-size:12px;flex-shrink:0;margin-left:8px;">'+(LANG==="en"?"Switch":"Перейти")+' ›</span>')+
-        '</div>'+
-        (isActive?'':'<button onclick="event.stopPropagation();gmpDeleteGroup(\''+code+'\')" style="flex-shrink:0;width:38px;height:38px;border-radius:8px;border:1px solid var(--br);background:none;color:var(--mu2);cursor:pointer;display:flex;align-items:center;justify-content:center;" title="'+(LANG==="en"?"Remove":"Удалить")+'">'+trashIcon+'</button>')+
-      '</div>';
-    }).join("");
+    // активная группа — первой
+    codes.sort(function(a,b){return (a===currentGroupId?-1:0)-(b===currentGroupId?-1:0);});
+    return Promise.all(codes.map(function(code){
+      return db.ref("groups/"+code+"/meta/name").once("value").then(function(n){return n.val();}).catch(function(){return null;});
+    })).then(function(names){
+      var trashIcon='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
+      wrap.innerHTML=codes.map(function(code,i){
+        var isActive=code===currentGroupId;
+        var name=names[i]||code;
+        return '<div class="gmp-grp-row'+(isActive?'':' click')+'"'+(isActive?'':' onclick="gmpSwitchGroup(\''+code+'\')"')+'>'+
+          '<div class="gmp-grp-ico">'+esc(name.charAt(0).toUpperCase())+'</div>'+
+          '<div class="gmp-grp-info"><div class="gmp-grp-name">'+esc(name)+'</div>'+(name!==code?'<div class="gmp-grp-code">'+esc(code)+'</div>':'')+'</div>'+
+          (isActive
+            ?'<span class="gmp-grp-active">'+(LANG==="en"?"Active":"Активна")+'</span>'
+            :'<button class="gmp-icon-btn" onclick="event.stopPropagation();gmpDeleteGroup(\''+code+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'">'+trashIcon+'</button>'
+             +'<span style="color:var(--mu2);font-size:16px;flex-shrink:0;">›</span>')+
+        '</div>';
+      }).join("");
+    });
   }).catch(function(){wrap.innerHTML="";});
 }
 function showConfirmDialog(title,msg,okLabel,onConfirm){
@@ -2741,11 +2775,10 @@ function shareGroupInviteLink(){
 }
 function gmpToggleManualJoin(){
   var wrap=document.getElementById("gmpManualJoinWrap");
-  var toggle=document.getElementById("gmpManualJoinToggle");
   if(!wrap)return;
   var isOpen=wrap.style.display==="flex";
   wrap.style.display=isOpen?"none":"flex";
-  if(toggle)toggle.textContent=(isOpen?"":"⌄ ")+(LANG==="en"?"Enter code manually":"Ввести код вручную")+(isOpen?" ›":"");
+  if(!isOpen){var inp=document.getElementById("gmpJoinCodeInp");if(inp)setTimeout(function(){inp.focus();},50);}
 }
 function copyGroupInviteLink(btnId,asAdmin){
   var codeEl=document.getElementById("newGroupCodeTxt");
@@ -2753,7 +2786,7 @@ function copyGroupInviteLink(btnId,asAdmin){
   if(!code)return;
   var link=location.origin+location.pathname+"?join="+encodeURIComponent(code)+(asAdmin?"&as=admin":"");
   var btn=document.getElementById(btnId||"copyInviteLinkBtn");
-  var origTxt=asAdmin?(LANG==="en"?"Copy link for admins":"Скопировать ссылку для админов"):(LANG==="en"?"Copy link for musicians":"Скопировать ссылку для музыкантов");
+  var origTxt=asAdmin?(btnId==="gmpCopyAdminBtn"?(LANG==="en"?"Invite as admin":"Пригласить как админа"):(LANG==="en"?"Copy link for admins":"Скопировать ссылку для админов")):(LANG==="en"?"Copy link for musicians":"Скопировать ссылку для музыкантов");
   function done(ok){ if(btn) btn.textContent = ok ? (LANG==="en"?"Link copied!":"Ссылка скопирована!") : link; setTimeout(function(){ if(btn) btn.textContent=origTxt; },2000); }
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(link).then(function(){done(true);}).catch(function(){done(false);});
