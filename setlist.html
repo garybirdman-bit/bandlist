@@ -2247,6 +2247,7 @@ function attachGroupListeners(){
     if(!D.sections)D.sections=DEF.sections;
     if(!D.active)D.active=D.concerts[0]&&D.concerts[0].id;
     D.repertoire.forEach(function(s){if(localTracks[s.id]){s.trackData=localTracks[s.id].data;s.trackName=localTracks[s.id].name;}});
+    setTimeout(syncLocalTracksToCloud,1500);
     try{localStorage.setItem("bandlist_v3",JSON.stringify(D));}catch(e){}
     rConcerts();rList();rRep();
     if(panel.id){var ps=findR(panel.id);if(ps)rPanel();else closePanel();}
@@ -5830,6 +5831,39 @@ function detectAndStoreTrackDuration(s,src){
   }catch(e){}
 }
 
+// Треки, загруженные давно (до подключения облака), лежат только во внутренней
+// памяти приложения на том устройстве, с которого их загружали. На других
+// устройствах их не скачать. Это устройство, если у него есть такая копия,
+// тихо отправляет её в облако — по одному треку, без участия пользователя.
+var _trackSyncRunning=false;
+function syncLocalTracksToCloud(){
+  if(_trackSyncRunning||!db||!currentGroupId||isGuestMode)return;
+  if(typeof firebase.storage!=='function')return;
+  var pending=D.repertoire.filter(function(s){return s.trackName&&!s.trackUrl;}).map(function(s){return s.id;});
+  if(!pending.length)return;
+  _trackSyncRunning=true;
+  var gid=currentGroupId;
+  function next(){
+    if(!pending.length||currentGroupId!==gid){_trackSyncRunning=false;return;}
+    var id=pending.shift();
+    loadTrackIDB(id,function(rec){
+      if(!rec||!rec.data){next();return;} // на этом устройстве копии нет
+      fetch(rec.data).then(function(r){return r.blob();}).then(function(blob){
+        var path='groups/'+gid+'/tracks/'+id+'_'+Date.now();
+        var ref=firebase.storage().ref(path);
+        return ref.put(blob,{contentType:blob.type||'audio/mpeg'}).then(function(){return ref.getDownloadURL();}).then(function(url){
+          var s=findR(id); // берём свежий объект — D мог обновиться, пока шла загрузка
+          if(s&&!s.trackUrl){
+            s.trackUrl=url;s.trackStoragePath=path;
+            if(!s.trackName)s.trackName=rec.name||'track';
+            save();
+          }
+        });
+      }).catch(function(e){console.warn('Синхронизация трека не удалась',id,e);}).then(next);
+    });
+  }
+  next();
+}
 function uploadTrackToStorage(s,file){
   var btn=document.querySelector('[data-track-upload-btn="'+s.id+'"]');
   if(btn){btn.innerHTML='<span style="font-size:11px;color:#aaa;">'+(LANG==="en"?"Uploading…":"Загружаем…")+'</span>';btn.disabled=true;}
@@ -8740,7 +8774,7 @@ function _renderLiveCards(songs, containerId){
     var num=document.createElement('div');num.className='lc-num';
     num.innerHTML='<div class="lc-num-badge">'+(i+1)+'</div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+statusColor(s.status)+'" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="16.5" r="4"/><path d="M12 16.5V0.5l7 4"/></svg>';
     var info=document.createElement('div');info.className='lc-info';
-    info.innerHTML='<div class="lc-title">'+esc(s.title||'')+((s.trackName||s.trackUrl)?' <span class="lc-load-dot" id="lcLoadDot_'+uniqueKey+'" title="'+(LANG==='en'?'Decoding track':'Трек декодируется')+'"></span>':'')+'</div><div class="lc-artist">'+esc(s.artist||'')+'</div>';
+    info.innerHTML='<div class="lc-title">'+esc(s.title||'')+((s.trackUrl||s.trackData)?' <span class="lc-load-dot" id="lcLoadDot_'+uniqueKey+'" title="'+(LANG==='en'?'Decoding track':'Трек декодируется')+'"></span>':'')+'</div><div class="lc-artist">'+esc(s.artist||'')+'</div>';
     var meta=document.createElement('div');meta.className='lc-meta';
     meta.innerHTML='<div class="lc-key-simple">'+esc(s.key||'—')+'</div><div class="lc-tempo-simple">'+esc(s.tempo||'')+'</div>';
     row.appendChild(num);row.appendChild(info);row.appendChild(meta);
