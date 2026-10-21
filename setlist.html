@@ -6651,6 +6651,27 @@ function rFormTab(s){
   renderMapCanvas(s, canvas);
 }
 
+// Подбирает размер квадратов формы так, чтобы вся форма влезала в экран
+// (Live, полноэкранный режим, ширина ≥700). Пробует от крупного к мелкому.
+function _fitMapCanvas(canvas){
+  var box=document.getElementById('lftContent');
+  if(!box||!canvas||(window.innerWidth||0)<700)return;
+  canvas.querySelectorAll('.map-blk-grp').forEach(function(el){el.style.flexBasis='';el.style.width='';});
+  canvas.style.columnGap='22px';canvas.style.rowGap='14px';
+  var sizes=[96,88,80,72,64,58,52,46,40];
+  var avail=box.clientHeight-64; // паддинги контейнера
+  for(var i=0;i<sizes.length;i++){
+    var sz=sizes[i];
+    canvas.querySelectorAll('.map-blk,.map-blk-add').forEach(function(el){
+      el.style.width=sz+'px';el.style.height=sz+'px';el.style.borderRadius=Math.round(sz*0.2)+'px';
+    });
+    canvas.querySelectorAll('.map-blk-row').forEach(function(el){el.style.gap=Math.round(sz*0.08)+'px';});
+    canvas.querySelectorAll('.map-blk-lbl').forEach(function(el){el.style.fontSize=(sz>=72?15:13)+'px';});
+    canvas.querySelectorAll('.map-blk-num').forEach(function(el){el.style.fontSize=(sz>=72?11:8)+'px';});
+    canvas.querySelectorAll('.map-blk-note').forEach(function(el){el.style.fontSize=(sz>=72?14:(sz>=56?11:9))+'px';});
+    if(canvas.scrollHeight<=avail)break;
+  }
+}
 function renderMapCanvas(s, canvas){
   canvas.innerHTML='';
   canvas.style.transform='';
@@ -6776,14 +6797,10 @@ function renderMapCanvas(s, canvas){
       el.style.fontSize=(_ww2>=1100?'13px':'12px');
     });
     canvas.style.gap='8px';
-    // Каждая секция — на своей строке целиком (не подряд одна за другой),
-    // только на широком экране. На телефоне места мало по горизонтали,
-    // там всё так же компактно, построчным потоком, чтобы не пришлось
-    // свайпать вбок.
-    canvas.querySelectorAll('.map-blk-grp').forEach(function(el){
-      el.style.flexBasis='100%';
-      el.style.width='100%';
-    });
+    // Секции идут подряд (потоком), а не каждая на своей строке: на ноутбуке
+    // и планшете вся форма должна помещаться на экране без скролла —
+    // у барабанщика нет третьей руки. Размер квадратов подбирается под экран.
+    if(canvas.closest&&canvas.closest('#lftContent')) _fitMapCanvas(canvas);
   }
 
   // landscape scale — актуально только для старой панели #pb (мобильный
@@ -9484,20 +9501,7 @@ function openLiveFullTab(s,tabId,uniqueKey){
     // Применяем и сразу, и повторно через небольшую паузу — на случай,
     // если что-то ещё перерисовывает форму следом и сбрасывает размер.
     var _ww=window.innerWidth||0;
-    function _scaleFormBlocks(){
-      if(_ww<700)return;
-      var blkSize=_ww>=1100?58:50;
-      var blkRadius=_ww>=1100?12:10;
-      mapCanvas.querySelectorAll('.map-blk').forEach(function(el){
-        el.style.width=blkSize+'px';
-        el.style.height=blkSize+'px';
-        el.style.borderRadius=blkRadius+'px';
-      });
-      mapCanvas.querySelectorAll('.map-blk-lbl').forEach(function(el){
-        el.style.fontSize=(_ww>=1100?'13px':'12px');
-      });
-      mapCanvas.style.gap='8px';
-    }
+    function _scaleFormBlocks(){ _fitMapCanvas(mapCanvas); }
     _scaleFormBlocks();
     setTimeout(_scaleFormBlocks,120);
     setTimeout(_scaleFormBlocks,500);
