@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon.png?v=3">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Bandlist</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@300;400;500&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -106,13 +106,14 @@ function logEvent(name,params){
   --br:#2e2e33;--tx:#f0ece4;--tx2:#d0ccc4;--mu:#b0aaa4;--mu2:#707070;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Montserrat',sans-serif;font-weight:300;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Golos Text',sans-serif;font-weight:300;}
 body{display:flex;flex-direction:column;height:100vh;height:100dvh;font-family:'Golos Text',sans-serif;}
+button,input,textarea,select{font-family:inherit;}
 
 /* HEADER */
 .hdr{padding:28px 20px 0;flex-shrink:0;background:var(--bg);}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.logo{font-family:'Inter',sans-serif;font-size:17px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:12px;}
+.logo{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:12px;}
 .add-btn{width:34px;height:34px;background:transparent;border:none;border-radius:50%;color:var(--tx2);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #undoToast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2a2a36;border:1px solid #3a3a46;border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-family:'Golos Text',sans-serif;font-size:13px;color:#f0ece4;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap;transition:opacity .3s;opacity:0;pointer-events:none;}
 #undoToast.show{opacity:1;pointer-events:auto;}
@@ -124,7 +125,7 @@ body{display:flex;flex-direction:column;height:100vh;height:100dvh;font-family:'
 .page-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
 .page-title-txt{font-family:'Golos Text',sans-serif;font-size:26px;font-weight:600;color:#fff;letter-spacing:-.2px;}
 .page-hdr-right{display:flex;align-items:center;gap:14px;}
-.profile-avatar-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--tx2);overflow:hidden;padding:0;}
+.profile-avatar-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;border:none;font-family:'Golos Text',sans-serif;font-size:13px;font-weight:700;color:var(--tx2);overflow:hidden;padding:0;}
 .profile-avatar-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 .hero-row{display:flex;gap:10px;margin-bottom:0;}
 .hero-btn-live{width:100%;height:38px;border-radius:10px;background:var(--s2);border:none;margin:0;padding:0;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:inherit;}
@@ -152,7 +153,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .ev-month-nav{display:flex;gap:6px;}
 .ev-nav-btn{width:28px;height:28px;border-radius:8px;background:var(--s2);border:none;color:var(--tx2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;}
 .ev-cal{padding:2px 14px 0;}
-.ev-weekdays{display:grid;grid-template-columns:repeat(7,1fr);font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:0.5px;color:var(--mu2);text-align:center;margin-bottom:2px;}
+.ev-weekdays{display:grid;grid-template-columns:repeat(7,1fr);font-family:'Golos Text',sans-serif;font-size:10.5px;letter-spacing:0.5px;color:var(--mu2);text-align:center;margin-bottom:2px;}
 .ev-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:0px;}
 .ev-day{height:38px;display:flex;align-items:center;justify-content:center;position:relative;font-size:13px;color:var(--tx2);cursor:pointer;}
 .ev-day span{position:relative;z-index:2;}
@@ -162,12 +163,12 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .ev-day.is-today{color:var(--bg);font-weight:700;}
 .ev-day.is-today::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#fff;border:none;z-index:1;}
 .ev-day.is-today .dot{background:var(--bg);}
-.ev-section-lbl{font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu2);font-weight:600;padding:12px 18px 6px;}
+.ev-section-lbl{font-family:'Golos Text',sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu2);font-weight:600;padding:12px 18px 6px;}
 .ev-list{padding:0 14px 90px;display:flex;flex-direction:column;gap:8px;}
 .ev-card{background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:center;cursor:pointer;}
 .ev-date-box{width:44px;height:44px;border-radius:11px;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
 .ev-date-box .d{color:#fff;font-size:17px;font-weight:700;line-height:1;}
-.ev-date-box .m{color:var(--mu);font-size:8.5px;font-family:'Inter',sans-serif;letter-spacing:0.5px;text-transform:uppercase;}
+.ev-date-box .m{color:var(--mu);font-size:8.5px;font-family:'Golos Text',sans-serif;letter-spacing:0.5px;text-transform:uppercase;}
 .ev-info{flex:1;min-width:0;}
 .ev-name{font-size:14.5px;font-weight:600;color:var(--tx);margin-bottom:2px;}
 .ev-meta{font-size:12px;color:var(--mu);}
@@ -178,7 +179,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .cp-item:active{background:rgba(255,255,255,0.05);}
 .cp-item .cp-check{width:18px;height:18px;flex-shrink:0;}
 .bnav-item svg{flex-shrink:0;}
-.bnav-item span{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.3px;}
+.bnav-item span{font-family:'Golos Text',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.3px;}
 .bnav-item.on svg *{stroke:#fff;}
 .bnav-item.on span{color:#fff;}
 .bnav-item:not(.on) svg *{stroke:var(--mu2);}
@@ -186,7 +187,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 
 /* NAV TABS (Сетлист / Репертуар) — legacy, kept for compat but unused */
 .nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--br);margin-bottom:0;flex-shrink:0;}
-.nav-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.nav-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:11px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
 .nav-tab.on{color:var(--or);border-bottom-color:var(--or);}
 
 /* SIMPLE PROFILE SCREEN */
@@ -196,10 +197,10 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .profile-screen-hdr button{background:none;border:none;cursor:pointer;color:var(--tx2);display:flex;align-items:center;padding:0;}
 .profile-screen-title{font-family:'Golos Text',sans-serif;font-size:18px;font-weight:600;color:#fff;}
 .profile-screen-body{flex:1;overflow-y:auto;padding:0 20px 30px;}
-.psec-lbl{font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--mu2);margin:22px 0 10px;}
+.psec-lbl{font-family:'Golos Text',sans-serif;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--mu2);margin:22px 0 10px;}
 .gmp-member-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--br);}
 .gmp-member-row:last-child{border-bottom:none;}
-.gmp-avatar{width:36px;height:36px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;color:var(--tx2);flex-shrink:0;position:relative;overflow:hidden;}
+.gmp-avatar{width:36px;height:36px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:'Golos Text',sans-serif;font-weight:700;font-size:13px;color:var(--tx2);flex-shrink:0;position:relative;overflow:hidden;}
 .gmp-avatar img{width:100%;height:100%;object-fit:cover;}
 .gmp-status-dot{position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--s1);}
 .gmp-status-dot.online{background:#fff;}
@@ -207,7 +208,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .gmp-member-info{flex:1;min-width:0;}
 .gmp-member-name{font-size:14.5px;font-weight:600;color:var(--tx);}
 .gmp-member-meta{font-size:12px;color:var(--mu2);margin-top:1px;}
-.gmp-role-badge{font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;color:var(--mu2);border:1px solid var(--br);border-radius:5px;padding:3px 7px;flex-shrink:0;}
+.gmp-role-badge{font-family:'Golos Text',sans-serif;font-size:9.5px;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;color:var(--mu2);border:1px solid var(--br);border-radius:5px;padding:3px 7px;flex-shrink:0;}
 .ev-contact-row{display:flex;gap:8px;}
 .ev-contact-row input{flex:1;min-width:0;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;color:var(--tx);padding:12px;font-size:14px;outline:none;box-sizing:border-box;font-family:'Golos Text',sans-serif;}
 .ev-contact-row .ev-contact-rm{flex-shrink:0;width:40px;background:none;border:1.5px solid var(--br);border-radius:8px;color:var(--mu2);font-size:16px;cursor:pointer;}
@@ -221,13 +222,13 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .psec-row+.psec-row{border-top:1px solid var(--br);}
 .psec-row span.lbl3{flex:1;font-family:'Golos Text',sans-serif;font-size:15px;color:var(--tx2);}
 .gmp{padding:4px 16px 18px;border-top:1px solid var(--br);}
-.gmp-lbl{font-family:'Inter',sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu2);margin:18px 2px 8px;}
+.gmp-lbl{font-family:'Golos Text',sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu2);margin:18px 2px 8px;}
 .gmp-card{background:var(--s1);border:1px solid var(--br);border-radius:12px;overflow:hidden;}
 .gmp-invite{display:flex;gap:16px;align-items:center;padding:14px;}
 .gmp-qr{flex-shrink:0;cursor:pointer;line-height:0;}
 .gmp-qr>div{background:#fff;border-radius:10px;padding:8px;display:inline-block;}
 .gmp-invite-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
-.gmp-code-cap{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mu2);}
+.gmp-code-cap{font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mu2);}
 .gmp-code-chip{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
 .gmp-code-chip.empty{justify-content:flex-start;}
 .gmp-code-txt{flex:1;min-width:0;font-family:'JetBrains Mono','Courier New',monospace;font-size:18px;font-weight:600;letter-spacing:2.5px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -241,11 +242,11 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .gmp-grp-row+.gmp-grp-row{border-top:1px solid var(--br);}
 .gmp-grp-row.click{cursor:pointer;}
 .gmp-grp-row.click:hover{background:var(--s2);}
-.gmp-grp-ico{width:34px;height:34px;border-radius:9px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;color:var(--tx2);flex-shrink:0;}
+.gmp-grp-ico{width:34px;height:34px;border-radius:9px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-family:'Golos Text',sans-serif;font-weight:700;font-size:13px;color:var(--tx2);flex-shrink:0;}
 .gmp-grp-info{flex:1;min-width:0;}
 .gmp-grp-name{font-size:14.5px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.gmp-grp-code{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;color:var(--mu2);margin-top:1px;}
-.gmp-grp-active{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#2dd4bf;flex-shrink:0;}
+.gmp-grp-code{font-family:'Golos Text',sans-serif;font-size:11px;letter-spacing:1px;color:var(--mu2);margin-top:1px;}
+.gmp-grp-active{font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#2dd4bf;flex-shrink:0;}
 .gmp-icon-btn{flex-shrink:0;width:32px;height:32px;border-radius:8px;border:none;background:none;color:var(--mu2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .gmp-icon-btn:hover{background:var(--s2);color:#e05252;}
 .gmp-icon-btn.gmp-icon-edit:hover{color:#fff;}
@@ -272,11 +273,11 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .profile-screen .gmp-member-meta,.profile-screen .gmp-member-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gmp-code-copy-btn{background:none;border:none;color:var(--mu2);cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;}
 .gmp-code-copy-btn:active{color:#fff;}
-.psec-row .val3{font-family:'Inter',sans-serif;font-size:13px;color:var(--mu2);}
+.psec-row .val3{font-family:'Golos Text',sans-serif;font-size:13px;color:var(--mu2);}
 .psec-row.disabled{opacity:.4;cursor:default;}
-.psec-row.disabled .soon-tag{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);background:var(--s3);padding:2px 7px;border-radius:8px;}
+.psec-row.disabled .soon-tag{font-family:'Golos Text',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);background:var(--s3);padding:2px 7px;border-radius:8px;}
 .lang-switch{display:flex;background:var(--s3);border-radius:8px;padding:3px;gap:3px;}
-.lang-switch button{flex:1;padding:7px 0;border-radius:8px;border:none;background:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--mu2);cursor:pointer;}
+.lang-switch button{flex:1;padding:7px 0;border-radius:8px;border:none;background:none;font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--mu2);cursor:pointer;}
 .lang-switch button.on{background:var(--or);color:#fff;}
 
 /* CONCERT TABS */
@@ -289,7 +290,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 /* SEARCH */
 .search-wrap{padding:6px 24px;background:var(--bg);flex-shrink:0;}
 .search-inner{position:relative;}
-.search-inp{width:100%;background:transparent;border:none;border-radius:0;color:var(--tx);padding:9px 4px 9px 26px;font-size:14px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
+.search-inp{width:100%;background:transparent;border:none;border-radius:0;color:var(--tx);padding:9px 4px 9px 26px;font-size:14px;font-family:'Golos Text',sans-serif;font-weight:300;outline:none;}
 .search-inp::placeholder{color:#8a8a92;}
 .search-icon{position:absolute;left:2px;top:50%;transform:translateY(-50%);pointer-events:none;}
 
@@ -301,19 +302,19 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 
 /* SECTIONS */
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;margin:0 12px;}
-.sec-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);font-weight:500;font-family:'Inter',sans-serif;}
-.sec-time{font-size:10px;color:#888;font-family:'Inter',sans-serif;letter-spacing:.5px;margin-left:8px;}
+.sec-name{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);font-weight:500;font-family:'Golos Text',sans-serif;}
+.sec-time{font-size:10px;color:#888;font-family:'Golos Text',sans-serif;letter-spacing:.5px;margin-left:8px;}
 .sec-left{display:flex;align-items:center;}
 .sec-acts{display:flex;gap:2px;padding-right:14px;}
 .sec-btn{background:none;border:none;color:var(--tx2);font-size:12px;cursor:pointer;padding:3px 6px;border-radius:8px;opacity:.9;}
 .sec-btn.red{color:var(--tx2);opacity:.9;}
 .add-sec-row{padding:0 0 20px;}
-.drop-placeholder{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:var(--s1);border:1.5px dashed var(--br);border-radius:10px;height:44px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;width:calc(100% - 48px);}
-.sec-add-song{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:var(--s1);border:none;border-radius:10px;height:44px;color:var(--tx2);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
-.sec-add-song{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:transparent;border:1px solid var(--br);border-radius:8px;height:44px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
+.drop-placeholder{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:var(--s1);border:1.5px dashed var(--br);border-radius:10px;height:44px;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;width:calc(100% - 48px);}
+.sec-add-song{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:var(--s1);border:none;border-radius:10px;height:44px;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
+.sec-add-song{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:transparent;border:1px solid var(--br);border-radius:8px;height:44px;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
 .sec-add-song:hover,.sec-add-song:active{border-color:var(--mu);color:var(--tx2);background:var(--s2);}
 .drop-placeholder.drag-over{border-color:var(--tx2);background:rgba(255,255,255,0.06);color:var(--tx2);}
-.add-sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:var(--s1);border:none;border-radius:10px;height:44px;color:var(--tx2);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
+.add-sec-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 24px 8px;background:var(--s1);border:none;border-radius:10px;height:44px;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:calc(100% - 48px);}
 
 /* SONG ROWS */
 .row{display:flex;align-items:center;gap:13px;padding:8px 12px;position:relative;margin:0 12px;background:transparent;min-height:0;}
@@ -326,7 +327,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .st{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
 .ss{font-size:13px;color:#8a8a8a;margin-top:3px;font-family:'Golos Text',sans-serif;}
 .sk{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:700;color:#888;flex-shrink:0;width:36px;text-align:center;}
-.sk-tempo{font-family:'Inter',sans-serif;font-size:10px;font-weight:500;color:var(--tx2);margin-top:2px;}
+.sk-tempo{font-family:'Golos Text',sans-serif;font-size:10px;font-weight:500;color:var(--tx2);margin-top:2px;}
 .row-menu-btn{background:none;border:none;color:#777;cursor:pointer;padding:8px 6px;flex-shrink:0;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;}
 .row-menu-btn span{display:block;width:3.5px;height:3.5px;border-radius:50%;background:#8a8a8a;}
 .row-menu-popup{display:none;}
@@ -365,9 +366,9 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .rep-title{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
 .rep-sub{font-size:13px;color:#8a8a8a;margin-top:3px;font-family:'Golos Text',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rep-key{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:600;color:#fff;flex-shrink:0;width:36px;text-align:center;}
-.rep-tempo{font-family:'Inter',sans-serif;font-size:10px;font-weight:500;color:var(--tx2);margin-top:2px;}
+.rep-tempo{font-family:'Golos Text',sans-serif;font-size:10px;font-weight:500;color:var(--tx2);margin-top:2px;}
 .rep-actions{display:flex;gap:6px;flex-shrink:0;}
-.rep-add-btn{background:transparent;border:1px solid rgba(255,255,255,0.6);border-radius:8px;color:var(--tx2);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:0;padding:4px 10px;cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
+.rep-add-btn{background:transparent;border:1px solid rgba(255,255,255,0.6);border-radius:8px;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:0;padding:4px 10px;cursor:pointer;transition:all .2s;flex-shrink:0;white-space:nowrap;}
 .rep-del{background:none;border:none;color:var(--tx2);font-size:12px;cursor:pointer;padding:4px;}
 .rep-dh{display:flex;flex-direction:column;gap:4px;cursor:grab;padding:4px 2px;flex-shrink:0;touch-action:none;}
 .rep-dh span{display:block;width:14px;height:1.5px;background:var(--mu2);border-radius:8px;}
@@ -394,7 +395,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .lp-play{width:30px;height:30px;border-radius:50%;background:#fff;border:none;color:#111015;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .lp-prog{flex:1;height:4px;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;min-width:80px;}
 .lp-prog-fill{height:100%;background:#fff;border-radius:8px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
-.lp-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
+.lp-time{font-family:'Golos Text',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
 @media (orientation:landscape) and (max-height:600px){
   .ph{padding:6px 12px 0;}
   .landscape-player{display:flex!important;}
@@ -417,7 +418,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .lp-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;padding:0 10px;}
 .lp-prog{width:6px;flex:1;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;max-height:160px;}
 .lp-prog-fill{width:100%;background:#fff;border-radius:8px;position:absolute;bottom:0;left:0;transition:height .1s linear;}
-.lp-time{font-family:'Inter',sans-serif;font-size:8px;color:#555;letter-spacing:.5px;writing-mode:vertical-rl;transform:rotate(180deg);}
+.lp-time{font-family:'Golos Text',sans-serif;font-size:8px;color:#555;letter-spacing:.5px;writing-mode:vertical-rl;transform:rotate(180deg);}
 .lp-notrack{font-size:18px;color:#2a2a2a;}
 @media (orientation:landscape) and (max-height:600px){
   .ph{padding:6px 12px 0;}
@@ -433,7 +434,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .lp-play{width:30px;height:30px;border-radius:50%;background:#fff;border:none;color:#111015;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .lp-prog{flex:1;height:4px;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;min-width:80px;}
 .lp-prog-fill{height:100%;background:#fff;border-radius:8px;position:absolute;left:0;top:0;transition:width .1s linear;pointer-events:none;}
-.lp-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
+.lp-time{font-family:'Golos Text',sans-serif;font-size:9px;color:#555;letter-spacing:.5px;flex-shrink:0;}
 @media (orientation:landscape) and (max-height:600px){
   .ph{padding:18px 12px 4px;}
   .ph-top{flex-direction:row!important;align-items:center!important;gap:10px!important;margin-bottom:0!important;}
@@ -458,7 +459,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .ph-sep{font-size:16px;color:#3a3a46;margin:0 8px;flex-shrink:0;font-weight:300;}
 .ptabs{display:flex;margin-top:14px;border-bottom:1px solid var(--br);overflow-x:auto;scrollbar-width:none;}
 .ptabs::-webkit-scrollbar{display:none;}
-.ptab{background:none;border:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.ptab{background:none;border:none;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
 .ptab.on{color:var(--or);border-bottom-color:var(--or);}
 
 /* CONTROLS */
@@ -471,7 +472,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 }
 .ctrls{display:flex;gap:8px;padding:12px 12px 0;flex-shrink:0;background:var(--bg);align-items:stretch;overflow:visible;}
 .ctrls-compact{display:none;padding:6px 14px;border-bottom:1px solid var(--br);flex-shrink:0;background:var(--bg);align-items:center;gap:16px;}
-.ctrls-compact-item{font-family:'Inter',sans-serif;font-size:10px;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;}
+.ctrls-compact-item{font-family:'Golos Text',sans-serif;font-size:10px;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;}
 .ctrls-compact-val{color:#fff;font-weight:500;margin-left:4px;font-size:12px;}
 @media (orientation:landscape) and (max-height:600px){
   .panel-form-active .ctrls{display:none;}
@@ -485,7 +486,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .cv.or{color:#fff !important;font-size:24px;}
 .cbtn{width:28px;height:28px;border-radius:8px;border:1px solid var(--br);background:var(--s3);color:var(--tx);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .cbtn:active{background:var(--br);}
-.tapbtn{height:26px;border-radius:8px;border:1px solid var(--tx2);background:transparent;color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;width:100%;font-weight:500;}
+.tapbtn{height:26px;border-radius:8px;border:1px solid var(--tx2);background:transparent;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;width:100%;font-weight:500;}
 .tapbtn:active{background:var(--tx2);color:#fff;}
 
 /* PANEL BODY */
@@ -495,11 +496,11 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 /* FORM TAB */
 .fr{display:flex;align-items:center;gap:6px;padding:10px 10px;margin-bottom:6px;background:var(--s1);border-radius:8px;}
 .fi2{font-family:'Golos Text',sans-serif;font-size:12px;color:var(--tx2);width:14px;text-align:center;flex-shrink:0;}
-.fn-inp{background:none;border:none;border-bottom:1px solid var(--br);color:var(--tx);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:300;outline:none;flex:1;padding:2px 0;min-width:0;}
+.fn-inp{background:none;border:none;border-bottom:1px solid var(--br);color:var(--tx);font-family:'Golos Text',sans-serif;font-size:13px;font-weight:300;outline:none;flex:1;padding:2px 0;min-width:0;}
 .fn-inp:focus{border-bottom-color:var(--tx2);}
 .ftbtn{width:26px;height:26px;border-radius:8px;border:1px solid var(--br);background:var(--s2);color:var(--tx2);font-size:13px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .ftval{font-family:'Golos Text',sans-serif;font-size:17px;color:var(--tx);min-width:26px;text-align:center;flex-shrink:0;font-weight:600;}
-.form-add-btn{width:100%;padding:14px;border:1px dashed var(--tx2);border-radius:8px;background:rgba(255,255,255,0.08);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-weight:500;}
+.form-add-btn{width:100%;padding:14px;border:1px dashed var(--tx2);border-radius:8px;background:rgba(255,255,255,0.08);color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-weight:500;}
 
 /* LYRICS */
 .lyr{font-size:14px;line-height:2;font-weight:300;color:var(--tx2);}
@@ -510,12 +511,12 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .lhd-tap:active{background:rgba(255,255,255,0.4);}
 .tap-sec-btn{transition:border .1s;}
 .tap-sec-btn:active{background:transparent!important;border:2px solid var(--tx2)!important;transform:scale(0.98);}
-.lhd-time{font-size:10px;color:#555;font-family:'Inter',sans-serif;letter-spacing:1px;}
+.lhd-time{font-size:10px;color:#555;font-family:'Golos Text',sans-serif;letter-spacing:1px;}
 .lhd-active{color:#fff;background:rgba(255,255,255,0.2);border-radius:8px;padding:2px 6px;}
 
 /* CHORDS + NOTES */
 .ta{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:8px;color:var(--tx);padding:12px;font-size:14px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:160px;line-height:1.9;}
-.ta.notes{font-family:'Montserrat',sans-serif;font-weight:300;font-size:13px;line-height:1.8;}
+.ta.notes{font-family:'Golos Text',sans-serif;font-weight:300;font-size:13px;line-height:1.8;}
 .ta:focus{border-color:var(--tx2);}
 .ta-hint{font-size:10px;color:var(--tx2);letter-spacing:1px;margin-bottom:8px;}
 .chord-sec{margin-bottom:8px;background:var(--s1);border-radius:8px;overflow:hidden;}
@@ -524,12 +525,12 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .chord-sec-del{background:none;border:none;color:var(--mu2);font-size:12px;cursor:pointer;padding:2px 6px;}
 .chord-sec-ta{background:none;border:none;border-top:1px solid var(--br);color:#ffffff !important;padding:10px 14px;font-size:18px;font-family:'Courier New',monospace;outline:none;resize:none;min-height:44px;line-height:1.7;width:100%;opacity:1;-webkit-text-fill-color:#ffffff;}
 .chord-sec-ta:focus{background:var(--s2);}
-.chord-add-btn{width:100%;padding:11px;border:1px dashed var(--s3);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;}
+.chord-add-btn{width:100%;padding:11px;border:1px dashed var(--s3);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;}
 
 /* ChordPro рендер */
 .cpro-wrap{padding:4px 0 12px;font-family:'Golos Text',sans-serif;}
 .perf-line .cpro-wrap{padding:0;}
-.cpro-directive{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#a8a4a0;margin:22px 0 16px;font-family:'Inter',sans-serif;font-weight:600;}
+.cpro-directive{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#a8a4a0;margin:22px 0 16px;font-family:'Golos Text',sans-serif;font-weight:600;}
 .cpro-directive:first-child{margin-top:0;}
 .cpro-line{display:flex;flex-wrap:wrap;align-items:flex-end;margin-bottom:0;margin-top:6px;line-height:1;column-gap:0.28em;row-gap:2px;}
 .cpro-directive+.cpro-line{margin-top:0;}
@@ -537,19 +538,19 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .cpro-line-empty{height:14px;}
 .cpro-chunk{display:inline-flex;flex-direction:column;align-items:flex-start;flex-shrink:0;}
 .cpro-wordgroup{display:inline-flex;flex-shrink:0;}
-.cpro-chord{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--chord-clr);min-height:20px;line-height:1;padding-bottom:0;padding-right:2px;white-space:nowrap;}
+.cpro-chord{font-family:'Golos Text',sans-serif;font-size:13px;font-weight:700;color:var(--chord-clr);min-height:20px;line-height:1;padding-bottom:0;padding-right:2px;white-space:nowrap;}
 .chords-hidden .cpro-chord,.chords-hidden .cpro-chord-only{display:none;}
 .cpro-word{font-size:13px;color:#f0ece4;white-space:pre-wrap;line-height:1.55;font-family:'Golos Text',sans-serif;font-weight:500;}
-.cpro-chord-only{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--chord-clr);padding:2px 8px 2px 0;white-space:nowrap;}
+.cpro-chord-only{font-family:'Golos Text',sans-serif;font-size:11px;font-weight:700;color:var(--chord-clr);padding:2px 8px 2px 0;white-space:nowrap;}
 /* Кнопки режима редактор/просмотр */
 .cpro-mode-btns{display:flex;gap:6px;margin-bottom:12px;}
-.cpro-mode-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--br);background:none;color:var(--mu2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;}
+.cpro-mode-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--br);background:none;color:var(--mu2);font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer;}
 .cpro-mode-btn.active{background:var(--s2);color:#fff;border-color:#fff;}
 .cpro-ta{width:100%;min-height:240px;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:#fff;font-family:'Courier New',monospace;font-size:14px;line-height:1.8;padding:12px 14px;outline:none;resize:none;box-sizing:border-box;-webkit-text-fill-color:#fff;}
 .cpro-ta:focus{border-color:#444;}
 /* section type picker */
 .sec-type-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
-.sec-type-btn{padding:9px 16px;border-radius:8px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;}
+.sec-type-btn{padding:9px 16px;border-radius:8px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:12px;cursor:pointer;transition:all .15s;}
 .sec-type-btn:hover{border-color:var(--tx2);color:var(--tx2);}
 
 /* PLAYER */
@@ -579,7 +580,7 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .mt{font-family:'Golos Text',sans-serif;font-size:22px;font-weight:600;letter-spacing:1px;color:var(--tx);}
 .fl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);margin-bottom:7px;margin-top:18px;font-weight:400;}
 .fl:first-child{margin-top:0;}
-.fi{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:8px;color:var(--tx);padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;}
+.fi{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:8px;color:var(--tx);padding:11px 13px;font-size:15px;font-family:'Golos Text',sans-serif;font-weight:300;outline:none;}
 .fi:focus{border-color:var(--tx2);}
 select.fi{cursor:pointer;}
 textarea.fi{resize:none;min-height:80px;}
@@ -590,12 +591,12 @@ textarea.fi.tall{min-height:120px;}
 .clrs{display:flex;gap:8px;flex-wrap:wrap;}
 .cc{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;}
 .cc.on{border-color:#fff;transform:scale(1.2);}
-.subbtn{display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .2s;}
-.delbtn{width:100%;padding:12px;border:1px solid #e05252;border-radius:8px;background:transparent;color:#e05252;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;}
+.subbtn{display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .2s;}
+.delbtn{width:100%;padding:12px;border:1px solid #e05252;border-radius:8px;background:transparent;color:#e05252;font-family:'Golos Text',sans-serif;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;}
 
 /* STATUS SELECTOR */
 .status-row{display:flex;gap:8px;flex-wrap:wrap;}
-.st-btn{padding:7px 14px;border-radius:8px;font-size:11px;font-family:'Montserrat',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--br);background:var(--s1);color:var(--tx2);transition:all .15s;letter-spacing:.5px;}
+.st-btn{padding:7px 14px;border-radius:8px;font-size:11px;font-family:'Golos Text',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--br);background:var(--s1);color:var(--tx2);transition:all .15s;letter-spacing:.5px;}
 .st-btn.on-ready{background:rgba(0,180,166,.2);border-color:#00B4A6;color:#00B4A6;}
 .st-btn.on-learning{background:rgba(240,146,43,.2);border-color:#F0922B;color:#F0922B;}
 
@@ -605,7 +606,7 @@ textarea.fi.tall{min-height:120px;}
 .cxov{position:fixed;inset:0;z-index:49;}
 .cxm{position:fixed;background:var(--s2);border:1px solid var(--br);border-radius:8px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;}
 @keyframes cxi{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
-.cxi{display:flex;align-items:center;gap:10px;padding:13px 17px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
+.cxi{display:flex;align-items:center;gap:10px;padding:13px 17px;font-size:13px;font-family:'Golos Text',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .cxi:hover{background:var(--s3);}
 .cxi.red{color:#e05252;}
 .cxi.off{opacity:.3;cursor:default;pointer-events:none;}
@@ -614,7 +615,7 @@ textarea.fi.tall{min-height:120px;}
 /* OVERFLOW MENU */
 .overflow-menu{position:fixed;right:16px;top:68px;background:var(--s2);border:1px solid var(--br);border-radius:8px;overflow:hidden;z-index:50;min-width:180px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:cxi .14s ease;display:none;}
 .overflow-menu.open{display:block;}
-.om-item{display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
+.om-item{display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:13px;font-family:'Golos Text',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .om-item:hover{background:var(--s3);}
 .om-item+.om-item{border-top:1px solid var(--br);}
 
@@ -631,9 +632,9 @@ textarea.fi.tall{min-height:120px;}
 .perf-overlay{position:fixed;inset:0;background:#0d0d0f;z-index:100;display:none;flex-direction:column;}
 .perf-overlay.open{display:flex;}
 .perf-hdr{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid #1a1a1a;gap:12px;}
-.perf-meta{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.perf-key-info{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--tx2);flex-shrink:0;white-space:nowrap;}
-.perf-exit{background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;padding:4px 0;flex-shrink:0;}
+.perf-meta{font-family:'Golos Text',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.perf-key-info{font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--tx2);flex-shrink:0;white-space:nowrap;}
+.perf-exit{background:none;border:none;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:14px;cursor:pointer;padding:4px 0;flex-shrink:0;}
 .perf-body{flex:1;min-height:0;overflow-y:auto;padding:16px 24px 40px;scrollbar-width:none;}
 .perf-body::-webkit-scrollbar{display:none;}
 .perf-section{margin-bottom:20px;}
@@ -646,10 +647,10 @@ textarea.fi.tall{min-height:120px;}
 #perfFooter.perf-controls-hidden{opacity:0;pointer-events:none;transform:translateY(8px);}
 .perf-fbtn-row{display:flex;align-items:center;gap:10px;width:100%;}
 .perf-player-row{display:flex;align-items:center;gap:10px;width:100%;}
-.perf-font-lbl{font-family:'Inter',sans-serif;font-size:13px;color:#888;letter-spacing:1px;text-transform:uppercase;}
+.perf-font-lbl{font-family:'Golos Text',sans-serif;font-size:13px;color:#888;letter-spacing:1px;text-transform:uppercase;}
 .perf-fbtn{background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-size:16px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .perf-fbtn:hover{border-color:#888;color:#fff;}
-.perf-scroll{flex:1;box-sizing:border-box;overflow:hidden;background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 12px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3;height:36px;display:flex;align-items:center;justify-content:center;}
+.perf-scroll{flex:1;box-sizing:border-box;overflow:hidden;background:none;border:1px solid #3a3a46;border-radius:8px;color:#c0bbb5;font-family:'Golos Text',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:0 12px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3;height:36px;display:flex;align-items:center;justify-content:center;}
 .perf-scroll.on{border-color:var(--tx2);color:var(--tx2);background:rgba(255,255,255,0.08);}
 
 
@@ -693,7 +694,7 @@ textarea.fi.tall{min-height:120px;}
 .map-bars-lbl{font-size:12px;color:#888;flex:1;}
 .map-bars-btn{width:32px;height:32px;border-radius:8px;border:1px solid #3a3a46;background:none;color:#c0bbb5;font-size:16px;cursor:pointer;}
 .map-bars-val{font-size:20px;font-weight:600;color:#fff;min-width:30px;text-align:center;}
-.map-sheet-ok{width:100%;padding:11px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.map-sheet-ok{width:100%;padding:11px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 .map-sheet-ov{position:fixed;inset:0;z-index:261;display:none;}
 .map-sheet-ov.open{display:block;}
 
@@ -702,10 +703,10 @@ textarea.fi.tall{min-height:120px;}
 .map-note-ov.open{display:flex;}
 .map-note-box{background:#22222a;border-radius:8px 16px 0 0;padding:18px 16px 36px;width:100%;}
 .map-note-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#555;margin-bottom:10px;}
-.map-note-inp{width:100%;background:#111015;border:1px solid var(--tx2);border-radius:8px;color:#fff;padding:10px 12px;font-size:16px;font-family:'Inter',sans-serif;outline:none;}
+.map-note-inp{width:100%;background:#111015;border:1px solid var(--tx2);border-radius:8px;color:#fff;padding:10px 12px;font-size:16px;font-family:'Golos Text',sans-serif;outline:none;}
 .map-note-btns{display:flex;gap:8px;margin-top:10px;}
-.map-note-ok{flex:1;padding:10px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
-.map-note-cancel{padding:10px 14px;border:1px solid #3a3a46;border-radius:8px;background:transparent;color:#888;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;}
+.map-note-ok{flex:1;padding:10px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
+.map-note-cancel{padding:10px 14px;border:1px solid #3a3a46;border-radius:8px;background:transparent;color:#888;font-family:'Golos Text',sans-serif;font-size:11px;cursor:pointer;}
 
 @media (orientation:landscape) and (max-height:600px){
   .pb{overflow:hidden!important;}
@@ -726,13 +727,13 @@ textarea.fi.tall{min-height:120px;}
 .lp-inline-play{width:24px;height:24px;border-radius:50%;background:#fff;border:none;color:#111015;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;}
 .lp-inline-prog{flex:1;height:5px;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;min-width:60px;}
 .lp-inline-fill{height:100%;background:#fff;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;transition:width .1s linear;}
-.lp-inline-time{font-family:'Inter',sans-serif;font-size:9px;color:#555;flex-shrink:0;white-space:nowrap;}
+.lp-inline-time{font-family:'Golos Text',sans-serif;font-size:9px;color:#555;flex-shrink:0;white-space:nowrap;}
 
 
 /* Map block context menu */
 .map-ctx-ov{position:fixed;inset:0;z-index:264;}
 .map-ctx{position:fixed;background:#22222a;border:1px solid #3a3a46;border-radius:8px;overflow:hidden;z-index:265;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:cxi .14s ease;}
-.map-ctx-item{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-family:'Montserrat',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
+.map-ctx-item{display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:13px;font-family:'Golos Text',sans-serif;cursor:pointer;border:none;background:none;color:var(--tx);width:100%;text-align:left;}
 .map-ctx-item:hover{background:var(--s3);}
 .map-ctx-item+.map-ctx-item{border-top:1px solid var(--br);}
 .map-ctx-item.red{color:#e05252;}
@@ -755,18 +756,18 @@ textarea.fi.tall{min-height:120px;}
 #authScreen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;overflow-y:auto;padding:0;}
 .auth-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;max-width:420px;margin:0 auto;width:100%;box-sizing:border-box;}
 .auth-logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:8px;}
-.auth-logo span{font-family:'Inter',sans-serif;font-size:18px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;}
+.auth-logo span{font-family:'Golos Text',sans-serif;font-size:18px;font-weight:600;letter-spacing:7px;text-transform:uppercase;color:#fff;}
 .auth-tagline{text-align:center;color:var(--mu);font-size:13px;font-family:'Golos Text',sans-serif;margin-bottom:36px;}
 .auth-field{margin-bottom:14px;}
-.auth-field label{display:block;font-size:10px;letter-spacing:2px;color:var(--mu);margin-bottom:7px;text-transform:uppercase;font-family:'Inter',sans-serif;}
+.auth-field label{display:block;font-size:10px;letter-spacing:2px;color:var(--mu);margin-bottom:7px;text-transform:uppercase;font-family:'Golos Text',sans-serif;}
 .auth-field input{width:100%;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;color:var(--tx);padding:14px;font-size:15px;outline:none;box-sizing:border-box;font-family:'Golos Text',sans-serif;transition:border-color .15s;}
 .auth-field input:focus{border-color:var(--tx2);}
-.auth-btn-primary{width:100%;padding:15px;background:var(--tx2);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-family:'Inter',sans-serif;transition:opacity .15s;}
+.auth-btn-primary{width:100%;padding:15px;background:var(--tx2);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;font-family:'Golos Text',sans-serif;transition:opacity .15s;}
 .auth-btn-primary:active{opacity:.8;}
 .auth-btn-primary:disabled{opacity:.5;cursor:default;}
 .auth-btn-google{width:100%;padding:13px;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;font-family:'Golos Text',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s;}
 .auth-btn-google:active{background:var(--s3);}
-.auth-divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--mu2);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:20px 0;color:var(--mu2);font-size:11px;letter-spacing:1px;text-transform:uppercase;font-family:'Golos Text',sans-serif;}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--br);}
 .auth-switch{text-align:center;margin-top:24px;font-size:13px;color:var(--mu);font-family:'Golos Text',sans-serif;}
 .auth-switch a{color:var(--tx2);cursor:pointer;font-weight:600;}
@@ -786,7 +787,7 @@ textarea.fi.tall{min-height:120px;}
 .ob-instrument{padding:16px 10px;background:var(--s2);border:1.5px solid var(--br);border-radius:8px;text-align:center;cursor:pointer;font-size:13px;color:var(--tx2);font-family:'Golos Text',sans-serif;transition:all .15s;}
 .ob-instrument.sel{border-color:var(--tx2);background:rgba(255,255,255,0.08);color:#fff;}
 .ob-code-tabs{display:flex;gap:0;border-bottom:1px solid var(--br);margin-bottom:18px;}
-.ob-code-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;}
+.ob-code-tab{flex:1;background:none;border:none;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-bottom:2px solid transparent;}
 .ob-code-tab.on{color:var(--or);border-bottom-color:var(--or);}
 .ob-code-pane{display:none;}
 .ob-code-pane.on{display:flex;flex-direction:column;}
@@ -796,9 +797,9 @@ textarea.fi.tall{min-height:120px;}
 .group-card:active{background:var(--s3);}
 .group-card-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:var(--tx2);font-weight:700;font-size:16px;flex-shrink:0;}
 .group-card-info h4{font-size:14px;color:var(--tx);font-family:'Golos Text',sans-serif;}
-.group-card-info span{font-size:11.5px;color:var(--mu);font-family:'Inter',sans-serif;letter-spacing:.5px;}
+.group-card-info span{font-size:11.5px;color:var(--mu);font-family:'Golos Text',sans-serif;letter-spacing:.5px;}
 #groupCodeDisplay{text-align:center;padding:24px;background:var(--s2);border:1.5px dashed var(--tx2);border-radius:8px;margin:18px 0;}
-#groupCodeDisplay .code{font-family:'Inter',sans-serif;font-size:24px;font-weight:700;letter-spacing:4px;color:var(--tx2);margin-bottom:12px;}
+#groupCodeDisplay .code{font-family:'Golos Text',sans-serif;font-size:24px;font-weight:700;letter-spacing:4px;color:var(--tx2);margin-bottom:12px;}
 .auth-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:auth-spin .7s linear infinite;}
 @keyframes auth-spin{to{transform:rotate(360deg);}}
 </style>
@@ -960,7 +961,7 @@ textarea.fi.tall{min-height:120px;}
   <div class="page-hdr-top">
     <div>
       <div class="page-title-txt" id="pageTitleTxt">Сетлист</div>
-      <div id="setlistDurationLbl" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--mu2);margin-top:2px;display:none;"></div>
+      <div id="setlistDurationLbl" style="font-family:'Golos Text',sans-serif;font-size:11px;color:var(--mu2);margin-top:2px;display:none;"></div>
     </div>
     <div class="page-hdr-right">
       <div id="syncDot" style="width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s;box-shadow:0 0 4px rgba(76,175,125,0.5);" title="Офлайн"></div>
@@ -1019,11 +1020,11 @@ textarea.fi.tall{min-height:120px;}
     </div>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 6px;position:relative;">
-    <div style="display:flex;align-items:center;gap:6px;color:var(--tx2);font-family:'Inter',sans-serif;font-size:15px;">
+    <div style="display:flex;align-items:center;gap:6px;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:15px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="1.6" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.6" fill="currentColor" stroke="none"/></svg>
       <span id="repFilterCountLbl"></span>
     </div>
-    <button onclick="toggleRepSortPicker()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--tx2);font-family:'Inter',sans-serif;font-size:15px;cursor:pointer;padding:4px 2px;">
+    <button onclick="toggleRepSortPicker()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:15px;cursor:pointer;padding:4px 2px;">
       <span id="repSortLbl"></span>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="repSortDirIcon"><polyline points="19,12 12,19 5,12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
     </button>
@@ -1051,7 +1052,7 @@ textarea.fi.tall{min-height:120px;}
 <div id="statusMgrOverlay" onclick="closeStatusManager()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;"></div>
 <div id="statusMgrSheet" style="display:none;position:fixed;left:0;right:0;bottom:0;background:rgba(28,29,31,0.92);backdrop-filter:saturate(180%) blur(40px);-webkit-backdrop-filter:saturate(180%) blur(40px);border-top:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:20px 20px calc(34px + env(safe-area-inset-bottom,0px));z-index:301;box-shadow:0 -8px 30px rgba(0,0,0,.4);max-height:80vh;overflow-y:auto;">
   <div style="width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 20px;"></div>
-  <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;text-align:center;margin-bottom:20px;" id="statusMgrTitle">СТАТУСЫ</div>
+  <div style="font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;text-align:center;margin-bottom:20px;" id="statusMgrTitle">СТАТУСЫ</div>
   <div id="statusMgrList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
   <button data-editable onclick="openAddStatus()" style="width:100%;padding:14px;background:none;border:1px dashed #3a3a42;border-radius:12px;color:#888;font-family:'Golos Text',sans-serif;font-size:14px;cursor:pointer;" id="statusMgrAddBtn">+ Добавить статус</button>
 </div>
@@ -1060,10 +1061,10 @@ textarea.fi.tall{min-height:120px;}
 <div id="statusEditOverlay" onclick="closeStatusEdit()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:310;"></div>
 <div id="statusEditSheet" style="display:none;position:fixed;left:0;right:0;bottom:0;background:rgba(28,29,31,0.92);backdrop-filter:saturate(180%) blur(40px);-webkit-backdrop-filter:saturate(180%) blur(40px);border-top:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:20px 20px calc(34px + env(safe-area-inset-bottom,0px));z-index:311;box-shadow:0 -8px 30px rgba(0,0,0,.4);">
   <div style="width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 20px;"></div>
-  <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:#bbb;text-align:center;margin-bottom:20px;" id="statusEditTitle">НОВЫЙ СТАТУС</div>
-  <div style="font-size:11px;color:#888;font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;" id="statusEditNameLbl">НАЗВАНИЕ</div>
+  <div style="font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:#bbb;text-align:center;margin-bottom:20px;" id="statusEditTitle">НОВЫЙ СТАТУС</div>
+  <div style="font-size:11px;color:#888;font-family:'Golos Text',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;" id="statusEditNameLbl">НАЗВАНИЕ</div>
   <input id="statusEditName" style="width:100%;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;box-sizing:border-box;margin-bottom:16px;" placeholder="Например: В архиве" id="statusEditName">
-  <div style="font-size:11px;color:#888;font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;" id="statusEditColorLbl">ЦВЕТ</div>
+  <div style="font-size:11px;color:#888;font-family:'Golos Text',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;" id="statusEditColorLbl">ЦВЕТ</div>
   <div id="statusColorPicker" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;"></div>
   <button onclick="saveStatusEdit()" style="width:100%;padding:14px;background:#fff;border:none;border-radius:12px;color:#000;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;" id="statusEditSaveBtn">Сохранить</button>
 </div>
@@ -1094,8 +1095,8 @@ textarea.fi.tall{min-height:120px;}
     <div class="ev-grid" id="evGrid"></div>
   </div>
   <div id="evTabRow" style="display:flex;gap:8px;padding:12px 20px 8px;flex-shrink:0;">
-    <button id="evTabUpcoming" onclick="setEvListTab('upcoming')" style="flex:1;height:38px;border-radius:10px;border:none;background:var(--s2);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
-    <button id="evTabArchive" onclick="setEvListTab('archive')" style="flex:1;height:38px;border-radius:10px;border:none;background:transparent;color:var(--mu2);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
+    <button id="evTabUpcoming" onclick="setEvListTab('upcoming')" style="flex:1;height:38px;border-radius:10px;border:none;background:var(--s2);color:#fff;font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
+    <button id="evTabArchive" onclick="setEvListTab('archive')" style="flex:1;height:38px;border-radius:10px;border:none;background:transparent;color:var(--mu2);font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
   </div>
   <div class="lw" style="overflow-y:auto;flex:1;">
     <div class="ev-list" id="evList"></div>
@@ -1292,7 +1293,7 @@ textarea.fi.tall{min-height:120px;}
   <div class="lp-prog" id="lpProg" style="flex:1;height:4px;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;">
     <div class="lp-prog-fill" id="lpFill" style="width:0%;height:100%;background:#fff;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;"></div>
   </div>
-  <span class="lp-time" id="lpTime" style="font-family:Inter,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>
+  <span class="lp-time" id="lpTime" style="font-family:Golos Text,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>
 </div>
   <div class="ph" id="ph"></div>
   <div class="ctrls" id="ctrls"></div>
@@ -1623,10 +1624,10 @@ function openShareImportSheet(title,text){
 
   sheet.innerHTML=
     '<div style="width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 20px;"></div>'+
-    '<div style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:16px;">'+(en?'IMPORT SONG':'ИМПОРТ ПЕСНИ')+'</div>'+
-    '<div style="font-size:11px;color:#666;font-family:Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">'+(en?'TITLE':'НАЗВАНИЕ')+'</div>'+
+    '<div style="font-family:Golos Text,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:16px;">'+(en?'IMPORT SONG':'ИМПОРТ ПЕСНИ')+'</div>'+
+    '<div style="font-size:11px;color:#666;font-family:Golos Text,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">'+(en?'TITLE':'НАЗВАНИЕ')+'</div>'+
     '<input id="shareImportTitle" style="width:100%;padding:12px 14px;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:#fff;font-family:Golos Text,sans-serif;font-size:15px;box-sizing:border-box;margin-bottom:14px;outline:none;" value="'+esc(parsedTitle)+'">'+
-    '<div style="font-size:11px;color:#666;font-family:Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">'+(en?'PREVIEW':'ПРЕДПРОСМОТР')+'</div>'+
+    '<div style="font-size:11px;color:#666;font-family:Golos Text,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">'+(en?'PREVIEW':'ПРЕДПРОСМОТР')+'</div>'+
     '<div style="background:var(--s1);border-radius:10px;padding:12px 14px;margin-bottom:16px;max-height:200px;overflow-y:auto;font-size:13px;color:#aaa;font-family:Golos Text,sans-serif;line-height:1.6;">'+
       renderChordPro(parsed.slice(0,500),0)+
     '</div>'+
@@ -1731,7 +1732,7 @@ function chordImportParse(){
 }
 function showManualPasteSheet(){
   var ta=document.createElement('textarea');
-  ta.style.cssText='width:100%;height:150px;background:#202020;border:1px solid #2a2a32;border-radius:8px;color:#fff;font-family:Inter,monospace;font-size:12px;padding:10px;box-sizing:border-box;outline:none;margin-top:8px;-webkit-text-fill-color:#fff;';
+  ta.style.cssText='width:100%;height:150px;background:#202020;border:1px solid #2a2a32;border-radius:8px;color:#fff;font-family:Golos Text,monospace;font-size:12px;padding:10px;box-sizing:border-box;outline:none;margin-top:8px;-webkit-text-fill-color:#fff;';
   ta.placeholder=LANG==='en'?'Paste chords here...':'Вставьте аккорды сюда...';
   var hint=document.getElementById('chordImportHint');
   var existing=document.getElementById('chordManualPasteTa');
@@ -1822,7 +1823,7 @@ function showStatusPicker(s,noteSq){
 
   var statuses=getStatuses();
   sheet.innerHTML='<div style="width:36px;height:4px;background:rgba(255,255,255,0.3);border-radius:3px;margin:0 auto 16px;"></div>'+
-    '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.6);font-family:Inter,sans-serif;text-transform:uppercase;margin-bottom:12px;text-align:center;">'+(LANG==='en'?'STATUS':'СТАТУС')+'</div>'+
+    '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.6);font-family:Golos Text,sans-serif;text-transform:uppercase;margin-bottom:12px;text-align:center;">'+(LANG==='en'?'STATUS':'СТАТУС')+'</div>'+
     '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;">'+
     statuses.map(function(st){
       var active=s.status===st.id;
@@ -2105,13 +2106,18 @@ function genGroupCode(){
 }
 function genGroupCodeUnique(cb){
   var code=genGroupCode();
-  db.ref("groups/"+code).once("value").then(function(snap){
+  db.ref("groups/"+code+"/meta").once("value").then(function(snap){
     if(snap.exists())genGroupCodeUnique(cb);else cb(code);
   }).catch(function(){cb(code);});
 }
 
 /* ---- migration of legacy single-tenant data into a fresh group ---- */
 function migrateLegacyDataInto(groupId,cb){
+  // Старое общее хранилище "bandlist" больше не читаем: раньше его содержимое
+  // копировалось в КАЖДУЮ новую группу любого пользователя. Новая группа — пустой шаблон.
+  db.ref("groups/"+groupId+"/data").set(JSON.parse(JSON.stringify(DEF))).then(function(){cb&&cb();}).catch(function(){cb&&cb();});
+}
+function _legacyMigrateUnused(groupId,cb){
   db.ref("bandlist").once("value").then(function(snap){
     var legacy=snap.val();
     if(legacy&&legacy.concerts&&legacy.repertoire){
@@ -2162,7 +2168,7 @@ function joinGroup(code,cb){
     if(!currentUser){cb&&cb(false,"noauth");return;}
     db.ref("groups/"+code+"/members/"+currentUser.uid+"/role").once("value").then(function(roleSnap){
       var existingRole=roleSnap.val();
-      // Роль по умолчанию "member"; если перешли по ссылке для админов (?as=admin) — "leader".
+      // Роль по умолчанию "member"; по ссылке для админов (?as=admin&t=токен) — "admin".
       // Уже существующую роль (например, лидера) никогда не понижаем.
       var requestedRole=(window._pendingJoinCode===code&&window._pendingJoinRole)?window._pendingJoinRole:"member";
       var memberData={
@@ -2172,11 +2178,15 @@ function joinGroup(code,cb){
         instrument:pendingInstrument||"",
         joinedAt:Date.now()
       };
+      if(!existingRole&&requestedRole==="admin"&&window._pendingJoinToken) memberData.invite=window._pendingJoinToken;
       var updates={};
       updates["groups/"+code+"/members/"+currentUser.uid]=memberData;
       updates["users/"+currentUser.uid+"/groups/"+code]=true;
       updates["users/"+currentUser.uid+"/activeGroup"]=code;
-      db.ref().update(updates).then(function(){cb&&cb(true,code);}).catch(function(){cb&&cb(false,"writeerr");});
+      db.ref().update(updates).then(function(){
+        if(memberData.invite){try{db.ref("groups/"+code+"/banned/"+currentUser.uid).remove().catch(function(){});}catch(e){}}
+        cb&&cb(true,code);
+      }).catch(function(){cb&&cb(false,"writeerr");});
     });
   }).catch(function(){cb&&cb(false,"readerr");});
 }
@@ -2579,6 +2589,9 @@ function gmpRemoveMember(uid,name){
     function(){
       if(!db||!currentGroupId||(currentRole!=='leader'&&currentRole!=='admin'))return;
       var gid=currentGroupId;
+      // Отмечаем как удалённого: по одному коду группы он больше не войдёт
+      // (вернуть можно только по новой ссылке «Пригласить как админа»)
+      db.ref('groups/'+gid+'/banned/'+uid).set(true).catch(function(){});
       db.ref('groups/'+gid+'/members/'+uid).remove();
       db.ref('groups/'+gid+'/presence/'+uid).remove().catch(function(){});
       db.ref('users/'+uid+'/groups/'+gid).remove().catch(function(){});
@@ -2601,7 +2614,7 @@ function gmpChangeRole(uid,currentRoleOfMember){
 
   sheet.innerHTML=
     '<div style="width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 20px;"></div>'+
-    '<div style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:16px;">'+(en?'MEMBER ACTIONS':'ДЕЙСТВИЯ С УЧАСТНИКОМ')+'</div>'+
+    '<div style="font-family:Golos Text,sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:16px;">'+(en?'MEMBER ACTIONS':'ДЕЙСТВИЯ С УЧАСТНИКОМ')+'</div>'+
     actions.map(function(a,i){
       return '<button data-action-idx="'+i+'" style="width:100%;padding:14px;background:var(--s1);border:1px solid var(--br);border-radius:12px;color:'+a.color+';font-family:\'Golos Text\',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-bottom:10px;">'+a.label+'</button>';
     }).join('')+
@@ -2935,7 +2948,14 @@ function copyGroupInviteLink(btnId,asAdmin){
   var codeEl=document.getElementById("newGroupCodeTxt");
   var code=(btnId==="gmpCopyBtn"||btnId==="gmpCopyAdminBtn")?currentGroupId:(codeEl?codeEl.textContent:currentGroupId);
   if(!code)return;
-  var link=location.origin+location.pathname+"?join="+encodeURIComponent(code)+(asAdmin?"&as=admin":"");
+  var tok="";
+  if(asAdmin){
+    // Одноразово генерируем токен приглашения админа и сохраняем в группе:
+    // правила базы пускают в группу с ролью admin только по действующему токену
+    tok=Math.random().toString(36).slice(2,8)+Math.random().toString(36).slice(2,8);
+    try{if(db&&currentUser)db.ref("groups/"+code+"/adminInvites/"+tok).set({by:currentUser.uid,at:Date.now()});}catch(e){}
+  }
+  var link=location.origin+location.pathname+"?join="+encodeURIComponent(code)+(asAdmin?"&as=admin&t="+tok:"");
   var btn=document.getElementById(btnId||"copyInviteLinkBtn");
   var origTxt=asAdmin?(btnId==="gmpCopyAdminBtn"?(LANG==="en"?"Invite as admin":"Пригласить как админа"):(LANG==="en"?"Copy link for admins":"Скопировать ссылку для админов")):(LANG==="en"?"Copy link for musicians":"Скопировать ссылку для музыкантов");
   function done(ok){ if(btn) btn.textContent = ok ? (LANG==="en"?"Link copied!":"Ссылка скопирована!") : link; setTimeout(function(){ if(btn) btn.textContent=origTxt; },2000); }
@@ -2950,7 +2970,8 @@ try{
   var _joinParam=_joinParams.get("join");
   if(_joinParam){
     window._pendingJoinCode=_joinParam.toUpperCase();
-    window._pendingJoinRole=_joinParams.get("as")==="admin"?"admin":"member";
+    window._pendingJoinRole=(_joinParams.get("as")==="admin"&&_joinParams.get("t"))?"admin":"member";
+    window._pendingJoinToken=_joinParams.get("t")||"";
   }
 }catch(e){}
 function obFinishOnboarding(){
@@ -2978,7 +2999,7 @@ function obJoinGroupClick(){
   joinGroup(code,function(ok,result){
     btn.disabled=false;btn.textContent=authT("Войти в группу","Join group");
     if(!ok){
-      var msgs={notfound:authT("Группа не найдена","Group not found"),noauth:authT("Нужно войти в аккаунт","Sign in required"),writeerr:authT("Ошибка записи","Write error"),readerr:authT("Ошибка соединения","Connection error")};
+      var msgs={notfound:authT("Группа не найдена","Group not found"),noauth:authT("Нужно войти в аккаунт","Sign in required"),writeerr:authT("Нет доступа к группе — попроси лидера прислать новую ссылку","No access to this group — ask the leader for a new invite link"),readerr:authT("Ошибка соединения","Connection error")};
       errEl.textContent=msgs[result]||authT("Ошибка","Error");errEl.classList.add("show");
       return;
     }
@@ -3257,7 +3278,7 @@ function toggleStatsPeriodPicker(){
     var active=o.key===statsPeriod;
     var borderStyle=i<STATS_PERIODS.length-1?'border-bottom:1px solid rgba(255,255,255,0.08);':'';
     var checkSvg=active?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>':'';
-    return '<div onclick="selectStatsPeriod(\''+o.key+'\')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;font-family:\'Inter\',sans-serif;font-size:14px;color:'+(active?'#fff':'#d2d2d2')+';font-weight:'+(active?'700':'400')+';cursor:pointer;'+borderStyle+'"><span>'+(LANG==='en'?o.en:o.ru)+'</span>'+checkSvg+'</div>';
+    return '<div onclick="selectStatsPeriod(\''+o.key+'\')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;font-family:\'Golos Text\',sans-serif;font-size:14px;color:'+(active?'#fff':'#d2d2d2')+';font-weight:'+(active?'700':'400')+';cursor:pointer;'+borderStyle+'"><span>'+(LANG==='en'?o.en:o.ru)+'</span>'+checkSvg+'</div>';
   }).join('');
   p.innerHTML=itemsHtml;
   p.style.display='block';
@@ -3291,7 +3312,7 @@ function renderStatsDashboard(){
 
   var curOpt=STATS_PERIODS.find(function(o){return o.key===statsPeriod;})||STATS_PERIODS[STATS_PERIODS.length-1];
   var periodRow='<div style="position:relative;margin-bottom:20px;">'
-    +'<button id="statsPeriodBtn" onclick="toggleStatsPeriodPicker()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--tx2);font-family:\'Inter\',sans-serif;font-size:15px;cursor:pointer;padding:4px 2px;">'
+    +'<button id="statsPeriodBtn" onclick="toggleStatsPeriodPicker()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--tx2);font-family:\'Golos Text\',sans-serif;font-size:15px;cursor:pointer;padding:4px 2px;">'
       +'<span id="statsPeriodLbl">'+(LANG==='en'?curOpt.en:curOpt.ru)+'</span>'
       +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="19,12 12,19 5,12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>'
     +'</button>'
@@ -3797,6 +3818,30 @@ function shiftKey(st){
   save();rPanel();rList();rRep();
 }
 function shiftTempo(d){var s=findR(panel.id);if(!s)return;s.tempo=Math.max(40,Math.min(240,s.tempo+d));save();rPanel();rList();}
+// Темп: шаг 1 BPM. Короткое нажатие = ±1, удержание — быстро листает
+// (сначала медленно, потом быстрее). Сохраняем один раз, при отпускании.
+var _tempoHoldT=null;
+function tempoHold(e,d,inSheet){
+  if(e&&e.button>0)return;
+  if(e&&e.preventDefault)e.preventDefault();
+  var s=findR(panel.id);if(!s)return;
+  var n=0;
+  function step(){
+    var cur=findR(panel.id);if(!cur)return;
+    cur.tempo=Math.max(40,Math.min(240,(+cur.tempo||120)+d));
+    if(inSheet&&typeof rEditSheet==='function')rEditSheet();else rPanel();
+    n++;
+    _tempoHoldT=setTimeout(step,n<2?400:(n<10?90:45));
+  }
+  clearTimeout(_tempoHoldT);
+  step();
+  function stop(){
+    clearTimeout(_tempoHoldT);_tempoHoldT=null;
+    document.removeEventListener('pointerup',stop);document.removeEventListener('pointercancel',stop);
+    save();rPanel();rList();if(inSheet&&typeof rEditSheet==='function')rEditSheet();
+  }
+  document.addEventListener('pointerup',stop);document.addEventListener('pointercancel',stop);
+}
 var metrInterval=null;
 var metrOn=false;
 function toggleMetronome(){
@@ -3951,10 +3996,10 @@ function openConcert(){
   inp.style.cssText="width:100%;background:#2a2a2a;border:2px solid var(--tx2);border-radius:8px;color:#fff;padding:12px;font-size:16px;outline:none;box-sizing:border-box;";
   inp.placeholder=LANG==="en"?"Setlist 1":"Сетлист 1";
   var okBtn=document.createElement("button");
-  okBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:16px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  okBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:16px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   okBtn.textContent=LANG==="en"?"CREATE":"СОЗДАТЬ";
   var cancelBtn=document.createElement("button");
-  cancelBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.textContent=LANG==="en"?"CANCEL":"ОТМЕНА";
   okBtn.addEventListener("click",function(){
     var name=inp.value.trim();if(!name)return;
@@ -3997,7 +4042,7 @@ function buildSecModal(title,btnText,defaultName,editId){
   var lbl=document.createElement("div");lbl.style.cssText="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b0aaa4;margin-bottom:7px;";lbl.textContent="Название";ov.appendChild(lbl);
   // input
   var inp=document.createElement("input");
-  inp.style.cssText="width:100%;background:#2a2a2a;border:1px solid var(--tx2);border-radius:8px;color:#f0ece4;padding:11px 13px;font-size:15px;font-family:'Montserrat',sans-serif;font-weight:300;outline:none;box-sizing:border-box;";
+  inp.style.cssText="width:100%;background:#2a2a2a;border:1px solid var(--tx2);border-radius:8px;color:#f0ece4;padding:11px 13px;font-size:15px;font-family:'Golos Text',sans-serif;font-weight:300;outline:none;box-sizing:border-box;";
   inp.value=defaultName;inp.placeholder="2 отделение";
   nSection._inp=inp;
   inp.addEventListener("input",function(){nSection.name=inp.value;});
@@ -4005,7 +4050,7 @@ function buildSecModal(title,btnText,defaultName,editId){
   ov.appendChild(inp);
   // button
   var btn=document.createElement("button");
-  btn.style.cssText="width:100%;padding:13px;border:none;border-radius:8px;background:#fff;color:#111015;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;";
+  btn.style.cssText="width:100%;padding:13px;border:none;border-radius:8px;background:#fff;color:#111015;font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;";
   btn.textContent=btnText;
   btn.addEventListener("click",function(){doSubmitSec(ov);});
   ov.appendChild(btn);
@@ -4457,7 +4502,7 @@ function rStatusFilter(){
         dot.style.cssText="display:inline-block;width:6px;height:6px;border-radius:50%;background:"+statusColor(sf.id)+";flex-shrink:0;";
         btn.appendChild(dot);
       }
-      var cnum=document.createElement("span");cnum.style.cssText="font-size:12px;font-family:'Inter',sans-serif;font-weight:600;flex-shrink:0;";cnum.textContent=String(count);
+      var cnum=document.createElement("span");cnum.style.cssText="font-size:12px;font-family:'Golos Text',sans-serif;font-weight:600;flex-shrink:0;";cnum.textContent=String(count);
       btn.appendChild(cnum);
       var lbl=document.createElement("span");lbl.textContent=" "+(sf.label||sf.id);
       lbl.style.cssText="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;text-align:left;";
@@ -4485,12 +4530,12 @@ function toggleRepSortPicker(){
   var p=document.getElementById('repSortPicker');
   if(!p)return;
   if(p.style.display==='block'){p.style.display='none';return;}
-  var headerHtml='<div style="padding:8px 12px 6px;font-family:\'Inter\',sans-serif;font-size:11px;color:#8b8c8e;">'+(LANG==='en'?'Sort by':'Сортировать по')+'</div>';
+  var headerHtml='<div style="padding:8px 12px 6px;font-family:\'Golos Text\',sans-serif;font-size:11px;color:#8b8c8e;">'+(LANG==='en'?'Sort by':'Сортировать по')+'</div>';
   var itemsHtml=REP_SORT_OPTIONS.map(function(o,i){
     var active=o.key===repSortKey;
     var borderStyle=i<REP_SORT_OPTIONS.length-1?'border-bottom:1px solid rgba(255,255,255,0.08);':'';
     var arrowSvg=active?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate('+(repSortDir===1?'0deg':'180deg')+');"><polyline points="19,12 12,19 5,12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>':'';
-    return '<div onclick="selectRepSort(\''+o.key+'\')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;font-family:\'Inter\',sans-serif;font-size:14px;color:'+(active?'#fff':'#d2d2d2')+';font-weight:'+(active?'700':'400')+';cursor:pointer;'+borderStyle+'"><span>'+(LANG==='en'?o.en:o.ru)+'</span>'+arrowSvg+'</div>';
+    return '<div onclick="selectRepSort(\''+o.key+'\')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;font-family:\'Golos Text\',sans-serif;font-size:14px;color:'+(active?'#fff':'#d2d2d2')+';font-weight:'+(active?'700':'400')+';cursor:pointer;'+borderStyle+'"><span>'+(LANG==='en'?o.en:o.ru)+'</span>'+arrowSvg+'</div>';
   }).join('');
   p.innerHTML=headerHtml+itemsHtml;
   p.style.display='block';
@@ -4687,7 +4732,7 @@ function cycleStatus(id,dotEl){
   getStatuses().forEach(function(st,i){
     var item=document.createElement("button");
     var isCurrent=s.status===st.id;
-    item.style.cssText="display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:14px;font-family:'Montserrat',sans-serif;font-weight:"+(isCurrent?"500":"300")+";cursor:pointer;border:none;background:"+(isCurrent?"#32323e":"transparent")+";color:#f0ece4;width:100%;text-align:left;"+(i>0?"border-top:1px solid #32323e;":"");
+    item.style.cssText="display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:14px;font-family:'Golos Text',sans-serif;font-weight:"+(isCurrent?"500":"300")+";cursor:pointer;border:none;background:"+(isCurrent?"#32323e":"transparent")+";color:#f0ece4;width:100%;text-align:left;"+(i>0?"border-top:1px solid #32323e;":"");
     var dot2=document.createElement("span");
     dot2.style.cssText="width:9px;height:9px;border-radius:50%;flex-shrink:0;background:"+statusColor(st.id)+";display:inline-block;";
     item.appendChild(dot2);
@@ -4956,7 +5001,7 @@ document.getElementById("ctrls").innerHTML=
     +'<button class="cbtn" onclick="shiftKey(-1)">−</button><div class="cv">'+esc(s.key)+'</div><button class="cbtn" onclick="shiftKey(+1)">+</button>'
     +'</div></div>'
     +'<div class="cb"><div class="cl">'+t('tempo')+'</div><div class="cr">'
-    +'<button class="cbtn" onclick="shiftTempo(-2)">−</button><div class="cv">'+s.tempo+'</div><button class="cbtn" onclick="shiftTempo(+2)">+</button>'
+    +'<button class="cbtn" onpointerdown="tempoHold(event,-1,0)">−</button><div class="cv">'+s.tempo+'</div><button class="cbtn" onpointerdown="tempoHold(event,1,0)">+</button>'
     +'</div></div>'
     +'<div style="display:flex;flex-direction:column;gap:8px;flex:0 0 72px;">'
     +'<button onclick="tapTempo()" style="flex:1;width:100%;background:var(--s2);border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:42px;">'
@@ -5002,7 +5047,7 @@ function showFormSectionPicker(sid){
   types.forEach(function(type){
     var btn=document.createElement("button");
     btn.textContent=type;
-    btn.style.cssText="padding:10px 18px;border-radius:8px;border:1px solid #32323e;background:#22222a;color:#d0ccc4;font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;";
+    btn.style.cssText="padding:10px 18px;border-radius:8px;border:1px solid #32323e;background:#22222a;color:#d0ccc4;font-family:'Golos Text',sans-serif;font-size:13px;cursor:pointer;";
     btn.addEventListener("click",function(){
       var s=findR(sid);if(!s)return;
       if(!s.form)s.form=[];
@@ -5019,10 +5064,10 @@ function showFormSectionPicker(sid){
   customRow.style.cssText="display:flex;gap:8px;margin-bottom:16px;";
   var inp=document.createElement("input");
   inp.placeholder=t("customName");
-  inp.style.cssText="flex:1;background:#22222a;border:1px solid #32323e;border-radius:8px;color:#f0ece4;padding:11px 13px;font-size:14px;font-family:'Montserrat',sans-serif;outline:none;";
+  inp.style.cssText="flex:1;background:#22222a;border:1px solid #32323e;border-radius:8px;color:#f0ece4;padding:11px 13px;font-size:14px;font-family:'Golos Text',sans-serif;outline:none;";
   var okBtn=document.createElement("button");
   okBtn.textContent=LANG==="en"?"Add":"Добавить";
-  okBtn.style.cssText="background:#fff;border:none;border-radius:8px;color:#111015;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:11px 16px;cursor:pointer;white-space:nowrap;";
+  okBtn.style.cssText="background:#fff;border:none;border-radius:8px;color:#111015;font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:11px 16px;cursor:pointer;white-space:nowrap;";
   okBtn.addEventListener("click",function(){
     var val=inp.value.trim();if(!val)return;
     var s=findR(sid);if(!s)return;
@@ -5036,7 +5081,7 @@ function showFormSectionPicker(sid){
 
   var cancelBtn=document.createElement("button");
   cancelBtn.textContent=LANG==="en"?"Cancel":"Отмена";
-  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid #32323e;border-radius:8px;background:none;color:#b0aaa4;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid #32323e;border-radius:8px;background:none;color:#b0aaa4;font-family:'Golos Text',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.addEventListener("click",function(){ov.remove();});
   ov.appendChild(cancelBtn);
 
@@ -5070,15 +5115,15 @@ function rLyricsTab(s){
       +'<div style="display:flex;gap:6px;margin-bottom:8px;">'
       +'<button onclick="insertLyricsChar(\'[\')" style="width:52px;height:38px;background:var(--s2);border:1px solid var(--tx2);border-radius:8px;color:#fff;font-family:Golos Text,sans-serif;font-size:18px;font-weight:600;cursor:pointer;">[</button>'
       +'<button onclick="insertLyricsChar(\']\')" style="width:52px;height:38px;background:var(--s2);border:1px solid var(--tx2);border-radius:8px;color:#fff;font-family:Golos Text,sans-serif;font-size:18px;font-weight:600;cursor:pointer;">]</button>'
-      +'<div style="font-family:Inter,sans-serif;font-size:9px;letter-spacing:1px;color:var(--mu2);display:flex;align-items:center;">'+(LANG==='en'?'quick chord brackets':'быстрые скобки для аккорда')+'</div>'
+      +'<div style="font-family:Golos Text,sans-serif;font-size:9px;letter-spacing:1px;color:var(--mu2);display:flex;align-items:center;">'+(LANG==='en'?'quick chord brackets':'быстрые скобки для аккорда')+'</div>'
       +'</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">'
       +(LANG==='en'?['Intro','Verse','Chorus','Bridge','Solo','Interlude','Outro']:['Интро','Куплет','Припев','Бридж','Соло','Проигрыш','Аутро']).map(function(sec){
-        return '<button onclick="insertLyricsSection(\''+sec+'\')" style="padding:6px 10px;background:transparent;border:1px solid rgba(255,255,255,0.5);border-radius:8px;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;">+ '+sec+'</button>';
+        return '<button onclick="insertLyricsSection(\''+sec+'\')" style="padding:6px 10px;background:transparent;border:1px solid rgba(255,255,255,0.5);border-radius:8px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;">+ '+sec+'</button>';
       }).join('')
       +'</div>'
       +'<textarea class="ta notes" id="taL" style="min-height:300px" oninput="saveLyrics()" placeholder="'+(LANG==='en'?'[Intro]&#10;&#10;[Verse]&#10;First verse text...&#10;&#10;[Chorus]&#10;Chorus text...':'[Интро]&#10;&#10;[Куплет]&#10;Текст первого куплета...&#10;&#10;[Припев]&#10;Текст припева...')+'">'+esc(s.lyrics||'')+'</textarea>'
-      +'<button onclick="doneLyricsEdit()" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Done':'Готово')+'</button>';
+      +'<button onclick="doneLyricsEdit()" style="width:100%;margin-top:10px;padding:10px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Done':'Готово')+'</button>';
     return;
   }
   var tapBar='';
@@ -5086,17 +5131,17 @@ function rLyricsTab(s){
     tapBar='<div style="background:#1a1a22;border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">'
       +'<button onclick="lyricsTapTogglePlay()" id="lyricsTapBtn" style="width:32px;height:32px;background:none;border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><polygon points="3,2 16,9 3,16" fill="var(--tx2)"/></svg></button>'
       +'<div style="flex:1;"><div style="width:100%;height:3px;background:#252530;border-radius:8px;"><div id="lyricsTapFill" style="width:0%;height:100%;background:#fff;border-radius:8px;"></div></div></div>'
-      +'<span id="lyricsTapTime" style="font-size:11px;color:var(--tx2);font-family:Inter,sans-serif;min-width:32px;">0:00</span>'
+      +'<span id="lyricsTapTime" style="font-size:11px;color:var(--tx2);font-family:Golos Text,sans-serif;min-width:32px;">0:00</span>'
       +'<button onclick="exitLyricsTap()" style="background:none;border:none;color:#555;font-size:14px;cursor:pointer;">✕</button>'
       +'</div>'
-      +'<div style="font-size:10px;color:#888;font-family:Inter,sans-serif;margin-bottom:10px;">'+(LANG==='en'?'Play track and tap section headers':'Запусти трек и тапай по заголовкам секций')+'</div>';
+      +'<div style="font-size:10px;color:#888;font-family:Golos Text,sans-serif;margin-bottom:10px;">'+(LANG==='en'?'Play track and tap section headers':'Запусти трек и тапай по заголовкам секций')+'</div>';
   }
   var h='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;margin-top:-6px;">'
-    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Import from text':'Импорт из текста')+'</button>'
+    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Import from text':'Импорт из текста')+'</button>'
     +'<div style="display:flex;gap:8px;">'
-    +'<button onclick="switchLyricsEdit()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>'+t('editLyrics')+'</button>'
-    +(s.trackData?'<button onclick="enterLyricsTapMode()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border:1px solid '+(lyricsTapMode?'#fff':'var(--br)')+';border-radius:8px;background:transparent;color:'+(lyricsTapMode?'#fff':'var(--mu)')+';font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>'+(LANG==='en'?'Tap':'Разметить')+'</button>':'')+'</div>'
-    +'<button onclick="enterPerfMode()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>'+(LANG==='en'?'Stage':'Сцена')+'</button>'
+    +'<button onclick="switchLyricsEdit()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>'+t('editLyrics')+'</button>'
+    +(s.trackData?'<button onclick="enterLyricsTapMode()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border:1px solid '+(lyricsTapMode?'#fff':'var(--br)')+';border-radius:8px;background:transparent;color:'+(lyricsTapMode?'#fff':'var(--mu)')+';font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>'+(LANG==='en'?'Tap':'Разметить')+'</button>':'')+'</div>'
+    +'<button onclick="enterPerfMode()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>'+(LANG==='en'?'Stage':'Сцена')+'</button>'
     +'</div>';
   h+=tapBar;
   // Определяем режим: если текст содержит аккорды [Am] — рендерим как ChordPro
@@ -5197,8 +5242,8 @@ function enterLyricsTapMode(){
   }
   var h='<div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">'
     +'<div><div style="font-size:16px;font-weight:600;color:#f0ece4;">'+esc(s.title||'')+'</div>'
-    +'<div style="font-size:10px;color:var(--tx2);letter-spacing:2px;font-family:Inter,sans-serif;margin-top:2px;">РЕЖИМ РАЗМЕТКИ</div></div>'
-    +'<button onclick="exitLyricsTap()" style="background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#e05252;height:38px;padding:0 16px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;">✕ Выйти</button>'
+    +'<div style="font-size:10px;color:var(--tx2);letter-spacing:2px;font-family:Golos Text,sans-serif;margin-top:2px;">РЕЖИМ РАЗМЕТКИ</div></div>'
+    +'<button onclick="exitLyricsTap()" style="background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#e05252;height:38px;padding:0 16px;font-size:12px;font-weight:600;font-family:Golos Text,sans-serif;cursor:pointer;">✕ Выйти</button>'
     +'</div>'
     +'<div style="padding:14px 16px 0;background:var(--bg);flex-shrink:0;">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
@@ -5209,12 +5254,12 @@ function enterLyricsTapMode(){
     +'<div id="lyricsTapFill" style="width:0%;height:100%;background:#fff;border-radius:8px;"></div>'
     +'<div id="lyricsTapDot" style="position:absolute;top:50%;transform:translateY(-50%);left:0%;width:12px;height:12px;border-radius:50%;background:#fff;margin-left:-6px;"></div>'
     +'</div></div>'
-    +'<span id="lyricsTapTime" style="font-size:13px;color:var(--tx2);font-family:Inter,sans-serif;min-width:36px;text-align:right;">0:00</span>'
+    +'<span id="lyricsTapTime" style="font-size:13px;color:var(--tx2);font-family:Golos Text,sans-serif;min-width:36px;text-align:right;">0:00</span>'
     +'</div>'
-    +'<div id="lyricsTapHint" style="font-size:11px;color:#555;font-family:Inter,sans-serif;min-height:0;margin-bottom:0;"></div>'
+    +'<div id="lyricsTapHint" style="font-size:11px;color:#555;font-family:Golos Text,sans-serif;min-height:0;margin-bottom:0;"></div>'
     +'<div style="display:flex;gap:8px;margin-top:2px;">'
-    +'<button id="lyricsTapUndoBtn" onclick="lyricsTapUndo()" style="flex:1;height:38px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Отменить</button>'
-    +'<button onclick="lyricsTapReset()" style="flex:1;height:38px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Сбросить</button>'
+    +'<button id="lyricsTapUndoBtn" onclick="lyricsTapUndo()" style="flex:1;height:38px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Отменить</button>'
+    +'<button onclick="lyricsTapReset()" style="flex:1;height:38px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Сбросить</button>'
     +'</div>'
     +'</div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px;"><div style="display:flex;flex-direction:column;gap:10px;">';
@@ -5226,8 +5271,8 @@ function enterLyricsTapMode(){
       +'background:var(--s1);border:1.5px solid '+(hasTap?'#2dd4bf':'transparent')+';'
       +'border-radius:10px;cursor:pointer;text-align:left;">'
       +'<div id="dot_'+sec.idx+'" style="width:8px;height:8px;border-radius:50%;background:'+(hasTap?'#2dd4bf':'#3a3a46')+';flex-shrink:0;"></div>'
-      +'<span id="name_'+sec.idx+'" style="font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:'+(hasTap?'var(--tx)':'#888')+';font-family:Inter,sans-serif;">'+esc(sec.name)+'</span>'
-      +'<span id="time_'+sec.idx+'" style="margin-left:auto;font-size:12px;color:'+(hasTap?'#2dd4bf':'#888')+';font-family:Inter,sans-serif;font-weight:'+(hasTap?'700':'400')+';">'+(hasTap?tStr:(LANG==='en'?'tap →':'тап →'))+'</span>'
+      +'<span id="name_'+sec.idx+'" style="font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:'+(hasTap?'var(--tx)':'#888')+';font-family:Golos Text,sans-serif;">'+esc(sec.name)+'</span>'
+      +'<span id="time_'+sec.idx+'" style="margin-left:auto;font-size:12px;color:'+(hasTap?'#2dd4bf':'#888')+';font-family:Golos Text,sans-serif;font-weight:'+(hasTap?'700':'400')+';">'+(hasTap?tStr:(LANG==='en'?'tap →':'тап →'))+'</span>'
       +'</button>';
   });
   h+='</div></div>';
@@ -5493,18 +5538,18 @@ function rChordsTab(s){
     var transpWrap=document.createElement("div");
     transpWrap.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:12px;";
     var transpLbl=document.createElement("span");
-    transpLbl.style.cssText="font-size:11px;color:#666;font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;";
+    transpLbl.style.cssText="font-size:11px;color:#666;font-family:'Golos Text',sans-serif;letter-spacing:1px;text-transform:uppercase;";
     transpLbl.textContent=LANG==="en"?"TRANSPOSE":"ТРАНСПОЗИЦИЯ";
     var transpVal=s.chordProTranspose||0;
     var transpNum=document.createElement("span");
-    transpNum.style.cssText="font-size:14px;color:#fff;font-family:'Inter',sans-serif;font-weight:600;min-width:28px;text-align:center;";
+    transpNum.style.cssText="font-size:14px;color:#fff;font-family:'Golos Text',sans-serif;font-weight:600;min-width:28px;text-align:center;";
     transpNum.textContent=(transpVal>0?"+":"")+transpVal;
     var btnDown=document.createElement("button");btnDown.textContent="−";
     btnDown.style.cssText="background:var(--s2);border:1px solid var(--br);border-radius:6px;color:#fff;width:30px;height:30px;cursor:pointer;font-size:16px;";
     var btnUp=document.createElement("button");btnUp.textContent="+";
     btnUp.style.cssText=btnDown.style.cssText;
     var btnReset=document.createElement("button");btnReset.textContent="0";
-    btnReset.style.cssText="background:none;border:none;color:#555;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;";
+    btnReset.style.cssText="background:none;border:none;color:#555;font-size:11px;cursor:pointer;font-family:'Golos Text',sans-serif;";
     function updateTransp(delta){
       s.chordProTranspose=(s.chordProTranspose||0)+delta;
       if(Math.abs(s.chordProTranspose)>11)s.chordProTranspose=0;
@@ -5523,12 +5568,12 @@ function rChordsTab(s){
 
     // Редактор
     var editHdr=document.createElement("div");
-    editHdr.style.cssText="font-size:10px;letter-spacing:2px;color:#555;font-family:'Inter',sans-serif;text-transform:uppercase;margin:16px 0 8px;";
+    editHdr.style.cssText="font-size:10px;letter-spacing:2px;color:#555;font-family:'Golos Text',sans-serif;text-transform:uppercase;margin:16px 0 8px;";
     editHdr.textContent=LANG==="en"?"EDITOR (ChordPro format)":"РЕДАКТОР (формат ChordPro)";
     pb.appendChild(editHdr);
 
     var hint=document.createElement("div");
-    hint.style.cssText="font-size:11px;color:#555;font-family:'Inter',sans-serif;margin-bottom:8px;line-height:1.5;";
+    hint.style.cssText="font-size:11px;color:#555;font-family:'Golos Text',sans-serif;margin-bottom:8px;line-height:1.5;";
     hint.textContent=LANG==="en"?"Use [Chord] before words: [Am]Yesterday [F]all my [C]troubles"
       :"Используйте [Аккорд] перед словами: [Am]Вчера [F]всё было [C]хорошо";
     pb.appendChild(hint);
@@ -5542,7 +5587,7 @@ function rChordsTab(s){
     ta.addEventListener("input",function(){s.chordPro=ta.value;save();preview.innerHTML=renderChordPro(s.chordPro,s.chordProTranspose||0);});
     // Кнопка импорта с сайта
     var importBtn=document.createElement("button");
-    importBtn.style.cssText="width:100%;padding:12px;background:none;border:1px solid var(--br);border-radius:10px;color:#aaa;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;";
+    importBtn.style.cssText="width:100%;padding:12px;background:none;border:1px solid var(--br);border-radius:10px;color:#aaa;font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;";
     importBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'+(LANG==="en"?"Import from website":"Импорт с сайта");
     (function(song){importBtn.addEventListener("click",function(){openChordImportBrowser(song);});})(s);
     pb.appendChild(importBtn);
@@ -5582,7 +5627,7 @@ function showSectionPicker(s){
   ov.style.cssText="position:fixed;inset:0;background:rgba(10,10,10,.92);z-index:100;display:flex;flex-direction:column;padding:28px 20px 40px;overflow-y:auto;";
 
   var title=document.createElement("div");
-  title.style.cssText="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mu);margin-bottom:20px;font-family:'Montserrat',sans-serif;";
+  title.style.cssText="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mu);margin-bottom:20px;font-family:'Golos Text',sans-serif;";
   title.textContent=t("chordsHint");
 
   var grid=document.createElement("div");
@@ -5590,7 +5635,7 @@ function showSectionPicker(s){
 
   SECTION_TYPES.forEach(function(type){
     var btn=document.createElement("button");
-    btn.style.cssText="padding:10px 18px;border-radius:8px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Montserrat',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;";
+    btn.style.cssText="padding:10px 18px;border-radius:8px;border:1px solid var(--br);background:var(--s1);color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;";
     btn.textContent=type;
     btn.addEventListener("click",function(){
       if(!s.chordBlocks)s.chordBlocks=[];
@@ -5616,7 +5661,7 @@ function showSectionPicker(s){
   customRow.appendChild(inp);customRow.appendChild(okBtn);
 
   var cancelBtn=document.createElement("button");
-  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:8px;background:none;color:var(--mu);font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="width:100%;padding:12px;border:1px solid var(--br);border-radius:8px;background:none;color:var(--mu);font-family:'Golos Text',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.textContent=LANG==="en"?"Cancel":"Отмена";
   cancelBtn.addEventListener("click",function(){ov.remove();});
 
@@ -5648,7 +5693,7 @@ function editArtistInline(sid){
   var paEl=document.querySelector(".pa");if(!paEl)return;
   var inp=document.createElement("input");
   inp.value=s.artist;
-  inp.style.cssText="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--tx2);background:none;border:none;border-bottom:1px solid var(--tx2);outline:none;width:100%;padding:1px 0;font-family:'Montserrat',sans-serif;";
+  inp.style.cssText="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--tx2);background:none;border:none;border-bottom:1px solid var(--tx2);outline:none;width:100%;padding:1px 0;font-family:'Golos Text',sans-serif;";
   paEl.innerHTML="";paEl.appendChild(inp);
   inp.focus();inp.select();
   function done(){
@@ -5674,7 +5719,7 @@ function rEditTab(s){
     +'<div class="fl">'+t('lyricsLabel')+'</div>'
     +'<textarea class="fi tall" oninput="editSong.lyrics=this.value">'+esc(s.lyrics||"")+'</textarea>'
     +'<button class="subbtn" onclick="saveEdit()">'+t('save').toUpperCase()+'</button>'
-    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;">'+(LANG==="en"?"Import from text":"Импорт из текста")+'</button>'
+    +'<button onclick="openImportModal()" style="width:100%;display:flex;align-items:center;justify-content:center;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:8px;">'+(LANG==="en"?"Import from text":"Импорт из текста")+'</button>'
     +'<button class="delbtn" onclick="delFromPanelRep()">'+t('deleteFromRep').toUpperCase()+'</button>';
 }
 function editStatus(st){
@@ -5768,7 +5813,7 @@ function rLandscapePlayer(s){
       +'<button id="lpInlinePlay" onclick="togglePlay()" style="width:24px;height:24px;border-radius:50%;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;">'+playSvg+'</button>'
       +'<div id="lpInlineProg" style="flex:1;height:4px;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;">'
       +'<div id="lpInlineFill" style="width:0%;height:100%;background:#fff;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;"></div></div>'
-      +'<span id="lpInlineTime" style="font-family:Inter,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>';
+      +'<span id="lpInlineTime" style="font-family:Golos Text,sans-serif;font-size:9px;color:#555;flex-shrink:0;">0:00</span>';
   }
   setTimeout(function(){
     // hook load button
@@ -5813,7 +5858,7 @@ function rPlayer(s){
   if(!s.trackName&&!s.trackUrl){
     var btn=document.createElement("button");
     btn.setAttribute('data-track-upload-btn', s.id);
-    btn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+    btn.style.cssText="display:flex;align-items:center;justify-content:center;width:100%;height:44px;border:none;border-radius:10px;background:var(--s1);color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
     btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>&nbsp;&nbsp;'+t("loadTrack").replace('♫  ','');
     btn.addEventListener("click",function(e){e.preventDefault();_trackTargetSongId=s.id;document.getElementById("trackFileInput").value="";document.getElementById("trackFileInput").click();});
     slot.appendChild(btn);
@@ -6178,11 +6223,11 @@ function showConfirm(msg,onOk){
   txt.textContent=msg;
   var btns=document.createElement("div");btns.style.cssText="display:flex;gap:10px;";
   var cancelBtn=document.createElement("button");
-  cancelBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(255,255,255,0.6);border-radius:8px;color:var(--tx2);font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  cancelBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(255,255,255,0.6);border-radius:8px;color:var(--tx2);font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   cancelBtn.textContent=LANG==="en"?"Cancel":"Отмена";
   cancelBtn.addEventListener("click",function(){ov.remove();});
   var okBtn=document.createElement("button");
-  okBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(224,82,82,0.6);border-radius:8px;color:#e05252;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
+  okBtn.style.cssText="flex:1;height:44px;background:transparent;border:1px solid rgba(224,82,82,0.6);border-radius:8px;color:#e05252;font-family:'Golos Text',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;";
   okBtn.textContent=LANG==="en"?"Delete":"Удалить";
   okBtn.addEventListener("click",function(){ov.remove();onOk();});
   btns.appendChild(cancelBtn);btns.appendChild(okBtn);
@@ -6385,7 +6430,7 @@ function perfRenderSongBody(s){
       var label=nameCounts[n]>1?n+' '+nameIdx[n]:n;
       var btn=document.createElement('button');
       btn.textContent=label;btn.dataset.secIdx=i;
-      btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:8px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Montserrat,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
+      btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;height:24px;border-radius:8px;margin-right:5px;background:transparent;border:1.5px solid #606070;cursor:pointer;font-size:11px;font-family:Golos Text,sans-serif;font-weight:500;color:#c0bcc0;white-space:nowrap;transition:all .2s;flex-shrink:0;';
       btn.addEventListener('click',function(){
         var idx=parseInt(btn.dataset.secIdx);
         var target=perfSecs[idx];
@@ -6626,7 +6671,7 @@ function openFormEditor(songId){
     '<div style="padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #202020;flex-shrink:0;">'
     +'<button id="formEditorBackBtn" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">'
     +'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-    +'<span style="font-size:12px;color:#b0aaa4;font-family:Inter,sans-serif;letter-spacing:1px;">'+(LANG==='en'?'BACK':'НАЗАД')+'</span></button>'
+    +'<span style="font-size:12px;color:#b0aaa4;font-family:Golos Text,sans-serif;letter-spacing:1px;">'+(LANG==='en'?'BACK':'НАЗАД')+'</span></button>'
     +'<div style="flex:1;text-align:center;font-size:12px;color:#f0ece4;font-family:\'Golos Text\',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(s.title||'')+'</div>'
     +'<div style="width:60px;flex-shrink:0;"></div>'
     +'</div>'
@@ -6686,7 +6731,7 @@ function renderMapCanvas(s, canvas){
     emptyBtn.textContent='+';
     (function(id){emptyBtn.addEventListener('click',function(){openMapSheet(id);});})(sid);
     var emptyLbl=document.createElement('span');
-    emptyLbl.style.cssText='color:var(--mu);font-family:Inter,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;';
+    emptyLbl.style.cssText='color:var(--mu);font-family:Golos Text,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;';
     emptyLbl.textContent=LANG==='en'?'Add first section':'Добавить первую секцию';
     empty.appendChild(emptyBtn);
     empty.appendChild(emptyLbl);
@@ -6883,17 +6928,17 @@ function renameMapSection(sid,gi){
   var box=document.createElement('div');
   box.style.cssText='background:#22222a;border-radius:8px;padding:20px;width:100%;max-width:320px;';
   var lbl=document.createElement('div');
-  lbl.style.cssText='font-size:11px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:Inter,sans-serif;';
+  lbl.style.cssText='font-size:11px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:Golos Text,sans-serif;';
   lbl.textContent=LANG==='en'?'Rename section':'Переименовать секцию';
   var inp=document.createElement('input');
   inp.style.cssText='width:100%;background:#111015;border:1px solid var(--tx2);border-radius:8px;color:#fff;padding:10px 12px;font-size:15px;font-family:Golos Text,sans-serif;outline:none;';
   inp.value=cur;
   var btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px;margin-top:12px;';
   var ok=document.createElement('button');
-  ok.style.cssText='flex:1;padding:10px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:Inter,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;';
+  ok.style.cssText='flex:1;padding:10px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;';
   ok.textContent=LANG==='en'?'Save':'Сохранить';
   var cancel=document.createElement('button');
-  cancel.style.cssText='padding:10px 14px;border:1px solid #3a3a46;border-radius:8px;background:transparent;color:#888;font-family:Inter,sans-serif;font-size:11px;cursor:pointer;';
+  cancel.style.cssText='padding:10px 14px;border:1px solid #3a3a46;border-radius:8px;background:transparent;color:#888;font-family:Golos Text,sans-serif;font-size:11px;cursor:pointer;';
   cancel.textContent=LANG==='en'?'Cancel':'Отмена';
   function doSave(){
     var val=inp.value.trim();
@@ -7389,9 +7434,9 @@ function openLyricsTextEditor(songId){
     '<div style="padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #202020;flex-shrink:0;">'
     +'<button id="lyricsEditBackBtn" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">'
     +'<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-    +'<span style="font-size:12px;color:#b0aaa4;font-family:Inter,sans-serif;letter-spacing:1px;">'+(LANG==='en'?'CANCEL':'ОТМЕНА')+'</span></button>'
+    +'<span style="font-size:12px;color:#b0aaa4;font-family:Golos Text,sans-serif;letter-spacing:1px;">'+(LANG==='en'?'CANCEL':'ОТМЕНА')+'</span></button>'
     +'<div style="flex:1;text-align:center;font-size:12px;color:#f0ece4;font-family:\'Golos Text\',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(s.title||'')+'</div>'
-    +'<button id="lyricsEditSaveBtn" style="background:none;border:none;cursor:pointer;color:var(--tx2);font-family:Inter,sans-serif;font-size:12px;letter-spacing:1px;flex-shrink:0;">'+(LANG==='en'?'SAVE':'СОХРАНИТЬ')+'</button>'
+    +'<button id="lyricsEditSaveBtn" style="background:none;border:none;cursor:pointer;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:12px;letter-spacing:1px;flex-shrink:0;">'+(LANG==='en'?'SAVE':'СОХРАНИТЬ')+'</button>'
     +'</div>'
     +'<textarea id="lyricsEditTa" style="flex:1;min-height:0;background:var(--bg);border:none;color:#d0ccc4;padding:16px 20px;font-size:14px;font-family:\'Courier New\',monospace;line-height:1.8;outline:none;resize:none;"></textarea>';
   document.body.appendChild(ov);
@@ -7422,7 +7467,7 @@ function openImportModal(explicitSongId){
   hdr.appendChild(ttl);hdr.appendChild(cls);ov.appendChild(hdr);
 
   var hint=document.createElement('div');
-  hint.style.cssText='font-family:Inter,sans-serif;font-size:11px;color:#555;letter-spacing:1px;margin-bottom:10px;line-height:1.6;';
+  hint.style.cssText='font-family:Golos Text,sans-serif;font-size:11px;color:#555;letter-spacing:1px;margin-bottom:10px;line-height:1.6;';
   hint.textContent=LANG==='en'?'Paste song text with chords':'Вставь текст песни с аккордами';
   hint.style.color='var(--tx2)';
   ov.appendChild(hint);
@@ -7433,7 +7478,7 @@ function openImportModal(explicitSongId){
   ov.appendChild(ta);
 
   var okBtn=document.createElement('button');
-  okBtn.style.cssText='width:100%;margin-top:12px;padding:12px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:Inter,sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
+  okBtn.style.cssText='width:100%;margin-top:12px;padding:12px;border:1px solid var(--tx2);border-radius:8px;background:transparent;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;';
   okBtn.textContent=LANG==='en'?'PARSE & IMPORT':'РАСПОЗНАТЬ И ИМПОРТИРОВАТЬ';
   okBtn.onclick=function(){
     var raw=ta.value.trim();
@@ -7497,7 +7542,7 @@ function openImportModal(explicitSongId){
     rSongModal();
     setTimeout(function(){
       var info=document.createElement('div');
-      info.style.cssText='background:rgba(0,180,166,0.15);border:1px solid #00B4A6;border-radius:8px;padding:8px 12px;font-family:Inter,sans-serif;font-size:11px;color:#00B4A6;letter-spacing:1px;margin-bottom:10px;';
+      info.style.cssText='background:rgba(0,180,166,0.15);border:1px solid #00B4A6;border-radius:8px;padding:8px 12px;font-family:Golos Text,sans-serif;font-size:11px;color:#00B4A6;letter-spacing:1px;margin-bottom:10px;';
       var titleInfo=parsed.title?(' · '+parsed.title):'';
       info.textContent=(LANG==='en'?'Imported: ':'Импортировано: ')+parsed.form.length+(LANG==='en'?' sections':'  секций')+titleInfo;
       var mi=document.getElementById('mSongI');
@@ -7508,7 +7553,7 @@ function openImportModal(explicitSongId){
   ov.appendChild(okBtn);
 
   var cancelBtn=document.createElement('button');
-  cancelBtn.style.cssText='width:100%;margin-top:8px;padding:10px;border:none;background:none;color:#444;font-family:Inter,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;';
+  cancelBtn.style.cssText='width:100%;margin-top:8px;padding:10px;border:none;background:none;color:#444;font-family:Golos Text,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;';
   cancelBtn.textContent=LANG==='en'?'CANCEL':'ОТМЕНА';
   cancelBtn.onclick=function(){ov.remove();};
   ov.appendChild(cancelBtn);
@@ -7618,7 +7663,7 @@ window.addEventListener("popstate", function(e){
       <div id="perfProgBar" onclick="seekAudio(event)" style="flex:1;height:4px;background:#2a2a2a;border-radius:8px;cursor:pointer;position:relative;">
         <div id="perfProgFill" style="width:0%;height:100%;background:#fff;border-radius:8px;position:absolute;left:0;top:0;pointer-events:none;"></div>
       </div>
-      <span id="perfTimeCur" style="font-family:Inter,sans-serif;font-size:9px;color:#888;flex-shrink:0;">0:00</span>
+      <span id="perfTimeCur" style="font-family:Golos Text,sans-serif;font-size:9px;color:#888;flex-shrink:0;">0:00</span>
     </div>
     <div class="perf-fbtn-row">
       <span class="perf-font-lbl">A</span>
@@ -7685,11 +7730,11 @@ if('serviceWorker' in navigator){
   <div style="padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #202020;flex-shrink:0;background:#111015;">
     <div style="display:flex;align-items:center;gap:8px;">
       <div style="width:8px;height:8px;border-radius:50%;background:#c0392b;box-shadow:0 0 8px #c0392b;"></div>
-      <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;color:#c0392b;">LIVE</span>
+      <span style="font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;color:#c0392b;">LIVE</span>
     </div>
     <div id="liveConTitle" style="font-size:13px;color:#fff;font-family:'Golos Text',sans-serif;font-weight:500;letter-spacing:0.5px;"></div>
     <div style="display:flex;align-items:center;gap:10px;">
-      <button id="liveDeviceRoleBadge" onclick="openDeviceRoleSheet()" style="background:none;border:1px solid #2a2a32;border-radius:6px;padding:4px 8px;cursor:pointer;font-family:'Inter',sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#666;"></button>
+      <button id="liveDeviceRoleBadge" onclick="openDeviceRoleSheet()" style="background:none;border:1px solid #2a2a32;border-radius:6px;padding:4px 8px;cursor:pointer;font-family:'Golos Text',sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#666;"></button>
       <button onclick="toggleLiveMode()" id="liveExitBtn" style="background:transparent;border:none;color:var(--mu);font-size:14px;font-weight:400;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;line-height:1;">✕</button>
     </div>
   </div>
@@ -7733,16 +7778,16 @@ if('serviceWorker' in navigator){
       });
     })();
     </script>
-    <div style="display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-size:11px;color:var(--tx2);margin-top:7px;margin-bottom:0;">
+    <div style="display:flex;justify-content:space-between;font-family:'Golos Text',sans-serif;font-size:11px;color:var(--tx2);margin-top:7px;margin-bottom:0;">
       <span id="livePlayerTimeElapsed">0:00</span>
       <span id="livePlayerTimeLeft">-0:00</span>
     </div>
-    <div id="liveDebugLine" style="font-family:'Inter',sans-serif;font-size:10px;color:#c0392b;margin:0;word-break:break-all;"></div>
+    <div id="liveDebugLine" style="font-family:'Golos Text',sans-serif;font-size:10px;color:#c0392b;margin:0;word-break:break-all;"></div>
     <div style="display:flex;align-items:center;gap:10px;margin-top:7px;">
       <div style="flex:1;display:flex;justify-content:flex-start;">
         <button id="liveMyMixBtn" onclick="openLiveMyMixSheet()" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mu2);cursor:pointer;margin-top:6px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="3"/><circle cx="4" cy="14" r="1.8" fill="currentColor" stroke="none"/><circle cx="12" cy="8" r="1.8" fill="currentColor" stroke="none"/><circle cx="20" cy="16" r="1.8" fill="currentColor" stroke="none"/></svg>
-          <span style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;">My Mix</span>
+          <span style="font-family:'Golos Text',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;">My Mix</span>
         </button>
       </div>
       <div style="display:flex;align-items:center;gap:18px;flex-shrink:0;">
@@ -7786,11 +7831,11 @@ if('serviceWorker' in navigator){
   <div style="padding:14px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #202020;flex-shrink:0;">
     <button onclick="closeEditSheet()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span style="font-size:12px;color:#b0aaa4;font-family:'Inter',sans-serif;letter-spacing:1px;" id="editSheetBackBtn">НАЗАД</span>
+      <span style="font-size:12px;color:#b0aaa4;font-family:'Golos Text',sans-serif;letter-spacing:1px;" id="editSheetBackBtn">НАЗАД</span>
     </button>
     <div style="text-align:center;flex:1;min-width:0;overflow:hidden;">
       <div id="editSheetTitle" style="font-size:12px;color:#f0ece4;font-family:'Golos Text',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-      <div id="editSheetSubtitle" style="font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;margin-top:3px;">Редактировать</div>
+      <div id="editSheetSubtitle" style="font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'Golos Text',sans-serif;margin-top:3px;">Редактировать</div>
     </div>
     <div style="width:60px;flex-shrink:0;"></div>
   </div>
@@ -7801,15 +7846,15 @@ if('serviceWorker' in navigator){
 <div id="deviceRoleOverlay" onclick="closeDeviceRoleSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:230;"></div>
 <div id="deviceRoleSheet" style="display:none;position:fixed;left:0;right:0;bottom:0;background:rgba(28,29,31,0.92);backdrop-filter:saturate(180%) blur(40px);-webkit-backdrop-filter:saturate(180%) blur(40px);border-top:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:20px 20px calc(34px + env(safe-area-inset-bottom,0px));z-index:231;box-shadow:0 -8px 30px rgba(0,0,0,.4);">
   <div style="width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 20px;"></div>
-  <div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;text-align:center;margin-bottom:20px;" id="deviceRoleSheetTitle">РОЛЬ УСТРОЙСТВА</div>
+  <div style="font-family:'Golos Text',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;text-align:center;margin-bottom:20px;" id="deviceRoleSheetTitle">РОЛЬ УСТРОЙСТВА</div>
   <div style="display:flex;flex-direction:column;gap:18px;">
     <button onclick="setDeviceRole('master')" id="drBtnMaster" style="width:100%;padding:22px 16px;background:var(--s1);border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
       <span id="drLblMaster">Мастер</span>
-      <span style="font-family:'Inter',sans-serif;font-size:10px;color:#aaa;letter-spacing:1px;" id="drSubMaster">ЗВУК В КОЛОНКИ</span>
+      <span style="font-family:'Golos Text',sans-serif;font-size:10px;color:#aaa;letter-spacing:1px;" id="drSubMaster">ЗВУК В КОЛОНКИ</span>
     </button>
     <button onclick="setDeviceRole('view')" id="drBtnView" style="width:100%;padding:22px 16px;background:var(--s1);border:1px solid #2a2a2a;border-radius:12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
       <span id="drLblView">Участник</span>
-      <span style="font-family:'Inter',sans-serif;font-size:10px;color:#aaa;letter-spacing:1px;" id="drSubView">ТЕКСТ И АККОРДЫ</span>
+      <span style="font-family:'Golos Text',sans-serif;font-size:10px;color:#aaa;letter-spacing:1px;" id="drSubView">ТЕКСТ И АККОРДЫ</span>
     </button>
   </div>
 </div>
@@ -7819,20 +7864,20 @@ if('serviceWorker' in navigator){
   <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px;">
     <button onclick="closeLiveFullTab()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;flex-shrink:0;">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="11,3 5,9 11,15" stroke="#b0aaa4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span style="font-size:12px;color:#b0aaa4;font-family:'Inter',sans-serif;letter-spacing:1px;" id="lftBackBtn">НАЗАД</span>
+      <span style="font-size:12px;color:#b0aaa4;font-family:'Golos Text',sans-serif;letter-spacing:1px;" id="lftBackBtn">НАЗАД</span>
       <div id="lftSyncDot" style="width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;transition:background .3s;box-shadow:0 0 4px rgba(76,175,125,0.5);" title="Офлайн"></div>
     </button>
     <div style="text-align:center;flex:1;min-width:0;overflow:hidden;">
       <div id="lftTitle" style="font-size:12px;color:#f0ece4;font-family:'Golos Text',sans-serif;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-      <div id="lftTabLabel" style="font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'Inter',sans-serif;margin-top:3px;"></div>
+      <div id="lftTabLabel" style="font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;font-family:'Golos Text',sans-serif;margin-top:3px;"></div>
     </div>
     <div style="display:flex;gap:6px;flex-shrink:0;">
       <div style="background:transparent;padding:4px 8px;text-align:center;">
-        <div style="font-size:8px;color:#888;font-family:'Inter',sans-serif;font-weight:600;">KEY</div>
+        <div style="font-size:8px;color:#888;font-family:'Golos Text',sans-serif;font-weight:600;">KEY</div>
         <div id="lftKey" style="font-size:13px;font-weight:700;color:#fff;"></div>
       </div>
       <div style="background:transparent;padding:4px 8px;text-align:center;">
-        <div style="font-size:8px;color:#888;font-family:'Inter',sans-serif;font-weight:600;">BPM</div>
+        <div style="font-size:8px;color:#888;font-family:'Golos Text',sans-serif;font-weight:600;">BPM</div>
         <div id="lftBpm" style="font-size:13px;font-weight:700;color:#fff;"></div>
       </div>
     </div>
@@ -7861,7 +7906,7 @@ if('serviceWorker' in navigator){
 .lc.active{border-left:2px solid #fff;background:rgba(255,255,255,0.04);}
 .lc-row{display:flex;align-items:center;gap:10px;padding-left:62px;min-height:52px;}
 .lc-num{width:52px;height:52px;border-radius:8px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:absolute;left:12px;top:50%;transform:translateY(-50%);}
-.lc-num-badge{position:absolute;top:-4px;left:-4px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:'Inter',sans-serif;}
+.lc-num-badge{position:absolute;top:-4px;left:-4px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--mu);font-family:'Golos Text',sans-serif;}
 .lc-info{flex:1;min-width:0;}
 .lc-title{font-family:'Golos Text',sans-serif;font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;letter-spacing:-.2px;}
 .lc-load-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#555;margin-left:2px;vertical-align:middle;transition:background .25s;}
@@ -7869,9 +7914,9 @@ if('serviceWorker' in navigator){
 .lc-artist{font-size:13px;color:#8a8a8a;margin-top:3px;font-family:'Golos Text',sans-serif;}
 .lc-meta{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
 .lc-key-simple{font-family:'Golos Text',sans-serif;font-size:14px;font-weight:700;color:var(--tx2);}
-.lc-tempo-simple{font-family:'Inter',sans-serif;font-size:10px;font-weight:500;color:var(--tx2);margin-top:2px;}
+.lc-tempo-simple{font-family:'Golos Text',sans-serif;font-size:10px;font-weight:500;color:var(--tx2);margin-top:2px;}
 .lc-box{background:transparent;padding:5px 10px;text-align:center;}
-.lc-box-lbl{font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;}
+.lc-box-lbl{font-size:9px;color:var(--mu);letter-spacing:1px;text-transform:uppercase;font-family:'Golos Text',sans-serif;font-weight:600;}
 .lc-box-val{font-size:16px;font-weight:700;color:#fff;line-height:1.1;}
 .lc-divider{display:none;}
 .lc-mix{background:transparent;margin-top:10px;}
@@ -7888,7 +7933,7 @@ if('serviceWorker' in navigator){
 .lc-beat.active1{background:#c0392b;color:#fff;}
 .lc-beat.active{background:#f0ece4;color:#111015;}
 .lc-tabs{display:flex;gap:5px;}
-.lc-tab{flex:1;padding:7px 2px;background:transparent;border:1.5px solid var(--br);border-radius:8px;color:#fff;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:400;cursor:pointer;}
+.lc-tab{flex:1;padding:7px 2px;background:transparent;border:1.5px solid var(--br);border-radius:8px;color:#fff;font-size:9px;letter-spacing:1.8px;text-transform:uppercase;font-family:'Golos Text',sans-serif;font-weight:400;cursor:pointer;}
 .lc-player{display:none;}
 .lc-mix{display:none;}
 .lp-prog-bar{position:relative;height:3px;background:#4a4a52;border-radius:8px;margin-bottom:10px;cursor:pointer;}
@@ -7905,8 +7950,8 @@ if('serviceWorker' in navigator){
 .lc-prog{flex:1;height:3px;background:var(--br);border-radius:8px;cursor:pointer;position:relative;}
 .lc-prog-fill{position:absolute;left:0;top:0;height:100%;background:#fff;border-radius:8px;}
 .lc-prog-dot{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#fff;}
-.lc-time{font-size:10px;color:#555;font-family:'Inter',sans-serif;flex-shrink:0;min-width:32px;text-align:right;}
-.lc-notrack{font-size:10px;color:#555;font-family:'Inter',sans-serif;letter-spacing:1px;padding:6px 0;}
+.lc-time{font-size:10px;color:#555;font-family:'Golos Text',sans-serif;flex-shrink:0;min-width:32px;text-align:right;}
+.lc-notrack{font-size:10px;color:#555;font-family:'Golos Text',sans-serif;letter-spacing:1px;padding:6px 0;}
 .empty-state{font-family:'Golos Text',sans-serif;font-size:16px;color:#555;padding:20px 0;text-align:center;letter-spacing:0.5px;}
 /* Live Sync: участники (не лидер) не управляют воспроизведением сами —
    трек реально звучит только на устройстве лидера. Прогресс/время у
@@ -8574,7 +8619,7 @@ function rEditSheet(){
   c.innerHTML=
     '<div style="display:flex;align-items:center;gap:8px;">'
     +'<div class="fl" style="margin-top:0;flex:1;">'+t('title')+'</div>'
-    +'<span id="editSheetSavedTick" style="opacity:0;transition:opacity .2s;display:flex;align-items:center;gap:4px;font-family:Inter,sans-serif;font-size:10px;color:#2dd4bf;letter-spacing:0.5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+(LANG==='en'?'Saved':'Сохранено')+'</span>'
+    +'<span id="editSheetSavedTick" style="opacity:0;transition:opacity .2s;display:flex;align-items:center;gap:4px;font-family:Golos Text,sans-serif;font-size:10px;color:#2dd4bf;letter-spacing:0.5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+(LANG==='en'?'Saved':'Сохранено')+'</span>'
     +'</div>'
     +'<input class="fi" id="editSheetTitleInput" value="'+esc(s.title||'')+'" oninput="editSheetUpdateField(\'title\',this.value)" onchange="editSheetUpdateField(\'title\',this.value)" placeholder="'+t('phTitle')+'">'
     +'<div class="fl">'+t('artist')+'</div>'
@@ -8583,7 +8628,7 @@ function rEditSheet(){
     +'<button class="cbtn" onclick="shiftKey(-1);rEditSheet();">−</button><div class="cv">'+esc(s.key)+'</div><button class="cbtn" onclick="shiftKey(+1);rEditSheet();">+</button>'
     +'</div></div>'
     +'<div class="cb" style="margin-top:10px;"><div class="cl">'+t('tempo')+'</div><div class="cr">'
-    +'<button class="cbtn" onclick="shiftTempo(-2);rEditSheet();">−</button><div class="cv">'+s.tempo+'</div><button class="cbtn" onclick="shiftTempo(+2);rEditSheet();">+</button>'
+    +'<button class="cbtn" onpointerdown="tempoHold(event,-1,1)">−</button><div class="cv">'+s.tempo+'</div><button class="cbtn" onpointerdown="tempoHold(event,1,1)">+</button>'
     +'</div></div>'
     +'<div class="cb" style="margin-top:10px;flex-direction:column;align-items:center;gap:8px;"><div class="cl">'+(LANG==='en'?'Rating':'Оценка')+'</div>'
     +'<div style="display:flex;justify-content:center;width:100%;gap:6px;">'+[1,2,3,4,5].map(function(n){
@@ -8606,15 +8651,15 @@ function rEditSheet(){
         +'<button onclick="triggerTrackUpload('+s.id+')" title="'+(LANG==='en'?'Replace':'Заменить')+'" style="background:none;border:none;color:var(--mu);cursor:pointer;padding:4px;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>'
         +'<button onclick="removeTrack('+s.id+');setTimeout(rEditSheet,50);" title="'+(LANG==='en'?'Delete':'Удалить')+'" style="background:none;border:none;color:#c0392b;cursor:pointer;padding:4px;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>'
         +'</div>'
-      : '<button onclick="triggerTrackUpload('+s.id+')" style="width:100%;margin-top:14px;height:44px;background:var(--s2);border:none;border-radius:10px;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'+(LANG==='en'?'Load audio':'Загрузить аудио')+'</button>')
+      : '<button onclick="triggerTrackUpload('+s.id+')" style="width:100%;margin-top:14px;height:44px;background:var(--s2);border:none;border-radius:10px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'+(LANG==='en'?'Load audio':'Загрузить аудио')+'</button>')
     +'<div style="display:flex;gap:8px;margin-top:14px;">'
-    +'<button onclick="tapTempo();rEditSheet();" style="flex:1;height:44px;background:var(--s2);border:none;border-radius:8px;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">TAP</button>'
-    +'<button id="editSheetMetrBtn" onclick="toggleMetronome();rEditSheet();" style="flex:1;height:44px;background:var(--s2);border:none;border-radius:8px;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Click':'Клик')+'</button>'
+    +'<button onclick="tapTempo();rEditSheet();" style="flex:1;height:44px;background:var(--s2);border:none;border-radius:8px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">TAP</button>'
+    +'<button id="editSheetMetrBtn" onclick="toggleMetronome();rEditSheet();" style="flex:1;height:44px;background:var(--s2);border:none;border-radius:8px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Click':'Клик')+'</button>'
     +'</div>'
-    +'<button onclick="closeEditSheet();openImportModal('+s.id+');" style="width:100%;margin-top:16px;height:44px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Import from text':'Импорт из текста')+'</button>'
-    +((s.trackData||s.trackUrl)?'<button onclick="closeEditSheet();enterLyricsTapMode();" style="width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Tap sections':'Разметить')+'</button>':'')
-    +'<button onclick="closeEditSheet();openLyricsTextEditor('+s.id+');" style="width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:Inter,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Edit lyrics text':'Редактировать текст')+'</button>'
-    +'<button onclick="delFromPanelRep()" style="width:100%;margin-top:18px;height:40px;background:none;border:none;color:#c0392b;font-family:Inter,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Delete from repertoire':'Удалить из репертуара')+'</button>';
+    +'<button onclick="closeEditSheet();openImportModal('+s.id+');" style="width:100%;margin-top:16px;height:44px;background:var(--s1);border:none;border-radius:10px;color:var(--tx2);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Import from text':'Импорт из текста')+'</button>'
+    +((s.trackData||s.trackUrl)?'<button onclick="closeEditSheet();enterLyricsTapMode();" style="width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Tap sections':'Разметить')+'</button>':'')
+    +'<button onclick="closeEditSheet();openLyricsTextEditor('+s.id+');" style="width:100%;margin-top:8px;height:44px;background:transparent;border:1px solid var(--br);border-radius:8px;color:var(--mu);font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Edit lyrics text':'Редактировать текст')+'</button>'
+    +'<button onclick="delFromPanelRep()" style="width:100%;margin-top:18px;height:40px;background:none;border:none;color:#c0392b;font-family:Golos Text,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">'+(LANG==='en'?'Delete from repertoire':'Удалить из репертуара')+'</button>';
 }
 var _editSheetTickTimer=null;
 var _editSheetSaveDebounce=null;
@@ -9292,7 +9337,7 @@ function _renderLiveCards(songs, containerId){
       var pb2=document.createElement('button');pb2.className='lc-play';pb2.innerHTML=svgPlay;pb2.style.opacity='0.3';pb2.disabled=true;
       var pg2=document.createElement('div');pg2.className='lc-prog';
       var pf2=document.createElement('div');pf2.className='lc-prog-fill';pf2.style.width='0%';pg2.appendChild(pf2);
-      var noTrk=document.createElement('div');noTrk.style.cssText='font-size:10px;color:#555;font-family:Inter,sans-serif;flex-shrink:0;';
+      var noTrk=document.createElement('div');noTrk.style.cssText='font-size:10px;color:#555;font-family:Golos Text,sans-serif;flex-shrink:0;';
       noTrk.textContent=LANG==='en'?'no track':'нет трека';
       pw2.appendChild(pb2);pw2.appendChild(pg2);pw2.appendChild(noTrk);
       card.appendChild(pw2);
@@ -9316,7 +9361,7 @@ function _renderLiveCards(songs, containerId){
     var mixHdr=document.createElement('button');mixHdr.className='lc-mix-hdr';mixHdr.id='lcMixHdr_'+uniqueKey;
     mixHdr.innerHTML='<div style="display:flex;align-items:center;gap:8px;">'
       +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--tx2)" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>'
-      +'<span style="font-size:10px;color:var(--tx2);font-family:\'Inter\',sans-serif;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">'+(LANG==='en'?'My Mix':'Мой микс')+'</span>'
+      +'<span style="font-size:10px;color:var(--tx2);font-family:\'Golos Text\',sans-serif;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">'+(LANG==='en'?'My Mix':'Мой микс')+'</span>'
       +'<span id="mixDot_'+s.id+'" style="display:none;width:6px;height:6px;border-radius:50%;background:#c0392b;box-shadow:0 0 6px #c0392b;"></span>'
       +'</div>'
       +'<svg id="mixArrow_'+s.id+'" width="16" height="16" viewBox="0 0 12 12" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" style="transition:transform .2s;"><polyline points="2,4 6,8 10,4"/></svg>';
@@ -9459,8 +9504,11 @@ function openLiveFullTab(s,tabId,uniqueKey){
   document.getElementById('lftTabLabel').textContent=labels[tabId]||tabId;
   var aaBtn=document.getElementById('lpFontScrollBtn');
   if(aaBtn){
+    // Аа + AUTO SCROLL нужны только на Тексте: Форма теперь помещается на экран целиком,
+    // Заметки короткие. На других вкладках кнопку не показываем вовсе (место сохраняем).
     var isLyrics=(tabId==='lyrics');
-    aaBtn.style.opacity=isLyrics?'1':'0.3';
+    aaBtn.style.opacity='1';
+    aaBtn.style.visibility=isLyrics?'visible':'hidden';
     aaBtn.style.pointerEvents=isLyrics?'auto':'none';
     var pop2=document.getElementById('lftFontScrollPopover');
     if(pop2&&!isLyrics) pop2.style.display='none';
@@ -9474,7 +9522,7 @@ function openLiveFullTab(s,tabId,uniqueKey){
   var fontLblEl=document.getElementById('lftFontLbl');
   var fontMinusEl=document.getElementById('lftFontMinusBtn');
   var fontPlusEl=document.getElementById('lftFontPlusBtn');
-  var showScrollControls=''; // раньше пряталось на Форме/Заметках — теперь видно всегда, на любой вкладке
+  var showScrollControls=''; // сами кнопки внутри поповера Аа; поповер доступен только на вкладке Текст
   if(scrollBtnEl) scrollBtnEl.style.display=showScrollControls;
   if(speedMinusEl) speedMinusEl.style.display=showScrollControls;
   if(speedPlusEl) speedPlusEl.style.display=showScrollControls;
@@ -9985,22 +10033,22 @@ function undoLast(){
 <div id="chordImportOverlay" style="display:none;position:fixed;inset:0;background:#111015;z-index:500;flex-direction:column;">
   <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #202020;flex-shrink:0;background:#111116;">
     <button onclick="closeChordImportBrowser()" style="background:none;border:none;color:#aaa;font-size:13px;cursor:pointer;padding:0 8px 0 0;flex-shrink:0;">✕</button>
-    <input id="chordImportUrl" type="url" style="flex:1;background:#202020;border:1px solid #2a2a32;border-radius:8px;padding:8px 12px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;outline:none;" placeholder="https://tabs.ultimate-guitar.com/...">
-    <button onclick="chordImportGo()" style="background:#fff;border:none;border-radius:8px;padding:8px 14px;color:#000;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;">GO</button>
+    <input id="chordImportUrl" type="url" style="flex:1;background:#202020;border:1px solid #2a2a32;border-radius:8px;padding:8px 12px;color:#fff;font-family:'Golos Text',sans-serif;font-size:13px;outline:none;" placeholder="https://tabs.ultimate-guitar.com/...">
+    <button onclick="chordImportGo()" style="background:#fff;border:none;border-radius:8px;padding:8px 14px;color:#000;font-family:'Golos Text',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;">GO</button>
   </div>
   <!-- Быстрые ссылки -->
   <div style="display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #202020;flex-shrink:0;overflow-x:auto;">
-    <button onclick="chordImportNavigate('https://tabs.ultimate-guitar.com')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;">Ultimate Guitar</button>
-    <button onclick="chordImportNavigate('https://www.e-chords.com')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;">E-Chords</button>
-    <button onclick="chordImportNavigate('https://www.chordie.com')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;">Chordie</button>
-    <button onclick="chordImportNavigate('https://amdm.ru')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;">AMDM.ru</button>
-    <button onclick="chordImportNavigate('https://mychords.net')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;">MyChords</button>
+    <button onclick="chordImportNavigate('https://tabs.ultimate-guitar.com')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Golos Text',sans-serif;font-size:11px;cursor:pointer;">Ultimate Guitar</button>
+    <button onclick="chordImportNavigate('https://www.e-chords.com')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Golos Text',sans-serif;font-size:11px;cursor:pointer;">E-Chords</button>
+    <button onclick="chordImportNavigate('https://www.chordie.com')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Golos Text',sans-serif;font-size:11px;cursor:pointer;">Chordie</button>
+    <button onclick="chordImportNavigate('https://amdm.ru')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Golos Text',sans-serif;font-size:11px;cursor:pointer;">AMDM.ru</button>
+    <button onclick="chordImportNavigate('https://mychords.net')" style="flex-shrink:0;padding:6px 12px;background:#202020;border:1px solid #2a2a32;border-radius:16px;color:#aaa;font-family:'Golos Text',sans-serif;font-size:11px;cursor:pointer;">MyChords</button>
   </div>
   <!-- iframe -->
   <iframe id="chordImportFrame" style="flex:1;border:none;background:#fff;" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
   <!-- Кнопка парсинга -->
   <div style="padding:12px 14px;border-top:1px solid #202020;background:#111116;flex-shrink:0;">
-    <div id="chordImportHint" style="font-size:11px;color:#555;font-family:'Inter',sans-serif;margin-bottom:8px;text-align:center;">Найдите песню и нажмите «Импортировать аккорды»</div>
+    <div id="chordImportHint" style="font-size:11px;color:#555;font-family:'Golos Text',sans-serif;margin-bottom:8px;text-align:center;">Найдите песню и нажмите «Импортировать аккорды»</div>
     <button onclick="chordImportParse()" style="width:100%;padding:14px;background:#fff;border:none;border-radius:12px;color:#000;font-family:'Golos Text',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Импортировать аккорды</button>
   </div>
 </div>
