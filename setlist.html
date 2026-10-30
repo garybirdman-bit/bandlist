@@ -2344,7 +2344,7 @@ function attachGroupListeners(){
   if(!db||!currentGroupId||_groupListenersAttached)return;
   _groupListenersAttached=true;
   // Следим, не начал ли кто-то Live мастером — тогда это устройство само войдёт в Live
-  try{db.ref("groups/"+currentGroupId+"/liveMaster").on("value",function(sn){_onLiveMasterChange(sn.val());});}catch(e){}
+  try{db.ref("groups/"+currentGroupId+"/liveMaster").on("value",function(sn){window._lastLiveMaster=sn.val();_onLiveMasterChange(window._lastLiveMaster);});}catch(e){}
   var _wasConnectedOnce=false;
   db.ref(".info/connected").on("value",function(snap){
     var dot=document.getElementById("syncDot");
@@ -8166,15 +8166,18 @@ function _releaseLiveMaster(){
 }
 // Мастер начал/закончил Live на другом устройстве → ведомые входят/выходят сами,
 // без единого нажатия (если на устройстве включена «СИНХР.»)
+var _declinedMasterTs=null; // мастер-сессия, из которой этот человек вышел сам — в неё не затягиваем снова
+function _isOtherMaster(v){return !!(v&&v.dev&&v.dev!==DEVICE_ID&&(!v.ts||Math.abs(Date.now()-v.ts)<12*3600*1000));}
 function _onLiveMasterChange(v){
-  var other=!!(v&&v.dev&&v.dev!==DEVICE_ID&&(!v.ts||Math.abs(Date.now()-v.ts)<12*3600*1000));
+  var other=_isOtherMaster(v);
   if(other){
     if(liveActive&&liveDeviceRole==='master'){ // мастером стало другое устройство — уступаем
       liveDeviceRole='view';updateDeviceRoleBadge();updateLiveSyncFollowerUI();
       try{db.ref('groups/'+currentGroupId+'/liveMaster').onDisconnect().cancel();}catch(e){}
       return;
     }
-    if(!liveActive&&typeof followMaster!=='undefined'&&followMaster&&currentGroupId){
+    if(!liveActive&&typeof followMaster!=='undefined'&&followMaster&&currentGroupId&&v.ts!==_declinedMasterTs){
+      try{console.info('[Live] мастер на другом устройстве — входим в Live',v.dev);}catch(e){}
       liveDeviceRole='view';
       window._autoLiveJoin=true;
       try{toggleLiveMode();}finally{window._autoLiveJoin=false;}
@@ -8182,11 +8185,23 @@ function _onLiveMasterChange(v){
     }
   } else if(liveActive&&_liveAutoJoined&&liveDeviceRole!=='master'&&followMaster){
     // Мастер вышел из Live — выходим и мы
+    try{console.info('[Live] мастер вышел — выходим из Live');}catch(e){}
     var lft=document.getElementById('liveFullTab');
     if(lft&&lft.classList.contains('open'))closeLiveFullTab();
-    toggleLiveMode();
+    window._autoLiveExit=true;
+    try{toggleLiveMode();}finally{window._autoLiveExit=false;}
   }
 }
+// Страховка: если событие из базы потерялось (вкладка спала, сеть мигнула) —
+// раз в 3 секунды и при возвращении на вкладку сверяемся с последним известным мастером
+function _reconcileLiveMaster(reRead){
+  if(!db||!currentGroupId||liveActive||!followMaster)return;
+  if(reRead){
+    db.ref('groups/'+currentGroupId+'/liveMaster').once('value').then(function(sn){window._lastLiveMaster=sn.val();_onLiveMasterChange(window._lastLiveMaster);}).catch(function(){});
+  } else if(_isOtherMaster(window._lastLiveMaster)) _onLiveMasterChange(window._lastLiveMaster);
+}
+setInterval(function(){if(!document.hidden)_reconcileLiveMaster(false);},3000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)_reconcileLiveMaster(true);});
 
 function openDeviceRoleSheet(){
   updateDeviceRoleSheetLang();
@@ -8488,6 +8503,7 @@ function toggleFollowMaster(){
   followMaster=!followMaster;
   try{localStorage.setItem('bandlist_followMaster',followMaster?'1':'0');}catch(e){}
   renderFollowSyncBtns();
+  if(!followMaster)_lftStopUniform();
   if(typeof showToast==='function')showToast(followMaster?(LANG==='en'?'Following master':'Синхронизация с мастером включена'):(LANG==='en'?'Sync off — browse freely':'Синхронизация выключена — смотри сам'));
   // Включили обратно — сразу догоняем, что сейчас у мастера
   if(followMaster&&LiveSync.state){_lftApplyRemoteView(LiveSync.state,'__force');_lftApplyRemoteScroll(LiveSync.state);}
@@ -8500,7 +8516,7 @@ setTimeout(renderFollowSyncBtns,0);
    Ведомое устройство открывает тот же экран той же песни и плавно повторяет прокрутку.
    Если у песни есть таймкоды и трек идёт — ведомое скроллит само по общему времени
    (точнее и без сетевых задержек), а scrollFrac игнорирует. Звук на ведомом не играет. */
-var _lftMirrorAttached=false,_lftScrollPushT=null,_lftScrollTarget=null,_lftScrollRaf=null,_lftLastPushedFrac=-1;
+var _lftMirrorAttached=false,_lftScrollPushT=null,_lftScrollTarget=null,_lftScrollRaf=null,_lftLastPushedFrac=-1,_lftRS=null;
 function _lftHasTimecodes(){
   var c=document.getElementById('lftContent');
   return !!(c&&c.querySelector('.perf-section[data-time]'));
@@ -8519,8 +8535,8 @@ function _lftAttachScrollMirror(){
       var f=max>0?Math.round(c.scrollTop/max*1000)/1000:0;
       if(Math.abs(f-_lftLastPushedFrac)<0.002)return;
       _lftLastPushedFrac=f;
-      pushLiveSync({scrollFrac:f});
-    },300);
+      pushLiveSync({scrollFrac:f,scrollAnchor:_lftCurrentAnchor(c)});
+    },(lftScrollOn&&window._lftMode==='uni')?1000:300); // при равномерной прокрутке ведомые едут сами — сверка раз в секунду
   },{passive:true});
 }
 function _lftApplyRemoteView(v,prevViewJson){
@@ -8542,6 +8558,84 @@ function _lftApplyRemoteView(v,prevViewJson){
     setTimeout(function(){window._lftApplyingRemote=false;},200);
   }
 }
+window._lftMode='off';window._lftModeDur=0;
+function _lftSetMode(m,dur){
+  if(dur)window._lftModeDur=dur;
+  if(window._lftMode===m)return;
+  window._lftMode=m;
+  if(liveDeviceRole==='master'&&!perfSoloMode)pushLiveSync({});
+}
+// Ведомое: собственная плавная прокрутка для песен без разметки
+var _lftUni={active:false,raf:null,posF:0,last:0,rate:0,tgt:null,tgtAt:0};
+function _lftFollowUniform(v){
+  var lft=document.getElementById('liveFullTab'),c=document.getElementById('lftContent');
+  var ok=!!(v&&v.scrollAuto&&v.scrollAuto.on&&lft&&lft.classList.contains('open')&&c
+    &&(!v.view||String(lftCurrentSongId)===String(v.view.key))&&!lftScrollOn
+    &&!(v.playing&&_lftHasTimecodes()));
+  if(!ok){_lftStopUniform();return;}
+  _lftUni.speed=v.scrollAuto.speed||1;_lftUni.dur=v.scrollAuto.dur||210;
+  // Где мастер был в момент отправки + сколько он успел проехать, пока сообщение летело
+  var t=_lftAnchorTarget(c,v.scrollAnchor);
+  var max=c.scrollHeight-c.clientHeight;
+  if(t===null&&typeof v.scrollFrac==='number')t=v.scrollFrac*max;
+  if(t!==null){
+    var lag=Math.max(0,Math.min(1500,LiveSync.deliveryDelayMs||150))/1000;
+    _lftUni.tgt=t+(max/_lftUni.dur*_lftUni.speed)*lag;_lftUni.tgtAt=performance.now();
+  }
+  if(_lftUni.active)return;
+  _lftUni.active=true;_lftUni.posF=c.scrollTop;_lftUni.last=performance.now();
+  if(_lftScrollRaf){cancelAnimationFrame(_lftScrollRaf);_lftScrollRaf=null;}
+  (function step(){
+    if(!_lftUni.active)return;
+    var now=performance.now(),dt=Math.min(0.25,(now-_lftUni.last)/1000);_lftUni.last=now;
+    var mx=c.scrollHeight-c.clientHeight;
+    if(mx>0){
+      var rate=mx/_lftUni.dur*_lftUni.speed;
+      var p=_lftUni.posF+rate*dt;
+      if(_lftUni.tgt!==null){
+        // цель тоже «едет» с той же скоростью; расхождение убираем плавно (~1 сек), без рывка
+        var tg=_lftUni.tgt+rate*((now-_lftUni.tgtAt)/1000);
+        var err=tg-p;
+        if(Math.abs(err)>mx*0.25)p=tg;            // сильно разошлись (мастер прыгнул) — сразу туда
+        else p+=err*Math.min(1,dt*1.2);
+      }
+      _lftUni.posF=Math.max(0,Math.min(mx,p));
+      c.scrollTop=_lftUni.posF;
+    }
+    _lftUni.raf=requestAnimationFrame(step);
+  })();
+}
+function _lftStopUniform(){
+  _lftUni.active=false;_lftUni.tgt=null;
+  if(_lftUni.raf){cancelAnimationFrame(_lftUni.raf);_lftUni.raf=null;}
+}
+// Привязка прокрутки к СТРОКЕ текста, а не к доле экрана: у мастера и ведомых разный
+// размер шрифта и ширина, поэтому «40% прокрутки» — это разные строки. Передаём номер
+// строки (или заголовка секции), которая сейчас вверху, и насколько она уже ушла вверх.
+var _LFT_ANCHOR_SEL='.perf-lhd,.perf-line,.cpro-line,.cpro-directive,.map-blk-grp';
+function _lftAnchorEls(c){
+  return Array.prototype.filter.call(c.querySelectorAll(_LFT_ANCHOR_SEL),function(el){return !el.querySelector(_LFT_ANCHOR_SEL);});
+}
+function _lftCurrentAnchor(c){
+  var els=_lftAnchorEls(c);if(!els.length)return null;
+  var max=c.scrollHeight-c.clientHeight;
+  if(max>0&&c.scrollTop>=max-2)return {n:els.length,end:1};
+  var top=c.getBoundingClientRect().top;
+  for(var i=0;i<els.length;i++){
+    var r=els[i].getBoundingClientRect();
+    if(r.bottom>top+1){var f=r.height>0?Math.max(0,Math.min(1,(top-r.top)/r.height)):0;return {n:els.length,i:i,f:Math.round(f*100)/100};}
+  }
+  return {n:els.length,end:1};
+}
+function _lftAnchorTarget(c,a){
+  if(!a)return null;
+  var els=_lftAnchorEls(c);if(els.length!==a.n)return null; // другой текст/раскладка — откат на долю
+  var max=c.scrollHeight-c.clientHeight;
+  if(a.end)return max;
+  var el=els[a.i];if(!el)return null;
+  var r=el.getBoundingClientRect(),top=c.getBoundingClientRect().top;
+  return Math.max(0,Math.min(max,c.scrollTop+(r.top-top)+(a.f||0)*r.height));
+}
 function _lftApplyRemoteScroll(v){
   if(typeof v.scrollFrac!=='number')return;
   var lft=document.getElementById('liveFullTab');
@@ -8549,14 +8643,33 @@ function _lftApplyRemoteScroll(v){
   if(v.view&&String(lftCurrentSongId)!==String(v.view.key))return;
   if(v.playing&&_lftHasTimecodes())return; // своё время-синхронное скроллирование
   var c=document.getElementById('lftContent');if(!c)return;
-  _lftScrollTarget=v.scrollFrac;
+  // Плавное повторение: мастер шлёт положение ~3 раза в секунду. Раньше ведомый
+  // догонял каждую точку и останавливался — получались шаги. Теперь он вычисляет
+  // скорость мастера и едет с ней непрерывно, мягко подправляясь к каждой новой точке.
+  var max=c.scrollHeight-c.clientHeight;
+  var tgt=_lftAnchorTarget(c,v.scrollAnchor||null);
+  if(tgt===null)tgt=Math.max(0,Math.min(1,v.scrollFrac))*max;
+  var now=performance.now(),R=_lftRS;
+  var vel=0;
+  if(R&&R.t){
+    var dt=(now-R.t)/1000,dx=tgt-R.tgt;
+    if(dt>0.05&&dt<1.5&&Math.abs(dx)<c.clientHeight*0.6) vel=(R.v?0.5*R.v:0)+0.5*(dx/dt); // прыжок (таблетка) — без разгона
+  }
+  _lftRS={tgt:tgt,v:vel,t:now,pos:(R&&Math.abs(R.pos-c.scrollTop)<3)?R.pos:c.scrollTop};
   if(_lftScrollRaf)return;
   (function step(){
-    var max=c.scrollHeight-c.clientHeight;
-    var tgt=Math.max(0,Math.min(1,_lftScrollTarget))*max;
-    var d=tgt-c.scrollTop;
-    if(Math.abs(d)<1){c.scrollTop=tgt;_lftScrollRaf=null;return;}
-    c.scrollTop=c.scrollTop+d*0.18;
+    var S=_lftRS;if(!S){_lftScrollRaf=null;return;}
+    var lftEl=document.getElementById('liveFullTab');
+    if(!lftEl||!lftEl.classList.contains('open')){_lftScrollRaf=null;return;}
+    var mx=c.scrollHeight-c.clientHeight;
+    if(Math.abs(S.pos-c.scrollTop)>=3)S.pos=c.scrollTop; // кто-то прокрутил вручную — продолжаем оттуда
+    var el=(performance.now()-S.t)/1000;
+    var moving=S.v!==0&&el<0.9;                          // нет новых точек почти секунду — мастер остановился
+    var want=Math.max(0,Math.min(mx,S.tgt+(moving?S.v*el:0)));
+    var d=want-S.pos;
+    if(!moving&&Math.abs(d)<0.5){S.pos=want;c.scrollTop=want;_lftScrollRaf=null;return;}
+    S.pos+=d*0.2;
+    c.scrollTop=S.pos;
     _lftScrollRaf=requestAnimationFrame(step);
   })();
 }
@@ -8578,6 +8691,7 @@ function attachLiveSync(){
 }
 
 function detachLiveSync(){
+  _lftStopUniform();
   if(!LiveSync.attached)return;
   try{if(LiveSync.ref&&LiveSync.listener)LiveSync.ref.off("value",LiveSync.listener);}catch(e){}
   try{if(LiveSync.offsetRef)LiveSync.offsetRef.off("value");}catch(e){}
@@ -8605,8 +8719,13 @@ function pushLiveSync(patch){
     if(_lftEl&&_lftEl.classList.contains('open')&&_lc){
       var _mx=_lc.scrollHeight-_lc.clientHeight;
       data.scrollFrac=_mx>0?Math.round(_lc.scrollTop/_mx*1000)/1000:0;
+      data.scrollAnchor=_lftCurrentAnchor(_lc);
     }
   }
+  // Режим автопрокрутки мастера: если текст едет равномерно (песня без разметки),
+  // ведомые крутят сами с той же скоростью и лишь мягко подравниваются по якорю
+  data.scrollAuto=(lftScrollOn&&window._lftMode==='uni')?{on:1,speed:lftScrollSpeed,dur:window._lftModeDur||210}:null;
+  if(('scrollFrac' in patch)&&!('scrollAnchor' in patch)) data.scrollAnchor=null; // открыли новый экран — якорь сбрасываем
   data.updatedAt=firebase.database.ServerValue.TIMESTAMP;
   data.pushedAt=Date.now(); // локальное время мастера для измерения задержки доставки
   LiveSync.lastPushed=data;
@@ -8656,7 +8775,8 @@ function onLiveSyncUpdate(v){
     // В момент «Стоп» текст у ведомого остаётся там, где был (он и так ехал синхронно);
     // дальше, если мастер листает руками, — повторяем его прокрутку
     var _justStopped=(prevPlaying===true&&!v.playing);
-    if(!_justStopped)_lftApplyRemoteScroll(v);
+    _lftFollowUniform(v);
+    if(!_justStopped&&!_lftUni.active)_lftApplyRemoteScroll(v);
   }
   if(!LiveSync.rafId)LiveSync.rafId=requestAnimationFrame(syncVisualLoop);
 }
@@ -9245,6 +9365,8 @@ function toggleLiveMode(){
     detachLiveSync();
     document.body.classList.remove("live-follower");
     if(liveDeviceRole==='master') _releaseLiveMaster();
+    // Вышел сам, пока мастер ещё играет — не затягиваем обратно в эту же сессию
+    if(!window._autoLiveExit&&_isOtherMaster(window._lastLiveMaster)) _declinedMasterTs=window._lastLiveMaster.ts;
     _liveAutoJoined=false;
   }
 }
@@ -10102,6 +10224,7 @@ function lftScrollSpeedChange(d){
   // плавно на любом уровне скорости.
   var factor=d>0?1.15:(1/1.15);
   lftScrollSpeed=Math.max(0.3,Math.min(3,Math.round(lftScrollSpeed*factor*100)/100));
+  if(window._lftMode==='uni'&&liveDeviceRole==='master')pushLiveSync({}); // ведомые подхватят новую скорость
 }
 
 // Плавная анимация скролла к нужной позиции с ease-in-out — встроенный
@@ -10147,7 +10270,7 @@ function toggleLftScroll(forcedSongId){
   var btn=document.getElementById('lftScrollBtn');
   if(btn){btn.classList.toggle('on',lftScrollOn);btn.innerHTML=lftScrollOn?'STOP':'AUTO<br>SCROLL';}
   clearInterval(lftScrollInterval);lftScrollInterval=null;
-  if(!lftScrollOn)return;
+  if(!lftScrollOn){_lftSetMode('off');return;}
 
   var c=document.getElementById('lftContent');
   var sections=[];
@@ -10240,6 +10363,7 @@ function toggleLftScroll(forcedSongId){
     var ct=sections.length>0?getAudioTime():null;
 
     if(ct!==null){
+      _lftSetMode('tc',_songDur);
       // Синхронно с таймкодами трека
       var curIdx=-1;
       for(var i=0;i<sections.length;i++){if(ct>=sections[i].time) curIdx=i;}
@@ -10264,7 +10388,8 @@ function toggleLftScroll(forcedSongId){
     } else {
       // Песня с таймкодами, трек остановили (СТОП) — текст замирает на том же месте,
       // а не прыгает в начало. Запустят трек снова — поедет дальше по таймкодам.
-      if(_wasSynced){_posF=b.scrollTop;return;}
+      if(_wasSynced){_lftSetMode('hold',_songDur);_posF=b.scrollTop;return;}
+      _lftSetMode('uni',_songDur);
       // Неразмеченная песня: равномерно, за длину песни × множитель кнопок -/+
       var maxScroll=b.scrollHeight-b.clientHeight;
       if(maxScroll<=0)return;
@@ -10288,6 +10413,7 @@ function closeLiveFullTab(){
     }
   }
   document.getElementById('liveFullTab').classList.remove('open');
+  _lftStopUniform();
   if(liveDeviceRole==='master'&&!window._lftApplyingRemote) pushLiveSync({view:null,scrollFrac:0});
   clearInterval(lftScrollInterval);lftScrollOn=false;
   if(_lftAutoScrollCheck){clearInterval(_lftAutoScrollCheck);_lftAutoScrollCheck=null;}
