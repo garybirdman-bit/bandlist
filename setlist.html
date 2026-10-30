@@ -273,6 +273,64 @@ body.guest-readonly [data-leader-only]{display:none!important;}
 .profile-screen .gmp-member-meta,.profile-screen .gmp-member-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gmp-code-copy-btn{background:none;border:none;color:var(--mu2);cursor:pointer;padding:4px;display:flex;align-items:center;flex-shrink:0;}
 .gmp-code-copy-btn:active{color:#fff;}
+/* ===== Профиль: плоская структура (аккаунт → группа → мои группы → язык) ===== */
+.pf-account{display:flex;align-items:center;gap:14px;margin-top:22px;padding:16px;background:var(--s2);border-radius:12px;}
+.pf-ava{width:46px;height:46px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:#fff;flex-shrink:0;}
+.pf-acc-info{min-width:0;flex:1;}
+.pf-acc-name{font-size:17px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-acc-mail{font-size:13px;color:var(--mu2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-card{background:var(--s2);border-radius:12px;overflow:hidden;}
+.pf-grp-head{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--br);}
+.pf-grp-ico{width:46px;height:46px;border-radius:12px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:#fff;flex-shrink:0;}
+.pf-grp-head-info{min-width:0;flex:1;}
+.pf-grp-name{font-size:17px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pf-grp-code-line{display:flex;align-items:center;gap:4px;margin-top:2px;}
+.pf-code{font-size:13px;color:var(--mu2);letter-spacing:.5px;}
+.pf-grp-code-line .gmp-code-copy-btn{padding:2px;}
+.pf-sub-lbl{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);padding:14px 16px 4px;}
+.pf-row{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:52px;border-top:1px solid var(--br);cursor:pointer;}
+.pf-row-act{color:var(--tx);font-size:15px;font-weight:500;}
+.pf-row-act:hover{background:var(--s3);}
+.pf-row-ico{width:34px;display:flex;align-items:center;justify-content:center;color:var(--mu2);flex-shrink:0;}
+#gmpMembersBox .gmp-member-row{padding:10px 16px;border-bottom:none;}
+#gmpMembersBox .gmp-member-row.click{cursor:pointer;}
+#gmpMembersBox .gmp-member-row.click:hover{background:var(--s3);}
+.gmp-avatar{position:relative;}
+.gmp-status-dot{border-color:var(--s2);}
+.gmp-status-dot.online{background:#2dd4bf;}
+.pf-card .gmp-avatar{background:var(--s3);}
+.pf-me{font-weight:400;color:var(--mu2);font-size:13px;}
+.pf-role{font-size:13px;color:var(--mu2);flex-shrink:0;display:flex;align-items:center;gap:4px;}
+.pf-role .chev{font-size:16px;line-height:1;color:var(--mu);}
+.gmp-grp-row{padding:10px 8px 10px 16px;min-height:60px;}
+.gmp-grp-row+.gmp-grp-row{border-top:1px solid var(--br);}
+.gmp-grp-row.click:hover{background:var(--s3);}
+.pf-grp-check{color:#2dd4bf;display:flex;align-items:center;flex-shrink:0;}
+.pf-more{width:36px;height:36px;border-radius:8px;border:none;background:none;color:var(--mu2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pf-more:hover{background:var(--s3);color:#fff;}
+.profile-screen #logoutBtn{margin-top:28px!important;}
+/* Лист приглашения */
+#confirmDialogOverlay{z-index:428!important;}#confirmDialogBox{z-index:429!important;}
+.inv-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:420;display:none;}
+.inv-ov.open{display:block;}
+.inv-sheet{position:fixed;left:0;right:0;bottom:0;z-index:421;background:rgba(28,29,31,0.98);border-top:1px solid rgba(255,255,255,0.1);border-radius:24px 24px 0 0;padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .25s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;gap:10px;font-family:'Golos Text',sans-serif;}
+.inv-sheet.open{transform:translateY(0);}
+@media(min-width:700px){.inv-sheet{left:50%;right:auto;width:420px;transform:translate(-50%,105%);}.inv-sheet.open{transform:translate(-50%,0);}}
+.inv-handle{width:36px;height:4px;background:rgba(255,255,255,0.25);border-radius:3px;margin:0 auto 6px;}
+.inv-title{font-size:17px;font-weight:600;color:#fff;text-align:center;margin-bottom:6px;}
+.inv-qr{align-self:center;line-height:0;cursor:pointer;}
+.inv-qr>div{background:#fff;border-radius:14px;padding:10px;display:inline-block;}
+.inv-code-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:4px 0 6px;}
+.inv-code-cap{font-size:13px;color:var(--mu2);}
+.inv-code{font-size:17px;font-weight:600;letter-spacing:1.5px;color:#fff;}
+.inv-sheet .gmp-btn{height:46px;font-size:15px;}
+.inv-seg{display:flex;background:var(--s1);border:1px solid var(--br);border-radius:10px;padding:3px;gap:3px;}
+.inv-seg button{flex:1;height:34px;border:none;border-radius:8px;background:none;color:var(--mu2);font-family:'Golos Text',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+.inv-seg button.on{background:var(--s3);color:#fff;}
+.inv-qr-ph{width:200px;height:200px;border-radius:14px;background:var(--s2);}
+.inv-reset{background:none;border:none;color:var(--mu2);font-family:'Golos Text',sans-serif;font-size:13px;cursor:pointer;padding:6px;align-self:center;text-decoration:underline;text-underline-offset:3px;}
+.inv-reset:hover{color:#e05252;}
+.inv-hint{font-size:12px;color:var(--mu2);text-align:center;line-height:1.45;margin-top:2px;}
 .psec-row .val3{font-family:'Golos Text',sans-serif;font-size:13px;color:var(--mu2);}
 .psec-row.disabled{opacity:.4;cursor:default;}
 .psec-row.disabled .soon-tag{font-family:'Golos Text',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);background:var(--s3);padding:2px 7px;border-radius:8px;}
@@ -909,7 +967,7 @@ textarea.fi.tall{min-height:120px;}
 
       <div class="ob-code-tabs" id="obCodeTabs">
         <button class="ob-code-tab on" id="obTabCreate" onclick="obSwitchTab('create')">Создать</button>
-        <button class="ob-code-tab" id="obTabJoin" onclick="obSwitchTab('join')">Войти по коду</button>
+        <button class="ob-code-tab" id="obTabJoin" onclick="obSwitchTab('join')">По приглашению</button>
       </div>
 
       <div class="ob-code-pane on" id="obPaneCreate">
@@ -917,18 +975,15 @@ textarea.fi.tall{min-height:120px;}
           <label id="obGroupNameLbl">Название группы</label>
           <input type="text" id="obGroupNameInp" placeholder="Время Назад">
         </div>
-        <div class="auth-field">
-          <label id="obGroupCodeLbl">Свой код для участников (необязательно)</label>
-          <input type="text" id="obCustomCodeInp" placeholder="ВЕТЕР2024" style="text-transform:uppercase;letter-spacing:2px;">
-        </div>
+        <input type="hidden" id="obCustomCodeInp" value="">
         <div class="auth-error" id="obCreateError"></div>
         <button class="auth-btn-primary" id="obCreateBtn" onclick="obCreateGroupClick()">Создать группу</button>
       </div>
 
       <div class="ob-code-pane" id="obPaneJoin">
         <div class="auth-field">
-          <label id="obCodeLbl">Код приглашения</label>
-          <input type="text" id="obJoinCodeInp" placeholder="ВЕТЕР-2024" style="text-transform:uppercase;letter-spacing:2px;">
+          <label id="obCodeLbl">Ссылка-приглашение</label>
+          <input type="text" id="obJoinCodeInp" placeholder="Вставь ссылку из сообщения" autocomplete="off">
         </div>
         <button class="auth-btn-google" id="obScanQrBtn" onclick="obStartQrScan()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7V4a1 1 0 0 1 1-1h3M21 7V4a1 1 0 0 0-1-1h-3M3 17v3a1 1 0 0 0 1 1h3M21 17v3a1 1 0 0 1-1 1h-3" stroke="#f0ece4" stroke-width="1.7" stroke-linecap="round"/><rect x="7" y="7" width="10" height="10" rx="1" stroke="#f0ece4" stroke-width="1.7"/></svg>
@@ -1227,6 +1282,31 @@ textarea.fi.tall{min-height:120px;}
     <div class="profile-screen-title" id="profileScreenTitle">Профиль</div>
   </div>
   <div class="profile-screen-body">
+    <div class="pf-account">
+      <div class="pf-ava" id="pfAva">?</div>
+      <div class="pf-acc-info"><div class="pf-acc-name" id="pfAccName">—</div><div class="pf-acc-mail" id="pfAccMail"></div></div>
+    </div>
+
+    <div class="psec-lbl" id="psecGroupLbl">Группа</div>
+    <div class="pf-card" id="pfGroupCard">
+      <div class="pf-grp-head">
+        <div class="pf-grp-ico" id="pfGrpIco">—</div>
+        <div class="pf-grp-head-info">
+          <div class="pf-grp-name" id="pfGrpName">—</div>
+          <div class="pf-grp-code-line"><span id="pfGrpSub" class="pf-code"></span><span id="gmpCodeTxt" style="display:none"></span></div>
+        </div>
+      </div>
+      <div class="pf-sub-lbl" id="gmpMembersLbl"></div>
+      <div id="gmpMembersBox"></div>
+      <div class="pf-row pf-row-act" id="pfInviteRow" onclick="openInviteSheet()"><span class="pf-row-ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></span><span id="pfInviteRowLbl">Пригласить в группу</span></div>
+    </div>
+
+    <div class="psec-lbl" id="gmpMyGroupsLbl">Мои группы</div>
+    <div class="pf-card">
+      <div id="gmpGroupsList"></div>
+      <div class="pf-row pf-row-act" onclick="gmpCreateNewGroup()"><span class="pf-row-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span id="gmpCreateBtn">Создать группу</span></div>
+    </div>
+
     <div class="psec-lbl" id="psecLangLbl">Язык</div>
     <div class="psec-box">
       <div class="psec-row" style="cursor:default;">
@@ -1238,53 +1318,26 @@ textarea.fi.tall{min-height:120px;}
       </div>
     </div>
 
-    <div class="psec-lbl" id="psecGroupLbl">Группа</div>
-    <div class="psec-box">
-      <div class="psec-row" onclick="toggleGroupManagePanel()" style="cursor:pointer;">
-        <span class="lbl3" id="psecGroupRowLbl">Управление группой и участниками</span>
-        <span style="color:var(--mu2);font-size:13px;">›</span>
-      </div>
-      <div id="groupManagePanel" class="gmp" style="display:none;">
-        <div class="gmp-lbl" id="gmpMembersLbl"></div>
-        <div id="gmpMembersBox" class="gmp-card"></div>
-
-        <div class="gmp-lbl" id="gmpInviteLbl">Пригласить в группу</div>
-        <div class="gmp-card gmp-invite">
-          <div id="gmpQrWrap" class="gmp-qr" onclick="toggleQrFullscreen()" title="Увеличить"></div>
-          <div class="gmp-invite-main">
-            <div class="gmp-code-cap" id="gmpCodeLbl">Код группы</div>
-            <div class="gmp-code-chip" id="gmpCodeChip">
-              <span class="gmp-code-txt" id="gmpCodeTxt">—</span>
-              <button class="gmp-code-copy-btn" id="gmpCodeCopyBtn" onclick="copyGroupCodeOnly()" title="Скопировать код">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </button>
-            </div>
-            <button onclick="shareGroupInviteLink()" id="gmpShareBtn" class="gmp-btn gmp-btn-primary">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-              <span id="gmpShareBtnTxt">Поделиться ссылкой</span>
-            </button>
-            <button onclick="copyGroupInviteLink('gmpCopyAdminBtn',true)" id="gmpCopyAdminBtn" class="gmp-btn gmp-btn-ghost">Пригласить как админа</button>
-          </div>
-        </div>
-        <div id="gmpQrFullOverlay" onclick="toggleQrFullscreen()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;align-items:center;justify-content:center;cursor:pointer;">
-          <div id="gmpQrFullBox" style="background:#fff;border-radius:24px;padding:28px;display:inline-flex;align-items:center;justify-content:center;"></div>
-        </div>
-
-        <div class="gmp-lbl" id="gmpMyGroupsLbl">Мои группы</div>
-        <div id="gmpGroupsList" class="gmp-card"></div>
-        <div class="gmp-row-actions">
-          <button onclick="gmpCreateNewGroup()" id="gmpCreateBtn" class="gmp-btn gmp-btn-ghost">+ Создать новую группу</button>
-          <button onclick="gmpToggleManualJoin()" id="gmpManualJoinToggle" class="gmp-btn gmp-btn-ghost">Ввести код вручную</button>
-        </div>
-        <div id="gmpManualJoinWrap" style="display:none;gap:8px;margin-top:8px;">
-          <input id="gmpJoinCodeInp" placeholder="КОД-ГРУППЫ" style="flex:1;min-width:0;background:var(--s1);border:1px solid var(--br);border-radius:10px;color:#fff;padding:0 14px;height:42px;font-size:14px;text-transform:uppercase;letter-spacing:1px;outline:none;font-family:'Golos Text',sans-serif;">
-          <button onclick="gmpJoinOtherGroup()" id="gmpJoinBtn" class="gmp-btn gmp-btn-primary" style="width:auto;padding:0 18px;">Войти</button>
-        </div>
-      </div>
-    </div>
-
     <button onclick="confirmLogout()" id="logoutBtn" style="width:100%;margin-top:24px;padding:14px;background:none;border:1px solid #4a2a2a;border-radius:8px;color:#e05252;font-family:'Golos Text',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Выйти из аккаунта</button>
   </div>
+</div>
+
+<div id="inviteSheetOv" class="inv-ov" onclick="closeInviteSheet()"></div>
+<div id="inviteSheet" class="inv-sheet">
+  <div class="inv-handle"></div>
+  <div class="inv-title" id="invTitle">Пригласить в группу</div>
+  <div class="inv-seg" id="invSeg">
+    <button id="invSegMember" class="on" onclick="setInviteRole('member')">Участник</button>
+    <button id="invSegAdmin" onclick="setInviteRole('admin')">Админ</button>
+  </div>
+  <div id="gmpQrWrap" class="inv-qr" onclick="toggleQrFullscreen()" title="Увеличить"></div>
+  <div class="inv-hint" id="invHint"></div>
+  <button onclick="shareGroupInviteLink()" id="gmpShareBtn" class="gmp-btn gmp-btn-primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span id="gmpShareBtnTxt">Поделиться ссылкой</span></button>
+  <button onclick="copyInviteLinkNow(this)" id="invCopyBtn" class="gmp-btn gmp-btn-ghost"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span id="invCopyTxt">Скопировать ссылку</span></button>
+  <button onclick="confirmResetInvite()" id="invResetBtn" class="inv-reset">Сбросить ссылку</button>
+</div>
+<div id="gmpQrFullOverlay" onclick="toggleQrFullscreen()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;align-items:center;justify-content:center;cursor:pointer;">
+  <div id="gmpQrFullBox" style="background:#fff;border-radius:24px;padding:28px;display:inline-flex;align-items:center;justify-content:center;"></div>
 </div>
 
 <div class="panel" id="panel" style="display:none">
@@ -2099,16 +2152,53 @@ function doLogout(){
 
 /* ---- group code generation ---- */
 var BAND_WORDS=["VETER","ROCK","STAGE","DRIVE","ECHO","SOUND","WAVE","BEAT","TONE","RIFF","AMP","JAM"];
-function genGroupCode(){
-  var w=BAND_WORDS[Math.floor(Math.random()*BAND_WORDS.length)];
-  var n=Math.floor(1000+Math.random()*9000);
-  return w+"-"+n;
+// Внутренний id группы — случайный, никому не показывается (приглашение — только ссылкой)
+function _randToken(n){
+  var abc="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",out="";
+  try{var a=new Uint32Array(n);crypto.getRandomValues(a);for(var i=0;i<n;i++)out+=abc[a[i]%abc.length];}
+  catch(e){for(var j=0;j<n;j++)out+=abc[Math.floor(Math.random()*abc.length)];}
+  return out;
 }
+function genGroupCode(){return "G"+_randToken(15);}
 function genGroupCodeUnique(cb){
   var code=genGroupCode();
   db.ref("groups/"+code+"/meta").once("value").then(function(snap){
     if(snap.exists())genGroupCodeUnique(cb);else cb(code);
   }).catch(function(){cb(code);});
+}
+
+/* ---- приглашения: ссылка со случайным ключом, отдельным от группы ----
+   groups/{id}/invites/{ключ} = {role:'member'|'admin'} — по нему база пускает в группу;
+   groups/{id}/inviteLinks = {member:ключ, admin:ключ} — текущие ссылки (лидер/админ может сбросить) */
+function ensureInviteLinks(code){
+  if(!db||!code)return Promise.reject();
+  return db.ref("groups/"+code+"/inviteLinks").once("value").then(function(sn){
+    var v=sn.val()||{};
+    var canMgr=(currentRole==="leader"||currentRole==="admin");
+    if(v.member&&(v.admin||!canMgr))return v;
+    if(!canMgr)return v; // участник видит только то, что уже создано
+    var up={};
+    if(!v.member){v.member=_randToken(20);up["groups/"+code+"/invites/"+v.member]={role:"member",by:currentUser.uid,at:Date.now()};up["groups/"+code+"/inviteLinks/member"]=v.member;}
+    if(!v.admin){v.admin=_randToken(20);up["groups/"+code+"/invites/"+v.admin]={role:"admin",by:currentUser.uid,at:Date.now()};up["groups/"+code+"/inviteLinks/admin"]=v.admin;}
+    return db.ref().update(up).then(function(){return v;});
+  });
+}
+function resetInviteLink(code,role){
+  return db.ref("groups/"+code+"/inviteLinks/"+role).once("value").then(function(sn){
+    var old=sn.val(),nt=_randToken(20),up={};
+    if(old)up["groups/"+code+"/invites/"+old]=null;
+    up["groups/"+code+"/invites/"+nt]={role:role,by:currentUser.uid,at:Date.now()};
+    up["groups/"+code+"/inviteLinks/"+role]=nt;
+    return db.ref().update(up).then(function(){return nt;});
+  });
+}
+function buildInviteLink(code,token){return location.origin+location.pathname+"?join="+encodeURIComponent(code)+"&t="+encodeURIComponent(token);}
+// Разбирает вставленную ссылку-приглашение (или старый код группы)
+function parseInviteInput(str){
+  str=(str||"").trim();
+  var m=str.match(/[?&]join=([^&#\s]+)/);
+  if(m){var t=str.match(/[?&]t=([^&#\s]+)/);return {code:decodeURIComponent(m[1]).toUpperCase(),token:t?decodeURIComponent(t[1]):""};}
+  return {code:str.toUpperCase(),token:""};
 }
 
 /* ---- migration of legacy single-tenant data into a fresh group ---- */
@@ -2160,34 +2250,43 @@ function createGroup(name,cb,customCode){
   }
 }
 
-function joinGroup(code,cb){
+function joinGroup(code,cb,token){
   if(!db){cb&&cb(false,"nodb");return;}
   code=code.trim().toUpperCase();
+  if(token===undefined) token=(window._pendingJoinCode===code&&window._pendingJoinToken)?window._pendingJoinToken:"";
   db.ref("groups/"+code+"/meta").once("value").then(function(snap){
     if(!snap.exists()){cb&&cb(false,"notfound");return;}
     if(!currentUser){cb&&cb(false,"noauth");return;}
     db.ref("groups/"+code+"/members/"+currentUser.uid+"/role").once("value").then(function(roleSnap){
       var existingRole=roleSnap.val();
-      // Роль по умолчанию "member"; по ссылке для админов (?as=admin&t=токен) — "admin".
-      // Уже существующую роль (например, лидера) никогда не понижаем.
-      var requestedRole=(window._pendingJoinCode===code&&window._pendingJoinRole)?window._pendingJoinRole:"member";
-      var memberData={
-        uid:currentUser.uid,
-        name:currentUser.displayName||currentUser.email||"Без имени",
-        role:existingRole||requestedRole,
-        instrument:pendingInstrument||"",
-        joinedAt:Date.now()
-      };
-      if(!existingRole&&requestedRole==="admin"&&window._pendingJoinToken) memberData.invite=window._pendingJoinToken;
-      var updates={};
-      updates["groups/"+code+"/members/"+currentUser.uid]=memberData;
-      updates["users/"+currentUser.uid+"/groups/"+code]=true;
-      updates["users/"+currentUser.uid+"/activeGroup"]=code;
-      db.ref().update(updates).then(function(){
-        if(memberData.invite){try{db.ref("groups/"+code+"/banned/"+currentUser.uid).remove().catch(function(){});}catch(e){}}
-        cb&&cb(true,code);
-      }).catch(function(){cb&&cb(false,"writeerr");});
-    });
+      // Роль берётся из самой ссылки-приглашения (ключ хранит роль). Уже существующую роль не понижаем.
+      var roleP=existingRole?Promise.resolve(existingRole)
+        :(!token?Promise.resolve(null)
+          :db.ref("groups/"+code+"/invites/"+token).once("value").then(function(iv){
+              var v=iv.val();if(v&&v.role)return v.role;
+              // старые админ-ссылки (до 30.10.2026)
+              return db.ref("groups/"+code+"/adminInvites/"+token).once("value").then(function(a){return a.exists()?"admin":null;}).catch(function(){return null;});
+            }).catch(function(){return null;}));
+      roleP.then(function(role){
+        if(!role){cb&&cb(false,token?"badlink":"needlink");return;}
+        var memberData={
+          uid:currentUser.uid,
+          name:currentUser.displayName||currentUser.email||"Без имени",
+          role:role,
+          instrument:pendingInstrument||"",
+          joinedAt:Date.now()
+        };
+        if(!existingRole&&token) memberData.invite=token;
+        var updates={};
+        updates["groups/"+code+"/members/"+currentUser.uid]=memberData;
+        updates["users/"+currentUser.uid+"/groups/"+code]=true;
+        updates["users/"+currentUser.uid+"/activeGroup"]=code;
+        db.ref().update(updates).then(function(){
+          if(memberData.invite&&role==="admin"){try{db.ref("groups/"+code+"/banned/"+currentUser.uid).remove().catch(function(){});}catch(e){}}
+          cb&&cb(true,code);
+        }).catch(function(){cb&&cb(false,"writeerr");});
+      });
+    }).catch(function(){cb&&cb(false,"readerr");});
   }).catch(function(){cb&&cb(false,"readerr");});
 }
 
@@ -2380,7 +2479,7 @@ function openOnboarding(mode){
   }
   if(window._pendingJoinCode){
     var joinInp=document.getElementById("obJoinCodeInp");
-    if(joinInp) joinInp.value=window._pendingJoinCode;
+    if(joinInp) joinInp.value=window._pendingJoinToken?buildInviteLink(window._pendingJoinCode,window._pendingJoinToken):window._pendingJoinCode;
     var joinTab=document.getElementById("obTabJoin");
     if(joinTab) joinTab.click();
   }
@@ -2448,48 +2547,100 @@ function obCreateGroupClick(){
 function showCreatedGroup(code){
   document.getElementById("obGroupChoice").classList.remove("on");
   document.getElementById("obGroupCreated").classList.add("on");
-  document.getElementById("newGroupCodeTxt").textContent=code;
+  var codeEl=document.getElementById("newGroupCodeTxt");if(codeEl)codeEl.style.display="none";
+  var sub=document.getElementById("obCreatedSub");if(sub)sub.textContent=authT("Отправь ссылку участникам или покажи им QR-код","Send the link to your bandmates or show them the QR code");
+  currentGroupId=code;currentRole="leader";
   var qrWrap=document.getElementById("newGroupQrWrap");
   qrWrap.innerHTML="";
-  if(window.QRCode){
-    try{ new QRCode(qrWrap,{text:code,width:170,height:170,colorDark:"#111015",colorLight:"#ffffff"}); }catch(e){}
-  }
-  currentGroupId=code;
+  ensureInviteLinks(code).then(function(v){
+    window._obInviteLink=buildInviteLink(code,v.member);
+    if(window.QRCode){try{ new QRCode(qrWrap,{text:window._obInviteLink,width:170,height:170,colorDark:"#111015",colorLight:"#ffffff"}); }catch(e){}}
+  }).catch(function(){});
 }
-function toggleGroupManagePanel(){
-  var panel=document.getElementById("groupManagePanel");
-  if(!panel)return;
-  var opening=panel.style.display==="none";
-  panel.style.display=opening?"block":"none";
-  if(opening){
-    var code=currentGroupId||"";
-    var gmpCodeEl=document.getElementById("gmpCodeTxt");
-    gmpCodeEl.textContent=code||(LANG==="en"?"No active group":"Нет активной группы");
-    gmpCodeEl.classList.toggle("empty",!code);
-    var gmpChip=document.getElementById("gmpCodeChip");if(gmpChip)gmpChip.classList.toggle("empty",!code);
-    var gmpCopyBtn2=document.getElementById("gmpCodeCopyBtn");if(gmpCopyBtn2)gmpCopyBtn2.style.display=code?"flex":"none";
-    // Переводим статичные лейблы панели
-    var codeLbl=document.getElementById("gmpCodeLbl");if(codeLbl)codeLbl.textContent=LANG==="en"?"Group code":"Код группы";
-    var myGroupsLbl=document.getElementById("gmpMyGroupsLbl");if(myGroupsLbl)myGroupsLbl.textContent=LANG==="en"?"My groups":"Мои группы";
-    var createBtn=document.getElementById("gmpCreateBtn");if(createBtn)createBtn.textContent=LANG==="en"?"+ Create new group":"+ Создать новую группу";
-    var joinInp=document.getElementById("gmpJoinCodeInp");if(joinInp)joinInp.placeholder=LANG==="en"?"GROUP-CODE":"КОД-ГРУППЫ";
-    var joinBtn=document.getElementById("gmpJoinBtn");if(joinBtn)joinBtn.textContent=LANG==="en"?"Join":"Войти";
-    var copyBtn=document.getElementById("gmpShareBtnTxt");if(copyBtn)copyBtn.textContent=LANG==="en"?"Share link":"Поделиться ссылкой";
-    var copyAdminBtn=document.getElementById("gmpCopyAdminBtn");if(copyAdminBtn)copyAdminBtn.textContent=LANG==="en"?"Invite as admin":"Пригласить как админа";
-    var manualToggle=document.getElementById("gmpManualJoinToggle");if(manualToggle)manualToggle.textContent=LANG==="en"?"Enter code":"Ввести код вручную";
-    var inviteLbl=document.getElementById("gmpInviteLbl");if(inviteLbl)inviteLbl.textContent=LANG==="en"?"Invite to group":"Пригласить в группу";
-    var qrWrap=document.getElementById("gmpQrWrap");
-    qrWrap.innerHTML="";qrWrap.style.display=code?"":"none";
-    if(code&&window.QRCode){
-      var qrBox=document.createElement("div");
-      qrWrap.appendChild(qrBox);
-      try{new QRCode(qrBox,{text:code,width:104,height:104,colorDark:"#111015",colorLight:"#ffffff"});}catch(e){}
-    }
-    renderGmpGroupsList();
-    startGmpMembersWatch();
-  } else {
-    stopGmpMembersWatch();
+function toggleGroupManagePanel(){refreshGroupPanel();} // старое имя — для совместимости
+// Профиль: заполняем аккаунт, текущую группу, участников и список групп
+function refreshGroupPanel(){
+  var en=LANG==="en";
+  var code=currentGroupId||"";
+  // Аккаунт
+  var nm=(currentUser&&(currentUser.displayName||currentUser.email))||(en?"Guest":"Гость");
+  var el;
+  if((el=document.getElementById("pfAccName")))el.textContent=nm;
+  if((el=document.getElementById("pfAccMail")))el.textContent=(currentUser&&currentUser.displayName&&currentUser.email)?currentUser.email:"";
+  if((el=document.getElementById("pfAva")))el.textContent=(nm||"?").charAt(0).toUpperCase();
+  // Текущая группа
+  var card=document.getElementById("pfGroupCard");
+  if(card)card.style.display=code?"":"none";
+  var gl=document.getElementById("psecGroupLbl");if(gl)gl.style.display=code?"":"none";
+  var _roleNames={leader:en?"You're the leader":"Ты — лидер",admin:en?"You're an admin":"Ты — админ",member:en?"You're a member":"Ты — участник"};
+  if((el=document.getElementById("pfGrpSub")))el.textContent=_roleNames[currentRole]||"";
+  if((el=document.getElementById("invCode")))el.textContent=code;
+  if((el=document.getElementById("pfInviteRowLbl")))el.textContent=en?"Invite to group":"Пригласить в группу";
+  if((el=document.getElementById("gmpMyGroupsLbl")))el.textContent=en?"My groups":"Мои группы";
+  if((el=document.getElementById("gmpCreateBtn")))el.textContent=en?"Create group":"Создать группу";
+  if((el=document.getElementById("gmpManualJoinToggle")))el.textContent=en?"Join with code":"Войти по коду";
+  if((el=document.getElementById("gmpJoinCodeInp")))el.placeholder=en?"GROUP-CODE":"КОД-ГРУППЫ";
+  if((el=document.getElementById("gmpJoinBtn")))el.textContent=en?"Join":"Войти";
+  if((el=document.getElementById("gmpShareBtnTxt")))el.textContent=en?"Share link":"Поделиться ссылкой";
+  if((el=document.getElementById("gmpCopyAdminBtn")))el.textContent=en?"Link for an admin":"Ссылка для админа";
+  if((el=document.getElementById("gmpCodeLbl")))el.textContent=en?"Group code":"Код группы";
+  if((el=document.getElementById("invHint")))el.textContent=en?"Point a phone camera at the QR code or send the link. The admin link grants admin rights right away.":"Наведите камеру телефона на QR-код или отправьте ссылку. Ссылка для админа сразу даёт права админа.";
+  if(code&&db){
+    db.ref("groups/"+code+"/meta/name").once("value").then(function(sn){
+      var n=sn.val()||code;
+      var a=document.getElementById("pfGrpName");if(a)a.textContent=n;
+      var b=document.getElementById("pfGrpIco");if(b)b.textContent=n.charAt(0).toUpperCase();
+      var t=document.getElementById("invTitle");if(t)t.textContent=(en?"Invite to ":"Пригласить в ")+"«"+n+"»";
+    }).catch(function(){});
   }
+  renderGmpGroupsList();
+  startGmpMembersWatch();
+}
+var _invLinks=null,_invRole="member";
+function _inviteLink(){return _currentInviteLink()||"";}
+function openInviteSheet(){
+  if(!currentGroupId)return;
+  _invRole="member";_invLinks=null;
+  var en=LANG==="en",canMgr=(currentRole==="leader"||currentRole==="admin");
+  document.getElementById("invSeg").style.display=canMgr?"":"none";
+  document.getElementById("invResetBtn").style.display=canMgr?"":"none";
+  document.getElementById("invSegMember").textContent=en?"Member":"Участник";
+  document.getElementById("invSegAdmin").textContent=en?"Admin":"Админ";
+  document.getElementById("gmpShareBtnTxt").textContent=en?"Share link":"Поделиться ссылкой";
+  document.getElementById("invCopyTxt").textContent=en?"Copy link":"Скопировать ссылку";
+  document.getElementById("invResetBtn").textContent=en?"Reset link":"Сбросить ссылку";
+  document.getElementById("gmpQrWrap").innerHTML='<div class="inv-qr-ph"></div>';
+  document.getElementById("inviteSheetOv").classList.add("open");
+  document.getElementById("inviteSheet").classList.add("open");
+  ensureInviteLinks(currentGroupId).then(function(v){_invLinks=v;renderInviteSheet();})
+    .catch(function(){document.getElementById("invHint").textContent=en?"Couldn't create a link. Check the connection.":"Не удалось создать ссылку. Проверь интернет.";});
+}
+function setInviteRole(r){_invRole=r;renderInviteSheet();}
+function renderInviteSheet(){
+  var en=LANG==="en";
+  document.getElementById("invSegMember").classList.toggle("on",_invRole==="member");
+  document.getElementById("invSegAdmin").classList.toggle("on",_invRole==="admin");
+  var link=_currentInviteLink();
+  var qrWrap=document.getElementById("gmpQrWrap");qrWrap.innerHTML="";
+  if(link&&window.QRCode){var qb=document.createElement("div");qrWrap.appendChild(qb);
+    try{new QRCode(qb,{text:link,width:180,height:180,colorDark:"#111015",colorLight:"#ffffff"});}catch(e){}}
+  document.getElementById("invHint").textContent=!link?(en?"Only the leader or an admin can create the first link.":"Первую ссылку создаёт лидер или админ.")
+    :_invRole==="admin"
+      ?(en?"Whoever opens this link joins as an admin. Send it only to people you trust.":"Кто откроет эту ссылку, войдёт в группу админом. Отправляй только тем, кому доверяешь.")
+      :(en?"Scan with a phone camera or send the link in any messenger.":"Отсканируй камерой телефона или отправь ссылку в любом мессенджере.");
+}
+function confirmResetInvite(){
+  var en=LANG==="en",role=_invRole;
+  showConfirmDialog(en?"Reset this link?":"Сбросить ссылку?",
+    en?"The old link will stop working. People already in the group stay.":"Старая ссылка перестанет работать. Те, кто уже в группе, останутся.",
+    en?"Reset":"Сбросить",function(){
+      resetInviteLink(currentGroupId,role).then(function(nt){_invLinks=_invLinks||{};_invLinks[role]=nt;renderInviteSheet();})
+        .catch(function(e){alert((en?"Couldn't reset: ":"Не удалось сбросить: ")+(e&&e.message||""));});
+    });
+}
+function closeInviteSheet(){
+  var o=document.getElementById("inviteSheetOv"),sh=document.getElementById("inviteSheet");
+  if(o)o.classList.remove("open");if(sh)sh.classList.remove("open");
 }
 var _gmpPresenceRef=null;
 function stopGmpMembersWatch(){
@@ -2571,18 +2722,29 @@ function renderGmpMembers(members,presence){
     var isCreator=window._gmpCreatedBy&&uid===window._gmpCreatedBy;
     var canManage=(currentRole==="leader"||currentRole==="admin")&&currentUser&&uid!==currentUser.uid&&!isCreator;
     var canChangeRole=canManage&&role!=="leader";
-    var trashBtn=canManage
-      ? '<button onclick="gmpRemoveMember(\''+uid+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Remove":"Удалить")+'" class="gmp-icon-btn" style="margin-left:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg></button>'
-      : '';
-    var roleCell=canChangeRole
-      ? '<button class="gmp-role-badge gmp-role-btn" onclick="gmpChangeRole(\''+uid+'\',\''+role+'\')">'+roleLbl+' ›</button>'
-      : '<div class="gmp-role-badge">'+roleLbl+'</div>';
-    return '<div class="gmp-member-row">'+
+    var nameAttr=esc(name).replace(/['"\\]/g,"");
+    var isMe=currentUser&&uid===currentUser.uid;
+    return '<div class="gmp-member-row'+(canManage?' click':'')+'"'+(canManage?' onclick="openMemberMenu(\''+uid+'\',\''+role+'\',\''+nameAttr+'\')"':'')+'>'+
       '<div class="gmp-avatar">'+esc(initial)+'<div class="gmp-status-dot '+(isOnline?'online':'offline')+'"></div></div>'+
-      '<div class="gmp-member-info"><div class="gmp-member-name">'+esc(name)+'</div><div class="gmp-member-meta">'+meta+'</div></div>'+
-      roleCell+trashBtn+
+      '<div class="gmp-member-info"><div class="gmp-member-name">'+esc(name)+(isMe?' <span class="pf-me">'+(LANG==="en"?"(you)":"(ты)")+'</span>':'')+'</div><div class="gmp-member-meta">'+meta+'</div></div>'+
+      '<div class="pf-role">'+roleLbl+(canManage?'<span class="chev">›</span>':'')+'</div>'+
     '</div>';
   }).join("");
+}
+// Меню участника: роль и удаление — одним листом, как в мессенджерах
+function openMemberMenu(uid,role,name){
+  var en=LANG==="en";
+  var icUser='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>';
+  var icDel='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
+  var items=[];
+  if(role==="member")items.push({icon:icUser,label:en?"Make admin":"Сделать админом",onClick:function(){gmpSetRole(uid,"admin");}});
+  if(role==="admin")items.push({icon:icUser,label:en?"Make member":"Сделать участником",onClick:function(){gmpSetRole(uid,"member");}});
+  items.push({icon:icDel,label:en?"Remove from group":"Удалить из группы",danger:true,onClick:function(){gmpRemoveMember(uid,name);}});
+  openRowActionSheet(name,items);
+}
+function gmpSetRole(uid,role){
+  if(!db||!currentGroupId)return;
+  db.ref("groups/"+currentGroupId+"/members/"+uid+"/role").set(role).catch(function(e){alert((LANG==="en"?"Couldn't change role: ":"Не удалось изменить роль: ")+e.message);});
 }
 function gmpRemoveMember(uid,name){
   var en=LANG==='en';
@@ -2683,7 +2845,7 @@ function toggleQrFullscreen(){
   var box=document.getElementById("gmpQrFullBox");
   box.innerHTML="";
   var size=Math.min(window.innerWidth,window.innerHeight)*0.7;
-  try{new QRCode(box,{text:currentGroupId,width:size,height:size,colorDark:"#111015",colorLight:"#ffffff"});}catch(e){}
+  try{new QRCode(box,{text:_inviteLink(),width:size,height:size,colorDark:"#111015",colorLight:"#ffffff"});}catch(e){}
   overlay.style.display="flex";
 }
 function renderGmpGroupsList(){
@@ -2700,22 +2862,35 @@ function renderGmpGroupsList(){
       return db.ref("groups/"+code+"/meta").once("value").then(function(n){return n.val()||{};}).catch(function(){return {};});
     })).then(function(metas){
       var names=metas.map(function(m){return m.name||null;});
-      var trashIcon='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
+      var dots='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+      var check='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      window._gmpGroupMetas={};
       wrap.innerHTML=codes.map(function(code,i){
         var isActive=code===currentGroupId;
-        var name=names[i]||code;
+        var name=names[i]||(LANG==="en"?"Group":"Группа");
+        window._gmpGroupMetas[code]={name:name,createdBy:metas[i].createdBy};
         return '<div class="gmp-grp-row'+(isActive?'':' click')+'"'+(isActive?'':' onclick="gmpSwitchGroup(\''+code+'\')"')+'>'+
           '<div class="gmp-grp-ico">'+esc(name.charAt(0).toUpperCase())+'</div>'+
-          '<div class="gmp-grp-info"><div class="gmp-grp-name">'+esc(name)+'</div>'+(name!==code?'<div class="gmp-grp-code">'+esc(code)+'</div>':'')+'</div>'+
-          (isActive?'<span class="gmp-grp-active">'+(LANG==="en"?"Active":"Активна")+'</span>':'')+
-          ((metas[i].createdBy===currentUser.uid||(isActive&&(currentRole==="leader"||currentRole==="admin")))
-            ?'<button class="gmp-icon-btn gmp-icon-edit" onclick="event.stopPropagation();gmpRenameGroup(\''+code+'\',\''+esc(name).replace(/['"\\]/g,"")+'\')" title="'+(LANG==="en"?"Rename":"Переименовать")+'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>'
-            :'<span class="gmp-icon-btn" style="visibility:hidden"></span>')+
-          '<button class="gmp-icon-btn" onclick="event.stopPropagation();gmpDeleteGroup(\''+code+'\')" title="'+(LANG==="en"?"Delete or leave":"Удалить или выйти")+'">'+trashIcon+'</button>'+
+          '<div class="gmp-grp-info"><div class="gmp-grp-name">'+esc(name)+'</div>'+(isActive?'<div class="gmp-grp-code">'+(LANG==="en"?"Current group":"Текущая группа")+'</div>':'')+'</div>'+
+          (isActive?'<span class="pf-grp-check">'+check+'</span>':'')+
+          '<button class="pf-more" onclick="event.stopPropagation();openGroupMenu(\''+code+'\')" title="'+(LANG==="en"?"More":"Ещё")+'">'+dots+'</button>'+
         '</div>';
       }).join("");
     });
   }).catch(function(){wrap.innerHTML="";});
+}
+function openGroupMenu(code){
+  var en=LANG==="en",m=(window._gmpGroupMetas||{})[code]||{};
+  var isOwner=currentUser&&m.createdBy===currentUser.uid;
+  var isActive=code===currentGroupId;
+  var canRename=isOwner||(isActive&&(currentRole==="leader"||currentRole==="admin"));
+  var icEdit='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  var icDel='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2,2 0 01-2,2H7a2,2 0 01-2-2V6m3,0V4a2,2 0 012-2h4a2,2 0 012,2v2"/></svg>';
+  var icOut='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+  var items=[];
+  if(canRename)items.push({icon:icEdit,label:en?"Rename":"Переименовать",onClick:function(){gmpRenameGroup(code,m.name||"");}});
+  items.push({icon:isOwner?icDel:icOut,label:isOwner?(en?"Delete group":"Удалить группу"):(en?"Leave group":"Выйти из группы"),danger:true,onClick:function(){gmpDeleteGroup(code);}});
+  openRowActionSheet(m.name||"",items);
 }
 function showConfirmDialog(title,msg,okLabel,onConfirm){
   document.getElementById("confirmDialogTitle").textContent=title;
@@ -2908,9 +3083,9 @@ function gmpJoinOtherGroup(){
     setActiveGroup(res);
   });
 }
-function copyGroupCodeOnly(){
+function copyGroupCodeOnly(srcBtn){
   if(!currentGroupId)return;
-  var btn=document.getElementById("gmpCodeCopyBtn");
+  var btn=(srcBtn&&srcBtn.nodeType)?srcBtn:document.getElementById("gmpCodeCopyBtn");
   function done(ok){
     if(!btn)return;
     var orig=btn.innerHTML;
@@ -2921,24 +3096,21 @@ function copyGroupCodeOnly(){
     navigator.clipboard.writeText(currentGroupId).then(function(){done(true);}).catch(function(){done(false);});
   }
 }
+function _currentInviteLink(){
+  if(!currentGroupId||!_invLinks)return null;
+  var t=_invLinks[_invRole];return t?buildInviteLink(currentGroupId,t):null;
+}
 function shareGroupInviteLink(){
-  var code=currentGroupId;
-  if(!code)return;
-  var link=location.origin+location.pathname+"?join="+encodeURIComponent(code);
-  var btn=document.getElementById("gmpShareBtn");
-  var txtEl=document.getElementById("gmpShareBtnTxt");
-  var origTxt=txtEl?txtEl.textContent:"";
-  if(navigator.share){
-    navigator.share({title:"Bandlist",text:(LANG==="en"?"Join our band on Bandlist":"Присоединяйся к группе в Bandlist"),url:link}).catch(function(){});
-    return;
-  }
-  // Фолбэк, если нативный share недоступен (например, в старом браузере)
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(link).then(function(){
-      if(txtEl){txtEl.textContent=LANG==="en"?"Link copied!":"Ссылка скопирована!";}
-      setTimeout(function(){if(txtEl)txtEl.textContent=origTxt;},2000);
-    });
-  }
+  var link=_currentInviteLink();if(!link)return;
+  var txt=_invRole==="admin"
+    ?(LANG==="en"?"You're invited as an admin of our band on Bandlist":"Приглашаю тебя админом нашей группы в Bandlist")
+    :(LANG==="en"?"Join our band on Bandlist":"Присоединяйся к нашей группе в Bandlist");
+  if(navigator.share){navigator.share({title:"Bandlist",text:txt,url:link}).catch(function(){});return;}
+  _copyText(link,document.getElementById("gmpShareBtn"),LANG==="en"?"Link copied!":"Ссылка скопирована!");
+}
+function copyInviteLinkNow(btn){
+  var link=_currentInviteLink();if(!link)return;
+  _copyText(link,btn,LANG==="en"?"Link copied!":"Ссылка скопирована!");
 }
 function gmpToggleManualJoin(){
   var wrap=document.getElementById("gmpManualJoinWrap");
@@ -2947,24 +3119,20 @@ function gmpToggleManualJoin(){
   wrap.style.display=isOpen?"none":"flex";
   if(!isOpen){var inp=document.getElementById("gmpJoinCodeInp");if(inp)setTimeout(function(){inp.focus();},50);}
 }
-function copyGroupInviteLink(btnId,asAdmin){
-  var codeEl=document.getElementById("newGroupCodeTxt");
-  var code=(btnId==="gmpCopyBtn"||btnId==="gmpCopyAdminBtn")?currentGroupId:(codeEl?codeEl.textContent:currentGroupId);
-  if(!code)return;
-  var tok="";
-  if(asAdmin){
-    // Одноразово генерируем токен приглашения админа и сохраняем в группе:
-    // правила базы пускают в группу с ролью admin только по действующему токену
-    tok=Math.random().toString(36).slice(2,8)+Math.random().toString(36).slice(2,8);
-    try{if(db&&currentUser)db.ref("groups/"+code+"/adminInvites/"+tok).set({by:currentUser.uid,at:Date.now()});}catch(e){}
+function _copyText(txt,btn,okLbl){
+  function done(ok){
+    if(!btn)return;var orig=btn.getAttribute("data-orig")||btn.innerHTML;btn.setAttribute("data-orig",orig);
+    btn.textContent=ok?okLbl:txt;setTimeout(function(){btn.innerHTML=orig;btn.removeAttribute("data-orig");},2000);
   }
-  var link=location.origin+location.pathname+"?join="+encodeURIComponent(code)+(asAdmin?"&as=admin&t="+tok:"");
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){done(true);}).catch(function(){done(false);});}
+  else done(false);
+}
+// Кнопка на экране «Группа создана» (онбординг)
+function copyGroupInviteLink(btnId){
   var btn=document.getElementById(btnId||"copyInviteLinkBtn");
-  var origTxt=asAdmin?(btnId==="gmpCopyAdminBtn"?(LANG==="en"?"Invite as admin":"Пригласить как админа"):(LANG==="en"?"Copy link for admins":"Скопировать ссылку для админов")):(LANG==="en"?"Copy link for musicians":"Скопировать ссылку для музыкантов");
-  function done(ok){ if(btn) btn.textContent = ok ? (LANG==="en"?"Link copied!":"Ссылка скопирована!") : link; setTimeout(function(){ if(btn) btn.textContent=origTxt; },2000); }
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(link).then(function(){done(true);}).catch(function(){done(false);});
-  } else { done(false); }
+  var link=window._obInviteLink||(_invLinks&&_invLinks.member&&buildInviteLink(currentGroupId,_invLinks.member));
+  if(!link)return;
+  _copyText(link,btn,LANG==="en"?"Link copied!":"Ссылка скопирована!");
 }
 // Если открыли по ссылке-приглашению (?join=КОД, опционально &as=admin) — подставляем
 // код в поле входа и запоминаем, с какой ролью нужно присоединиться
@@ -2973,7 +3141,6 @@ try{
   var _joinParam=_joinParams.get("join");
   if(_joinParam){
     window._pendingJoinCode=_joinParam.toUpperCase();
-    window._pendingJoinRole=(_joinParams.get("as")==="admin"&&_joinParams.get("t"))?"admin":"member";
     window._pendingJoinToken=_joinParams.get("t")||"";
   }
 }catch(e){}
@@ -2982,7 +3149,8 @@ function obFinishOnboarding(){
 }
 
 function obJoinGroupClick(){
-  var code=document.getElementById("obJoinCodeInp").value.trim();
+  var _parsed=parseInviteInput(document.getElementById("obJoinCodeInp").value);
+  var code=_parsed.code;
   var errEl=document.getElementById("obJoinError");
   errEl.classList.remove("show");
   if(!code){errEl.textContent=authT("Введите код группы","Enter group code");errEl.classList.add("show");return;}
@@ -3002,12 +3170,12 @@ function obJoinGroupClick(){
   joinGroup(code,function(ok,result){
     btn.disabled=false;btn.textContent=authT("Войти в группу","Join group");
     if(!ok){
-      var msgs={notfound:authT("Группа не найдена","Group not found"),noauth:authT("Нужно войти в аккаунт","Sign in required"),writeerr:authT("Нет доступа к группе — попроси лидера прислать новую ссылку","No access to this group — ask the leader for a new invite link"),readerr:authT("Ошибка соединения","Connection error")};
+      var msgs={notfound:authT("Группа не найдена","Group not found"),noauth:authT("Нужно войти в аккаунт","Sign in required"),badlink:authT("Ссылка-приглашение устарела — попроси новую","This invite link has expired — ask for a new one"),needlink:authT("Нужна ссылка-приглашение от участника группы","You need an invite link from a group member"),writeerr:authT("Нет доступа к группе — попроси лидера прислать новую ссылку","No access to this group — ask the leader for a new invite link"),readerr:authT("Ошибка соединения","Connection error")};
       errEl.textContent=msgs[result]||authT("Ошибка","Error");errEl.classList.add("show");
       return;
     }
     setActiveGroup(result);
-  });
+  },_parsed.token);
 }
 
 var _qrScannerInstance=null;
@@ -3021,7 +3189,7 @@ function obStartQrScan(){
     {facingMode:"environment"},
     {fps:10,qrbox:220},
     function(decodedText){
-      document.getElementById("obJoinCodeInp").value=decodedText.trim().toUpperCase();
+      document.getElementById("obJoinCodeInp").value=decodedText.trim();
       obStopQrScan();
       obJoinGroupClick();
     },
@@ -3711,11 +3879,13 @@ function mainAdd(){
 }
 function openProfileScreen(){
   updateProfileScreenTexts();
+  refreshGroupPanel();
   document.getElementById("profileScreen").classList.add("open");
   history.pushState({profileScreen:true},"","");
 }
 function closeProfileScreen(){
   document.getElementById("profileScreen").classList.remove("open");
+  closeInviteSheet();
   stopGmpMembersWatch();
 }
 // Переключатель языка реагирует и на тап, и на свайп пальцем по всей дорожке —
@@ -3767,17 +3937,15 @@ function updateProfileScreenTexts(){
     var el=document.getElementById(id);
     if(el) el.textContent=map[id];
   });
-  var gmpTxt=document.getElementById("gmpCodeTxt");
+  var gmpTxt=null;
   if(gmpTxt){
-    gmpTxt.textContent=currentGroupId||(LANG==="en"?"No active group":"Нет активной группы");
-    gmpTxt.classList.toggle("empty",!currentGroupId);
     var gmpChip2=document.getElementById("gmpCodeChip");if(gmpChip2)gmpChip2.classList.toggle("empty",!currentGroupId);
     var gmpCopyBtn3=document.getElementById("gmpCodeCopyBtn");if(gmpCopyBtn3)gmpCopyBtn3.style.display=currentGroupId?"flex":"none";
   }
   var gmpJoinInp=document.getElementById("gmpJoinCodeInp");
   if(gmpJoinInp) gmpJoinInp.placeholder=LANG==="en"?"GROUP-CODE":"КОД-ГРУППЫ";
-  var gmpPanel=document.getElementById("groupManagePanel");
-  if(gmpPanel&&gmpPanel.style.display==="block") renderGmpGroupsList();
+  var _ps=document.getElementById("profileScreen");
+  if(_ps&&_ps.classList.contains("open")) refreshGroupPanel();
 }
 window.addEventListener('popstate',function(){
   closeCtx();
@@ -8429,6 +8597,16 @@ function pushLiveSync(patch){
   if(!db||!currentGroupId||liveDeviceRole!=="master")return;  var data={};
   for(var k in (LiveSync.lastPushed||{})) data[k]=LiveSync.lastPushed[k];
   for(var k2 in patch) data[k2]=patch[k2];
+  // Всегда отправляем ТЕКУЩУЮ позицию текста, если он открыт: раньше во время игры по
+  // таймкодам позиция не отправлялась, и при «Стоп» ведомым уходило старое значение
+  // (обычно 0) — текст на них прыгал в начало
+  if(!('scrollFrac' in patch)){
+    var _lftEl=document.getElementById('liveFullTab'),_lc=document.getElementById('lftContent');
+    if(_lftEl&&_lftEl.classList.contains('open')&&_lc){
+      var _mx=_lc.scrollHeight-_lc.clientHeight;
+      data.scrollFrac=_mx>0?Math.round(_lc.scrollTop/_mx*1000)/1000:0;
+    }
+  }
   data.updatedAt=firebase.database.ServerValue.TIMESTAMP;
   data.pushedAt=Date.now(); // локальное время мастера для измерения задержки доставки
   LiveSync.lastPushed=data;
@@ -8475,7 +8653,10 @@ function onLiveSyncUpdate(v){
   }
   if(followMaster){
     _lftApplyRemoteView(v,prevView);
-    _lftApplyRemoteScroll(v);
+    // В момент «Стоп» текст у ведомого остаётся там, где был (он и так ехал синхронно);
+    // дальше, если мастер листает руками, — повторяем его прокрутку
+    var _justStopped=(prevPlaying===true&&!v.playing);
+    if(!_justStopped)_lftApplyRemoteScroll(v);
   }
   if(!LiveSync.rafId)LiveSync.rafId=requestAnimationFrame(syncVisualLoop);
 }
